@@ -1,0 +1,26 @@
+<dashboard userName="String" message="String" userType="UserType" items="List<Item>">
+    <page-layout title="Dashboard - ${user.name}">
+        <header>
+            <h1>Dashboard</h1>
+        </header>
+        <body>
+        <h1>Hello, ${user.name}!</h1>
+        <h2 if="${userType == UserType.ADMIN}">You are an admin!</h2>
+        <h2 if="${userType == UserType.USER}">You are a user!</h2>
+        <h2 if="${userType == UserType.GUEST}">You are a guest!</h2>
+        <h2 if="${userType != UserType.GUEST}">You are not a guest!</h2>
+        <card>
+            <header>
+                <h3>Items</h3>
+            </header>
+            <body>
+            <ul>
+                <li each="${item, index in items}">${item.name} - Item ${index}</li>
+            </ul>
+            </body>
+        </card>
+        <sidebar/>
+        <my-button text="Click me!" onClick="alert('Hello World!')"/>
+        </body>
+    </page-layout>
+</dashboard>
