@@ -4,8 +4,10 @@ import java.io.OutputStream
 import java.io.OutputStreamWriter
 import java.io.Writer
 
-class OutputStreamHtmlWriter(out: OutputStream) : HtmlWriter() {
+class OutputStreamHtmlWriter(out: OutputStream) : ContentWriter {
     private val out: Writer = OutputStreamWriter(out)
 
-    override fun raw(content: String) = also { out.write(content) }
+    override fun write(content: String) {
+        out.write(content)
+    }
 }

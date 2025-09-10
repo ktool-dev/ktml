@@ -1,18 +1,18 @@
-package io.ktml.template
+package io.ktml.templates
 
 import io.ktml.Content
-import io.ktml.HtmlWriter
+import io.ktml.Context
 
-fun HtmlWriter.writePageLayout(
+fun Context.writePageLayout(
     title: String = "No Title",
     header: Content,
     body: Content
 ) {
     raw("<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>")
-    text(title)
+    write(title)
     raw("</title></head><body><div class=\"header\">")
-    content(header)
+    write(header)
     raw("</div><div class=\"content\">")
-    content(body)
+    write(body)
     raw("</div></body></html>")
 }

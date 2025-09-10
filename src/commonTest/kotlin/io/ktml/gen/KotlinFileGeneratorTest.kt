@@ -1,5 +1,7 @@
 package io.ktml.gen
 
+import io.ktml.TEMPLATE_PACKAGE
+import io.ktml.Templates
 import io.ktml.parser.HtmlElement
 import io.ktml.parser.ParsedTemplate
 import io.ktml.parser.TemplateParameter
@@ -9,7 +11,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class KotlinFileGeneratorTest {
-    private val kotlinFileGenerator = KotlinFileGenerator()
+    private val kotlinFileGenerator = KotlinFileGenerator(Templates())
 
     @Test
     fun testGenerateCodeWithBasicTemplate() {
@@ -20,14 +22,20 @@ class KotlinFileGeneratorTest {
                 TemplateParameter("text", "String"),
                 TemplateParameter("onClick", "String")
             ),
-            root = HtmlElement.Tag("my-button", emptyMap(), emptyList())
+            root = HtmlElement.Tag("my-button", emptyMap())
         )
 
         val result = kotlinFileGenerator.generateCode(template)
 
-        assertContains(result, "package io.ktml.templates")
-        assertContains(result, "import io.ktml.HtmlWriter")
-        assertContains(result, "fun HtmlWriter.writeMyButton(text: String, onClick: String) {")
+        assertContains(result, "package $TEMPLATE_PACKAGE")
+        assertContains(result, "import io.ktml.Context")
+        assertContains(
+            result, """
+            fun Context.writeMyButton(
+                text: String,
+                onClick: String,
+            ) {""".trimIndent()
+        )
     }
 
     @Test
@@ -36,7 +44,7 @@ class KotlinFileGeneratorTest {
             name = "custom-component",
             imports = listOf("import kotlinx.datetime.LocalDate", "import kotlin.collections.List"),
             parameters = emptyList(),
-            root = HtmlElement.Tag("custom-component", emptyMap(), emptyList())
+            root = HtmlElement.Tag("custom-component", emptyMap())
         )
 
         val result = kotlinFileGenerator.generateCode(template)
@@ -45,7 +53,7 @@ class KotlinFileGeneratorTest {
         val importLines = lines.filter { it.startsWith("import") }
         assertEquals(
             listOf(
-                "import io.ktml.HtmlWriter",
+                "import io.ktml.Context",
                 "import kotlin.collections.List",
                 "import kotlinx.datetime.LocalDate"
             ), importLines
@@ -61,14 +69,21 @@ class KotlinFileGeneratorTest {
                 TemplateParameter("title", "String"),
                 TemplateParameter("content", "Content")
             ),
-            root = HtmlElement.Tag("card", emptyMap(), emptyList())
+            root = HtmlElement.Tag("card", emptyMap())
         )
 
         val result = kotlinFileGenerator.generateCode(template)
 
         assertContains(result, "import io.ktml.Content")
-        assertContains(result, "import io.ktml.HtmlWriter")
-        assertContains(result, "fun HtmlWriter.writeCard(title: String, content: Content) {")
+        assertContains(result, "import io.ktml.Context")
+        assertContains(
+            result, """
+            fun Context.writeCard(
+                title: String,
+                content: Content,
+            ) {
+        """.trimIndent()
+        )
     }
 
     @Test
@@ -81,7 +96,7 @@ class KotlinFileGeneratorTest {
                 TemplateParameter("disabled", "Boolean", "false"),
                 TemplateParameter("count", "Int", "0")
             ),
-            root = HtmlElement.Tag("button", emptyMap(), emptyList())
+            root = HtmlElement.Tag("button", emptyMap())
         )
 
         val result = kotlinFileGenerator.generateCode(template)
@@ -102,17 +117,23 @@ class KotlinFileGeneratorTest {
                 TemplateParameter("required", "Boolean", "true"),
                 TemplateParameter("content", "Content")
             ),
-            root = HtmlElement.Tag("form-input", emptyMap(), emptyList())
+            root = HtmlElement.Tag("form-input", emptyMap())
         )
 
         val result = kotlinFileGenerator.generateCode(template)
 
         assertContains(result, "import io.ktml.Content")
-        assertContains(result, "import io.ktml.HtmlWriter")
+        assertContains(result, "import io.ktml.Context")
         assertContains(result, "import kotlinx.serialization.Serializable")
         assertContains(
             result,
-            "fun HtmlWriter.writeFormInput(label: String, placeholder: String = \"Enter text\", required: Boolean = true, content: Content) {"
+            """
+            fun Context.writeFormInput(
+                label: String,
+                placeholder: String = "Enter text",
+                required: Boolean = true,
+                content: Content,
+            ) {""".trimIndent()
         )
     }
 
@@ -122,12 +143,12 @@ class KotlinFileGeneratorTest {
             name = "my-custom-button",
             imports = emptyList(),
             parameters = emptyList(),
-            root = HtmlElement.Tag("my-custom-button", emptyMap(), emptyList())
+            root = HtmlElement.Tag("my-custom-button", emptyMap())
         )
 
         val result = kotlinFileGenerator.generateCode(template)
 
-        assertContains(result, "fun HtmlWriter.writeMyCustomButton() {")
+        assertContains(result, "fun Context.writeMyCustomButton() {")
     }
 
     @Test
@@ -136,12 +157,12 @@ class KotlinFileGeneratorTest {
             name = "button",
             imports = emptyList(),
             parameters = emptyList(),
-            root = HtmlElement.Tag("button", emptyMap(), emptyList())
+            root = HtmlElement.Tag("button", emptyMap())
         )
 
         val result = kotlinFileGenerator.generateCode(template)
 
-        assertContains(result, "fun HtmlWriter.writeButton() {")
+        assertContains(result, "fun Context.writeButton() {")
     }
 
     @Test
@@ -150,13 +171,13 @@ class KotlinFileGeneratorTest {
             name = "header",
             imports = emptyList(),
             parameters = emptyList(),
-            root = HtmlElement.Tag("header", emptyMap(), emptyList())
+            root = HtmlElement.Tag("header", emptyMap())
         )
 
         val result = kotlinFileGenerator.generateCode(template)
 
-        assertContains(result, "fun HtmlWriter.writeHeader() {")
-        assertContains(result, "import io.ktml.HtmlWriter")
+        assertContains(result, "fun Context.writeHeader() {")
+        assertContains(result, "import io.ktml.Context")
         // Should not import Content if no Content parameters
         assertTrue(!result.contains("import io.ktml.Content"))
     }
@@ -167,22 +188,36 @@ class KotlinFileGeneratorTest {
             name = "test-component",
             imports = listOf("import kotlin.String"),
             parameters = listOf(TemplateParameter("value", "String")),
-            root = HtmlElement.Tag("test-component", emptyMap(), emptyList())
+            root = HtmlElement.Tag(
+                "test-component", emptyMap(), mutableListOf(
+                    HtmlElement.Text("Hello, World!")
+                )
+            ),
+            topExternalScriptContent = "val a = 1",
+            bottomExternalScriptContent = "val b = 1",
         )
 
         val result = kotlinFileGenerator.generateCode(template)
-        val lines = result.lines()
 
-        // Check structure: package, blank line, imports, blank line, function
-        assertTrue(lines[0].startsWith("package"))
-        assertEquals("", lines[1])
-        assertTrue(lines[2].startsWith("import"))
-        assertTrue(lines[3].startsWith("import"))
-        assertEquals("", lines[4])
-        assertTrue(lines[5].startsWith("fun HtmlWriter.writeTestComponent"))
-        assertEquals("", lines[6])
-        assertTrue(lines[7].endsWith("}"))
-        assertEquals("", lines[8])
+        val expected = """
+            package io.ktml.templates
 
+            import io.ktml.Context
+            import kotlin.String
+
+            val a = 1
+
+            fun Context.writeTestComponent(
+                value: String,
+            ) {
+                raw(RAW_CONTENT_0)
+            }
+
+            val b = 1
+
+            private const val RAW_CONTENT_0 = ""${'"'}Hello, World!""${'"'}
+            
+        """.trimIndent()
+        assertEquals(expected, result)
     }
 }

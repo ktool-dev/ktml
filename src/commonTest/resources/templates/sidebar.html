@@ -1,5 +1,7 @@
-<div class="sidebar">
-    <a href="/">Home</a>
-    <a href="/about">About</a>
-    <a href="/contact">Contact</a>
-</div>
+import io.ktml.gen.SideBarItem
+
+<sidebar ctx-sideBarItems="List<SideBarItem> = listOf()">
+    <div class="sidebar">
+        <a each="${item in contextItems}" href="${item.href}">${item.name}</a>
+    </div>
+</sidebar>

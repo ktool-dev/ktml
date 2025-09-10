@@ -29,8 +29,10 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
+                implementation("io.github.oshai:kotlin-logging:7.0.7")
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.ksoup.html)
+                implementation(libs.ksoup.entities)
             }
         }
 
@@ -43,13 +45,19 @@ kotlin {
 
         val jvmMain by getting {
             dependencies {
-                // JVM-specific dependencies
+                implementation("org.slf4j:slf4j-simple:2.0.7")
             }
         }
 
         val jvmTest by getting {
             dependencies {
                 // JVM-specific test dependencies
+            }
+        }
+
+        val nativeMain by creating {
+            dependencies {
+                implementation("com.squareup.okio:okio:3.16.0")
             }
         }
     }

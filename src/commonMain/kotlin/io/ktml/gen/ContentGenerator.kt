@@ -1,170 +1,166 @@
 package io.ktml.gen
 
+import io.ktml.Templates
 import io.ktml.parser.HtmlElement
+import io.ktml.parser.HtmlElement.Tag
+import io.ktml.parser.HtmlElement.Text
+import io.ktml.parser.ParsedTemplate
+
+data class TemplateContent(val functionContent: String, val rawConstants: String)
 
 /**
  * Generates HtmlWriter method calls from parsed HTML elements
  */
-class ContentGenerator {
-    fun generateChildrenContent(children: List<HtmlElement>): String = buildString {
-        children.forEach { append(generateElementContent(it)) }
+class ContentGenerator(private val templates: Templates) {
+    private val contentBuilder = ContentBuilder()
+    private val expressionParser = ExpressionParser()
+
+    fun generateTemplateContent(template: ParsedTemplate): TemplateContent {
+        contentBuilder.clear()
+        generateChildContent(template, template.root.children)
+        return contentBuilder.templateContent
     }
 
-    private fun generateElementContent(element: HtmlElement) = when (element) {
-        is HtmlElement.Tag -> generateTagContent(element)
-        is HtmlElement.Text -> generateTextContent(element)
+    private fun generateChildContent(template: ParsedTemplate, children: List<HtmlElement>) {
+        children.forEach {
+            when (it) {
+                is Tag -> generateTagContent(template, it)
+                is Text -> generateTextContent(it)
+            }
+        }
     }
 
-    private fun generateTagContent(tag: HtmlElement.Tag): String = buildString {
-        if (isCustomTemplateTag(tag.name)) {
-            return generateCustomTagContent(tag)
+    private val controlAttrs = setOf("if", "each")
+
+    private fun generateTagContent(template: ParsedTemplate, tag: Tag) {
+        val customTag = templates.locate(tag.name, template)
+
+        if (customTag != null) return generateCustomTagContent(tag, customTag)
+
+        if (tag.isKotlinScript) {
+            tag.children.joinToString("") { (it as Text).content.trim() }
+                .split("\n").also { contentBuilder.kotlin(it) }
+
+            return
         }
 
-        append("raw(\"<${tag.name}")
+        tag.attrs["if"]?.let {
+            contentBuilder.startControlFlow("if", expressionParser.extractSingleExpression(it))
+        }
 
-        tag.attrs.forEach { (name, value) ->
-            if (isKotlinValue(value)) {
-                append(" $name=\\\"\").text(${extractVariableExpression(value)}).raw(\"\\\"")
+        tag.attrs["each"]?.let {
+            contentBuilder.startControlFlow("for", expressionParser.extractSingleExpression(it))
+        }
+
+        contentBuilder.raw("<${tag.name}")
+
+        tag.attrs.filterNot { it.key in controlAttrs }.forEach { (name, value) ->
+            if (expressionParser.isKotlinExpression(value)) {
+                contentBuilder.raw(" $name=\"")
+                contentBuilder.write(expressionParser.extractSingleExpression(value))
+                contentBuilder.raw("\"")
             } else {
-                append(" $name=\\\"$value\\\"")
+                contentBuilder.raw(" $name=\"$value\"")
             }
         }
 
-        append(">\")")
+        contentBuilder.raw(">")
 
-        append(generateChildrenContent(tag.children))
+        generateChildContent(template, tag.children)
 
-        if (!isSelfClosingTag(tag.name)) {
-            append("raw(\"</${tag.name}>\")")
+        if (tag.children.isNotEmpty()) {
+            contentBuilder.raw("</${tag.name}>")
+        } else if (!SELF_CLOSING_TAGS.contains(tag.name)) {
+            contentBuilder.raw(" />")
+        } else {
+            contentBuilder.raw(">")
+        }
+
+        tag.attrs.filter { it.key in controlAttrs }.forEach { _ ->
+            contentBuilder.endControlFlow()
         }
     }
 
-    /**
-     * Generate content for text nodes
-     */
-    private fun generateTextContent(text: HtmlElement.Text): String {
-        val content = text.content.trim()
-        if (content.isEmpty()) return ""
-
-        return "text(\"${escapeKotlinString(content)}\")"
+    private fun generateTextContent(text: Text) {
+        val content = text.content
+        if (expressionParser.hasKotlinExpression(content)) {
+            expressionParser.extractMultipleExpressions(content).forEach { part ->
+                if (part.isKotlin) {
+                    contentBuilder.write(part.text)
+                } else {
+                    contentBuilder.raw(part.text)
+                }
+            }
+        } else {
+            contentBuilder.raw(content)
+        }
     }
 
-    /**
-     * Generate content for variable expressions
-     */
-    private fun generateVariableContent(variable: HtmlElement.Text): String {
-        return "text(${variable})"
-    }
+    private fun generateCustomTagContent(tag: Tag, template: ParsedTemplate) {
+        contentBuilder.startTemplateCall(template.qualifiedFunctionName)
+        val params = template.orderedParameters
 
-    /**
-     * Generate content for custom template tags
-     */
-    private fun generateCustomTagContent(tag: HtmlElement.Tag) = buildString {
-        val functionName = "render${tag.name.toCamelCase()}"
-
-        append("$functionName(")
-
-        // Add parameters from attributes
-        tag.attrs.forEach { (name, value) ->
-            if (!endsWith("(")) {
-                append(", ")
-            }
-            if (isKotlinValue(value)) {
-                val expression = extractVariableExpression(value)
-                append("$name = $expression")
-            } else {
-                append("$name = \"${escapeKotlinString(value)}\"")
-            }
+        if (params.isEmpty()) {
+            contentBuilder.endTemplateCall()
+            return
         }
 
-        // Add content parameters from child elements
-        val contentParams = extractContentParameters(tag.children)
-        contentParams.forEach { (paramName, elements) ->
-            append(", $paramName = { ")
-            val contentCode = generateChildrenContent(elements)
-            if (contentCode.isNotEmpty()) {
-                append(" $contentCode ")
-            }
-            append("}")
+        val lastParamIsContent = params.last().type == "Content"
+
+        val passedParams = if (lastParamIsContent) {
+            params.dropLast(1)
+        } else {
+            params
         }
 
-        append(")")
-    }
+        passedParams.forEach { param ->
+            val attr = tag.attrs[param.name] ?: error("Unknown attribute name '${param.name}'")
 
-    /**
-     * Extract content parameters from child elements
-     */
-    private fun extractContentParameters(children: List<HtmlElement>): Map<String, List<HtmlElement>> {
-        val contentParams = mutableMapOf<String, List<HtmlElement>>()
+            when {
+                expressionParser.isKotlinExpression(attr) -> {
+                    contentBuilder.kotlin("${param.name} = ${expressionParser.extractSingleExpression(attr)},")
+                }
 
-        children.forEach { child ->
-            if (child is HtmlElement.Tag && isContentParameterTag(child.name)) {
-                contentParams[child.name] = child.children
+                param.type == "String" -> contentBuilder.kotlin("${param.name} = \"$attr\",")
+                param.type == "Content" -> {
+                    contentBuilder.startEmbeddedContent()
+                    generateChildContent(template, tag.children)
+                    contentBuilder.endEmbeddedContent(",")
+                }
+
+                else -> contentBuilder.kotlin("${param.name} = $attr,")
             }
         }
 
-        return contentParams
-    }
-
-    /**
-     * Check if a tag name represents a custom template
-     */
-    private fun isCustomTemplateTag(tagName: String): Boolean {
-        return false
-    }
-
-    /**
-     * Check if a tag name represents a content parameter
-     */
-    private fun isContentParameterTag(tagName: String): Boolean {
-        return tagName in setOf("header", "body", "content")
-    }
-
-    private fun isKotlinValue(value: String) = value.startsWith($$"${") && value.endsWith("}")
-
-    /**
-     * Extract variable expression from ${...} syntax
-     */
-    private fun extractVariableExpression(value: String) = value.removeSurrounding($$"${", "}")
-
-    /**
-     * Check if a tag is self-closing
-     */
-    private fun isSelfClosingTag(tagName: String): Boolean {
-        return tagName in setOf(
-            "br",
-            "hr",
-            "img",
-            "input",
-            "meta",
-            "link",
-            "area",
-            "base",
-            "col",
-            "embed",
-            "source",
-            "track",
-            "wbr"
-        )
-    }
-
-    /**
-     * Escape content for Kotlin string literals
-     */
-    protected fun escapeKotlinString(content: String): String {
-        return content.replace("\\", "\\\\")
-            .replace("\"", "\\\"")
-            .replace("\n", "\\n")
-            .replace("\r", "\\r")
-            .replace("\t", "\\t")
-    }
-
-    /**
-     * Convert kebab-case to CamelCase
-     */
-    private fun String.toCamelCase(): String {
-        return split("-").joinToString("") { word ->
-            word.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+        if (passedParams.isEmpty()) {
+            contentBuilder.deleteLastNewLine()
         }
+
+        if (lastParamIsContent) {
+            contentBuilder.endTemplateCallWithContent()
+            contentBuilder.startEmbeddedContent()
+            generateChildContent(template, tag.children)
+            contentBuilder.endEmbeddedContent()
+        } else {
+            contentBuilder.endTemplateCall()
+        }
+
+        return
     }
 }
+
+private val SELF_CLOSING_TAGS = setOf(
+    "br",
+    "hr",
+    "img",
+    "input",
+    "meta",
+    "link",
+    "area",
+    "base",
+    "col",
+    "embed",
+    "source",
+    "track",
+    "wbr"
+)

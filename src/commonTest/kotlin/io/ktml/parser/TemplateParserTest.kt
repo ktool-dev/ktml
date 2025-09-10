@@ -2,6 +2,7 @@ package io.ktml.parser
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 
 class TemplateParserTest {
     private val parser = TemplateParser()
@@ -16,8 +17,7 @@ class TemplateParserTest {
 
         val result = parser.parseContent(content)
 
-        assertEquals(1, result.size)
-        assertEquals("my-button", result[0].name)
+        assertEquals("my-button", result.name)
     }
 
     @Test
@@ -31,25 +31,22 @@ class TemplateParserTest {
             </my-button-two>
         """.trimIndent()
 
-        val result = parser.parseContent(content)
-
-        assertEquals(2, result.size)
-        assertEquals("my-button-one", result[0].name)
-        assertEquals("my-button-two", result[1].name)
+        assertFailsWith(IllegalArgumentException::class) {
+            parser.parseContent(content)
+        }
     }
 
     @Test
-    fun testPrefixAddedToRootName() {
+    fun testPackageNameSet() {
         val content = $$"""
             <my-button text="String" onClick="String">
                 <button onclick="${onClick}">${text}</button>
             </my-button>
         """.trimIndent()
 
-        val result = parser.parseContent(content, "prefix-")
+        val result = parser.parseContent(content, "my.package")
 
-        assertEquals(1, result.size)
-        assertEquals("prefix-my-button", result[0].name)
+        assertEquals("my.package", result.packageName)
     }
 
     @Test
@@ -62,12 +59,11 @@ class TemplateParserTest {
 
         val result = parser.parseContent(content)
 
-        assertEquals(1, result.size)
-        assertEquals(2, result[0].parameters.size)
-        assertEquals("text", result[0].parameters[0].name)
-        assertEquals("String", result[0].parameters[0].type)
-        assertEquals("onClick", result[0].parameters[1].name)
-        assertEquals("String", result[0].parameters[1].type)
+        assertEquals(2, result.parameters.size)
+        assertEquals("text", result.parameters[0].name)
+        assertEquals("String", result.parameters[0].type)
+        assertEquals("onClick", result.parameters[1].name)
+        assertEquals("String", result.parameters[1].type)
     }
 
     @Test
@@ -78,7 +74,7 @@ class TemplateParserTest {
             </my-button>
         """.trimIndent()
 
-        val result = parser.parseContent(content).first()
+        val result = parser.parseContent(content)
 
         assertEquals("text", result.parameters[0].name)
         assertEquals("String", result.parameters[0].type)
@@ -95,7 +91,7 @@ class TemplateParserTest {
             </my-button>
         """.trimIndent()
 
-        val result = parser.parseContent(content).first()
+        val result = parser.parseContent(content)
 
         assertEquals("my-button", result.name)
         assertEquals(1, result.imports.size)
@@ -110,9 +106,43 @@ class TemplateParserTest {
             </my-button>
         """.trimIndent()
 
-        val result = parser.parseContent(content).first()
+        val result = parser.parseContent(content)
 
         assertEquals("my-button", result.name)
         assertEquals("my-button", result.root.name)
+    }
+
+    @Test
+    fun testAllowsSpecialCharactersInExpressions() {
+        val content = $$"""
+            <my-button text="String" onClick="String">
+                <button class="${if(a < b && b < c) {'a'} else {'b'}}">A</button>
+            </my-button>
+        """.trimIndent()
+
+        val result = parser.parseContent(content)
+
+        val tag = result.root.children.find { it is HtmlElement.Tag && it.name == "button" } as HtmlElement.Tag
+        assertEquals($$"${if(a < b && b < c) {'a'} else {'b'}}", tag.attrs["class"])
+    }
+
+    @Test
+    fun testIncludesExternalScript() {
+        val content = $$"""
+            <script type="text/kotlin">
+                val a = 1
+            </script>
+            <my-button text="String" onClick="String">
+                <button onclick="${onClick}">${text}</button>
+            </my-button>
+            <script type="text/kotlin">
+                val b = 1
+            </script>
+        """.trimIndent()
+
+        val result = parser.parseContent(content)
+
+        assertEquals("val a = 1", result.topExternalScriptContent)
+        assertEquals("val b = 1", result.bottomExternalScriptContent)
     }
 }

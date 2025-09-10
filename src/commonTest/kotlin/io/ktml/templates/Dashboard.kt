@@ -1,10 +1,10 @@
-package io.ktml.template
+package io.ktml.templates
 
-import io.ktml.HtmlWriter
+import io.ktml.Context
 import my.app.Item
 import my.app.UserType
 
-fun HtmlWriter.writeDashboard(
+fun Context.writeDashboard(
     userName: String,
     message: String,
     userType: UserType,
@@ -12,8 +12,13 @@ fun HtmlWriter.writeDashboard(
 ) {
     writePageLayout(
         "Dashboard - $userName",
-        header = { raw("<h1>Dashboard</h1>") }) {
-        raw("<h1>Hello, ").text(message).raw("!</h1>")
+        header = {
+            raw("<h1>Dashboard</h1>")
+        }
+    ) {
+        raw("<h1>Hello, ")
+        write(message)
+        raw("!</h1>")
 
         if (userType == UserType.ADMIN) {
             raw("<h2>You are an admin!</h2>")
@@ -27,14 +32,18 @@ fun HtmlWriter.writeDashboard(
             raw("<h2>You are a guest!</h2>")
         }
 
-        if (!(userType == UserType.GUEST)) {
+        if (userType != UserType.GUEST) {
             raw("<h2>You are not a guest!</h2>")
         }
 
         writeCard(header = { raw("<h3>Items</h3>") }) {
             raw("<ul>")
-            items.forEachIndexed { index, item ->
-                raw("<li>").text(item.name).raw(" - Item ").text(index.toString()).raw("</li>")
+            for ((index, item) in items.withIndex()) {
+                raw("<li>")
+                write(item.name)
+                raw(" - Item ")
+                write(index.toString())
+                raw("</li>")
             }
             raw("</ul>")
         }
@@ -43,6 +52,6 @@ fun HtmlWriter.writeDashboard(
 
         raw("<br><hr>")
 
-        writeButton("Click me!", "alert('Hello World!')")
+        writeMyButton("Click me!", "alert('Hello World!')")
     }
 }

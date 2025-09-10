@@ -1,13 +1,12 @@
-package io.ktml.template
+package io.ktml.templates
 
 import io.ktml.Content
-import io.ktml.HtmlWriter
+import io.ktml.Context
 
-
-fun HtmlWriter.writeCard(header: Content, body: Content) {
+fun Context.writeCard(header: Content, body: Content) {
     raw("<div class=\"card\"><div class=\"card-header\">")
-    content(header)
+    write(header)
     raw("</div><div class=\"card-body\">")
-    content(body)
+    write(body)
     raw("</div></div>")
 }

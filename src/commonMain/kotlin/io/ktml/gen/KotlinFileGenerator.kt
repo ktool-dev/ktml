@@ -1,62 +1,76 @@
 package io.ktml.gen
 
+import io.ktml.INDENTATION
+import io.ktml.Templates
 import io.ktml.parser.ParsedTemplate
+import io.ktml.toCamelCase
 
-private const val PACKAGE_NAME: String = "io.ktml.templates"
-
-class KotlinFileGenerator(private val contentGenerator: ContentGenerator = ContentGenerator()) {
+class KotlinFileGenerator(templates: Templates) {
+    private val contentGenerator = ContentGenerator(templates)
+    
     fun generateCode(template: ParsedTemplate) = buildString {
-        appendLine("package $PACKAGE_NAME")
+        appendLine("package ${template.packageName}")
         appendLine()
 
         requiredImports(template).forEach { appendLine(it) }
         appendLine()
 
-        appendLine(generateFunction(template))
-        appendLine("}")
+        if (template.topExternalScriptContent.isNotEmpty()) {
+            appendLine(template.topExternalScriptContent)
+            appendLine()
+        }
+
+        val (functionContent, rawConstants) = generateFunction(template)
+        appendLine(functionContent)
         appendLine()
+
+        if (template.bottomExternalScriptContent.isNotEmpty()) {
+            appendLine(template.bottomExternalScriptContent)
+            appendLine()
+        }
+
+        appendLine(rawConstants)
     }
 
-    private fun requiredImports(template: ParsedTemplate) = buildList {
+    private fun requiredImports(template: ParsedTemplate) = buildSet {
         addAll(template.imports)
 
         if (template.parameters.any { it.type == "Content" }) {
             add("import io.ktml.Content")
         }
 
-        add("import io.ktml.HtmlWriter")
+        add("import io.ktml.Context")
     }.sorted()
 
-    private fun generateFunction(template: ParsedTemplate) = buildString {
-        append("fun HtmlWriter.write${template.name.toCamelCase()}(")
+    private fun generateFunction(template: ParsedTemplate): Pair<String, String> {
+        val content = contentGenerator.generateTemplateContent(template)
 
-        template.parameters.forEach { param ->
-            if (!endsWith("(")) {
-                append(", ")
-            }
+        val functionContent = buildString {
+            append("fun Context.write${template.name.toCamelCase()}(")
 
-            append(param.name).append(": ").append(param.type)
+            template.parameters.forEach { param ->
+                appendLine().append(INDENTATION).append(param.name).append(": ").append(param.type)
 
-            if (param.defaultValue != null) {
-                append(" = ")
-                if (param.type == "String") {
-                    append('"').append(param.defaultValue).append('"')
-                } else {
-                    append(param.defaultValue)
+                if (param.defaultValue != null) {
+                    append(" = ")
+                    if (param.type == "String") {
+                        append('"').append(param.defaultValue).append('"')
+                    } else {
+                        append(param.defaultValue)
+                    }
                 }
+                append(",")
             }
+
+            if (template.parameters.isNotEmpty()) {
+                appendLine()
+            }
+
+            appendLine(") {")
+            appendLine(content.functionContent)
+            append("}")
         }
 
-        appendLine(") {")
-
-        appendLine(contentGenerator.generateChildrenContent(template.root.children))
-
-        appendLine("}")
-    }
-
-    private fun String.toCamelCase(): String {
-        return split("-").joinToString("") { word ->
-            word.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
-        }
+        return functionContent to content.rawConstants
     }
 }
