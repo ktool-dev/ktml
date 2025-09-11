@@ -29,7 +29,7 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation("io.github.oshai:kotlin-logging:7.0.7")
+                implementation(libs.kotlin.logging)
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.ksoup.html)
                 implementation(libs.ksoup.entities)
@@ -40,24 +40,27 @@ kotlin {
             dependencies {
                 implementation(libs.kotlin.test)
                 implementation(libs.kotlinx.coroutines.test)
+                implementation(libs.kotest.framework.engine)
+                implementation(libs.kotest.assertions.core)
             }
         }
 
         val jvmMain by getting {
             dependencies {
-                implementation("org.slf4j:slf4j-simple:2.0.7")
+                implementation(libs.slf4j.simple)
+                implementation(libs.kotlin.compiler.embeddable)
             }
         }
 
         val jvmTest by getting {
             dependencies {
-                // JVM-specific test dependencies
+                implementation(libs.kotest.runner.junit5)
             }
         }
 
         val nativeMain by creating {
             dependencies {
-                implementation("com.squareup.okio:okio:3.16.0")
+                implementation(libs.okio)
             }
         }
     }

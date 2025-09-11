@@ -1,27 +1,30 @@
 package io.ktml.parser
 
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.shouldBe
+import io.ktml.test.BddSpec
 
-class TemplateParserTest {
-    private val parser = TemplateParser()
+class TemplateParserSpec : BddSpec({
+    val parser = TemplateParser()
 
-    @Test
-    fun testGetTemplateNameFromTag() {
+    "get template name from tag" {
+        Given
         val content = $$"""
             <my-button text="String" onClick="String">
                 <button onclick="${onClick}">${text}</button>
             </my-button>
         """.trimIndent()
 
+        When
         val result = parser.parseContent(content)
 
-        assertEquals("my-button", result.name)
+        Then
+        "my-button" shouldBe result.name
     }
 
-    @Test
-    fun testGetMultipleRootElements() {
+    "get multiple root elements should fail" {
+        Given
         val content = $$"""
             <my-button-one text="String" onClick="String">
                 <button onclick="${onClick}">${text}</button>
@@ -31,103 +34,116 @@ class TemplateParserTest {
             </my-button-two>
         """.trimIndent()
 
-        assertFailsWith(IllegalArgumentException::class) {
+        Expect
+        shouldThrow<IllegalArgumentException> {
             parser.parseContent(content)
         }
     }
 
-    @Test
-    fun testPackageNameSet() {
+    "package name is set correctly" {
+        Given
         val content = $$"""
             <my-button text="String" onClick="String">
                 <button onclick="${onClick}">${text}</button>
             </my-button>
         """.trimIndent()
 
+        When
         val result = parser.parseContent(content, "my.package")
 
-        assertEquals("my.package", result.packageName)
+        Then
+        "io.ktml.templates.my.package" shouldBe result.packageName
     }
 
-    @Test
-    fun testGetParametersFromAttributes() {
+    "get parameters from attributes" {
+        Given
         val content = $$"""
             <my-button text="String" onClick="String">
                 <button onclick="${onClick}">${text}</button>
             </my-button>
         """.trimIndent()
 
+        When
         val result = parser.parseContent(content)
 
-        assertEquals(2, result.parameters.size)
-        assertEquals("text", result.parameters[0].name)
-        assertEquals("String", result.parameters[0].type)
-        assertEquals("onClick", result.parameters[1].name)
-        assertEquals("String", result.parameters[1].type)
+        Then
+        result.parameters shouldHaveSize 2
+        result.parameters[0].name shouldBe "text"
+        result.parameters[0].type shouldBe "String"
+        result.parameters[1].name shouldBe "onClick"
+        result.parameters[1].type shouldBe "String"
     }
 
-    @Test
-    fun testGetParametersWithDefaultValues() {
+    "get parameters with default values" {
+        Given
         val content = $$"""
             <my-button text="String = 'Default Text'">
                 <button onclick="${onClick}">${text}</button>
             </my-button>
         """.trimIndent()
 
+        When
         val result = parser.parseContent(content)
 
-        assertEquals("text", result.parameters[0].name)
-        assertEquals("String", result.parameters[0].type)
-        assertEquals("Default Text", result.parameters[0].defaultValue)
+        Then
+        result.parameters[0].name shouldBe "text"
+        result.parameters[0].type shouldBe "String"
+        result.parameters[0].defaultValue shouldBe "Default Text"
     }
 
-    @Test
-    fun testAllowImportsAboveRoot() {
+    "allow imports above root element" {
+        Given
         val content = $$"""
             import my.app.UserType
-            
+
             <my-button text="String">
                 <button onclick="${onClick}">${text}</button>
             </my-button>
         """.trimIndent()
 
+        When
         val result = parser.parseContent(content)
 
-        assertEquals("my-button", result.name)
-        assertEquals(1, result.imports.size)
-        assertEquals("import my.app.UserType", result.imports[0])
+        Then
+        result.name shouldBe "my-button"
+        result.imports shouldHaveSize 1
+        result.imports[0] shouldBe "import my.app.UserType"
     }
 
-    @Test
-    fun testShouldAssignRoot() {
+    "should assign root element correctly" {
+        Given
         val content = $$"""
             <my-button text="String">
                 <button onclick="${onClick}">${text}</button>
             </my-button>
         """.trimIndent()
 
+        When
         val result = parser.parseContent(content)
 
-        assertEquals("my-button", result.name)
-        assertEquals("my-button", result.root.name)
+        Then
+        result.name shouldBe "my-button"
+        result.root.name shouldBe "my-button"
     }
 
-    @Test
-    fun testAllowsSpecialCharactersInExpressions() {
+    "allows special characters in expressions" {
+        Given
         val content = $$"""
             <my-button text="String" onClick="String">
                 <button class="${if(a < b && b < c) {'a'} else {'b'}}">A</button>
             </my-button>
         """.trimIndent()
 
+        When
         val result = parser.parseContent(content)
 
+        Then
         val tag = result.root.children.find { it is HtmlElement.Tag && it.name == "button" } as HtmlElement.Tag
-        assertEquals($$"${if(a < b && b < c) {'a'} else {'b'}}", tag.attrs["class"])
+        tag.attrs["class"] shouldBe $$"${if(a < b && b < c) {'a'} else {'b'}}"
     }
 
-    @Test
-    fun testIncludesExternalScript() {
+    "includes external script content" {
+        Given
         val content = $$"""
             <script type="text/kotlin">
                 val a = 1
@@ -140,9 +156,11 @@ class TemplateParserTest {
             </script>
         """.trimIndent()
 
+        When
         val result = parser.parseContent(content)
 
-        assertEquals("val a = 1", result.topExternalScriptContent)
-        assertEquals("val b = 1", result.bottomExternalScriptContent)
+        Then
+        result.topExternalScriptContent shouldBe "val a = 1"
+        result.bottomExternalScriptContent shouldBe "val b = 1"
     }
-}
+})

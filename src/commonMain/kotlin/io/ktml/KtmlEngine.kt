@@ -12,10 +12,11 @@ class KtmlEngine(val basePath: String) {
     private val templates = Templates()
     private val fileGenerator = KotlinFileGenerator(templates)
 
-    fun processDirectory(path: String) {
-        require(Path(path).isDirectory) { "Path '$path' is not a directory" }
+    fun processDirectory(dir: String) {
+        val path = dir.toPath()
+        require(path.isDirectory) { "Path '${path.absolute}' is not a directory" }
 
-        Path(path).list().forEach {
+        path.list().forEach {
             if (it.isDirectory) {
                 processDirectory(it.toString())
             } else {
@@ -24,10 +25,11 @@ class KtmlEngine(val basePath: String) {
         }
     }
 
-    fun processFile(path: String) {
+    fun processFile(file: String) {
+        val path = file.toPath()
         log.info { "Processing file: $path" }
-        val packageName = path.substringAfter(basePath).substringBeforeLast("/").replace("/", ".")
-        processTemplate(Path(path).readText(), packageName)
+        val packageName = path.path.substringAfter(basePath).substringBeforeLast("/").replace("/", ".")
+        processTemplate(path.readText(), packageName)
     }
 
     fun processTemplate(content: String, packageName: String = "") = parser.parseContent(content, packageName).also {

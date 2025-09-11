@@ -1,11 +1,12 @@
 package io.ktml.parser
 
-import kotlin.test.Test
-import kotlin.test.assertEquals
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.shouldBe
+import io.ktml.test.BddSpec
 
-class ParsedTemplateTest {
-    @Test
-    fun testOrderedParametersWithContentParameter() {
+class ParsedTemplateSpec : BddSpec({
+    "ordered parameters with content parameter" {
+        Given
         val template = parsedTemplate(
             listOf(
                 TemplateParameter("title", "String"),
@@ -15,17 +16,19 @@ class ParsedTemplateTest {
             )
         )
 
+        When
         val params = template.orderedParameters
 
-        assertEquals(4, params.size)
-        assertEquals("isVisible", params[0].name)
-        assertEquals("onClick", params[1].name)
-        assertEquals("title", params[2].name)
-        assertEquals("content", params[3].name)
+        Then
+        params shouldHaveSize 4
+        params[0].name shouldBe "isVisible"
+        params[1].name shouldBe "onClick"
+        params[2].name shouldBe "title"
+        params[3].name shouldBe "content"
     }
 
-    @Test
-    fun testOrderedParametersWithoutContentParameter() {
+    "ordered parameters without content parameter" {
+        Given
         val template = parsedTemplate(
             listOf(
                 TemplateParameter("title", "String"),
@@ -35,17 +38,19 @@ class ParsedTemplateTest {
             )
         )
 
+        When
         val params = template.orderedParameters
 
-        assertEquals(4, params.size)
-        assertEquals("count", params[0].name)
-        assertEquals("isVisible", params[1].name)
-        assertEquals("onClick", params[2].name)
-        assertEquals("title", params[3].name)
+        Then
+        params shouldHaveSize 4
+        params[0].name shouldBe "count"
+        params[1].name shouldBe "isVisible"
+        params[2].name shouldBe "onClick"
+        params[3].name shouldBe "title"
     }
 
-    @Test
-    fun testOrderedParametersWithMultipleContentParameters() {
+    "ordered parameters with multiple content parameters" {
+        Given
         val template = parsedTemplate(
             listOf(
                 TemplateParameter("title", "String"),
@@ -55,16 +60,18 @@ class ParsedTemplateTest {
             )
         )
 
+        When
         val params = template.orderedParameters
 
-        assertEquals("onClick", params[0].name)
-        assertEquals("sidebar", params[1].name)
-        assertEquals("title", params[2].name)
-        assertEquals("content", params[3].name)
+        Then
+        params[0].name shouldBe "onClick"
+        params[1].name shouldBe "sidebar"
+        params[2].name shouldBe "title"
+        params[3].name shouldBe "content"
     }
 
-    @Test
-    fun testOrderedParametersWithContentParameterNotNamedContent() {
+    "ordered parameters with content parameter not named content" {
+        Given
         val template = parsedTemplate(
             listOf(
                 TemplateParameter("title", "String"),
@@ -73,16 +80,18 @@ class ParsedTemplateTest {
             )
         )
 
+        When
         val params = template.orderedParameters
 
-        assertEquals(3, params.size)
-        assertEquals("body", params[0].name)
-        assertEquals("onClick", params[1].name)
-        assertEquals("title", params[2].name)
+        Then
+        params shouldHaveSize 3
+        params[0].name shouldBe "body"
+        params[1].name shouldBe "onClick"
+        params[2].name shouldBe "title"
     }
-}
+})
 
-fun parsedTemplate(parameters: List<TemplateParameter>) = ParsedTemplate(
+private fun parsedTemplate(parameters: List<TemplateParameter>) = ParsedTemplate(
     name = "test-component",
     imports = emptyList(),
     parameters = parameters,

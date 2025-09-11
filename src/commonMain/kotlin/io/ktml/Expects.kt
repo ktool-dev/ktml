@@ -1,5 +1,6 @@
 package io.ktml
 
+internal expect val Path.absolute: String
 internal expect fun Path.readText(): String
 internal expect fun Path.writeText(content: String)
 internal expect fun Path.list(): List<Path>

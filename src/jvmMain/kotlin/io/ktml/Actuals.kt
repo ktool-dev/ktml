@@ -2,8 +2,10 @@ package io.ktml
 
 import java.io.File
 
-private fun Path.toFile() = File(path)
+private fun Path.toFile() =
+    if (path.startsWith("/")) File(path) else File(System.getProperty("user.dir"), path)
 
+internal actual val Path.absolute: String get() = toFile().absolutePath
 internal actual fun Path.readText(): String = toFile().readText()
 internal actual fun Path.writeText(content: String) = toFile().writeText(content)
 internal actual fun Path.list(): List<Path> = toFile().listFiles().map { Path(it.path) }

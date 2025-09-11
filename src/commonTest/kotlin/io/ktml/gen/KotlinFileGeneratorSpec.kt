@@ -1,20 +1,20 @@
 package io.ktml.gen
 
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
+import io.kotest.matchers.string.shouldNotContain
 import io.ktml.TEMPLATE_PACKAGE
 import io.ktml.Templates
 import io.ktml.parser.HtmlElement
 import io.ktml.parser.ParsedTemplate
 import io.ktml.parser.TemplateParameter
-import kotlin.test.Test
-import kotlin.test.assertContains
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
+import io.ktml.test.BddSpec
 
-class KotlinFileGeneratorTest {
-    private val kotlinFileGenerator = KotlinFileGenerator(Templates())
+class KotlinFileGeneratorSpec : BddSpec({
+    val kotlinFileGenerator = KotlinFileGenerator(Templates())
 
-    @Test
-    fun testGenerateCodeWithBasicTemplate() {
+    "generate code with basic template" {
+        Given
         val template = ParsedTemplate(
             name = "my-button",
             imports = emptyList(),
@@ -25,21 +25,21 @@ class KotlinFileGeneratorTest {
             root = HtmlElement.Tag("my-button", emptyMap())
         )
 
+        When
         val result = kotlinFileGenerator.generateCode(template)
 
-        assertContains(result, "package $TEMPLATE_PACKAGE")
-        assertContains(result, "import io.ktml.Context")
-        assertContains(
-            result, """
+        Then
+        result shouldContain "package $TEMPLATE_PACKAGE"
+        result shouldContain "import io.ktml.Context"
+        result shouldContain """
             fun Context.writeMyButton(
                 text: String,
                 onClick: String,
             ) {""".trimIndent()
-        )
     }
 
-    @Test
-    fun testGenerateCodeWithImports() {
+    "generate code with imports" {
+        Given
         val template = ParsedTemplate(
             name = "custom-component",
             imports = listOf("import kotlinx.datetime.LocalDate", "import kotlin.collections.List"),
@@ -47,21 +47,21 @@ class KotlinFileGeneratorTest {
             root = HtmlElement.Tag("custom-component", emptyMap())
         )
 
+        When
         val result = kotlinFileGenerator.generateCode(template)
 
+        Then
         val lines = result.lines()
         val importLines = lines.filter { it.startsWith("import") }
-        assertEquals(
-            listOf(
-                "import io.ktml.Context",
-                "import kotlin.collections.List",
-                "import kotlinx.datetime.LocalDate"
-            ), importLines
+        importLines shouldBe listOf(
+            "import io.ktml.Context",
+            "import kotlin.collections.List",
+            "import kotlinx.datetime.LocalDate"
         )
     }
 
-    @Test
-    fun testGenerateCodeWithContentParameter() {
+    "generate code with content parameter" {
+        Given
         val template = ParsedTemplate(
             name = "card",
             imports = emptyList(),
@@ -72,22 +72,22 @@ class KotlinFileGeneratorTest {
             root = HtmlElement.Tag("card", emptyMap())
         )
 
+        When
         val result = kotlinFileGenerator.generateCode(template)
 
-        assertContains(result, "import io.ktml.Content")
-        assertContains(result, "import io.ktml.Context")
-        assertContains(
-            result, """
+        Then
+        result shouldContain "import io.ktml.Content"
+        result shouldContain "import io.ktml.Context"
+        result shouldContain """
             fun Context.writeCard(
                 title: String,
                 content: Content,
             ) {
         """.trimIndent()
-        )
     }
 
-    @Test
-    fun testGenerateCodeWithDefaultValues() {
+    "generate code with default values" {
+        Given
         val template = ParsedTemplate(
             name = "button",
             imports = emptyList(),
@@ -99,15 +99,17 @@ class KotlinFileGeneratorTest {
             root = HtmlElement.Tag("button", emptyMap())
         )
 
+        When
         val result = kotlinFileGenerator.generateCode(template)
 
-        assertContains(result, "text: String = \"Click me\"")
-        assertContains(result, "disabled: Boolean = false")
-        assertContains(result, "count: Int = 0")
+        Then
+        result shouldContain "text: String = \"Click me\""
+        result shouldContain "disabled: Boolean = false"
+        result shouldContain "count: Int = 0"
     }
 
-    @Test
-    fun testGenerateCodeWithMixedParameters() {
+    "generate code with mixed parameters" {
+        Given
         val template = ParsedTemplate(
             name = "form-input",
             imports = listOf("import kotlinx.serialization.Serializable"),
@@ -120,25 +122,24 @@ class KotlinFileGeneratorTest {
             root = HtmlElement.Tag("form-input", emptyMap())
         )
 
+        When
         val result = kotlinFileGenerator.generateCode(template)
 
-        assertContains(result, "import io.ktml.Content")
-        assertContains(result, "import io.ktml.Context")
-        assertContains(result, "import kotlinx.serialization.Serializable")
-        assertContains(
-            result,
-            """
+        Then
+        result shouldContain "import io.ktml.Content"
+        result shouldContain "import io.ktml.Context"
+        result shouldContain "import kotlinx.serialization.Serializable"
+        result shouldContain """
             fun Context.writeFormInput(
                 label: String,
                 placeholder: String = "Enter text",
                 required: Boolean = true,
                 content: Content,
             ) {""".trimIndent()
-        )
     }
 
-    @Test
-    fun testToCamelCaseConversion() {
+    "to camel case conversion" {
+        Given
         val template = ParsedTemplate(
             name = "my-custom-button",
             imports = emptyList(),
@@ -146,13 +147,15 @@ class KotlinFileGeneratorTest {
             root = HtmlElement.Tag("my-custom-button", emptyMap())
         )
 
+        When
         val result = kotlinFileGenerator.generateCode(template)
 
-        assertContains(result, "fun Context.writeMyCustomButton() {")
+        Then
+        result shouldContain "fun Context.writeMyCustomButton() {"
     }
 
-    @Test
-    fun testToCamelCaseWithSingleWord() {
+    "to camel case with single word" {
+        Given
         val template = ParsedTemplate(
             name = "button",
             imports = emptyList(),
@@ -160,13 +163,15 @@ class KotlinFileGeneratorTest {
             root = HtmlElement.Tag("button", emptyMap())
         )
 
+        When
         val result = kotlinFileGenerator.generateCode(template)
 
-        assertContains(result, "fun Context.writeButton() {")
+        Then
+        result shouldContain "fun Context.writeButton() {"
     }
 
-    @Test
-    fun testGenerateCodeWithNoParameters() {
+    "generate code with no parameters" {
+        Given
         val template = ParsedTemplate(
             name = "header",
             imports = emptyList(),
@@ -174,16 +179,18 @@ class KotlinFileGeneratorTest {
             root = HtmlElement.Tag("header", emptyMap())
         )
 
+        When
         val result = kotlinFileGenerator.generateCode(template)
 
-        assertContains(result, "fun Context.writeHeader() {")
-        assertContains(result, "import io.ktml.Context")
+        Then
+        result shouldContain "fun Context.writeHeader() {"
+        result shouldContain "import io.ktml.Context"
         // Should not import Content if no Content parameters
-        assertTrue(!result.contains("import io.ktml.Content"))
+        result shouldNotContain "import io.ktml.Content"
     }
 
-    @Test
-    fun testGenerateCodeStructure() {
+    "generate code structure" {
+        Given
         val template = ParsedTemplate(
             name = "test-component",
             imports = listOf("import kotlin.String"),
@@ -197,8 +204,10 @@ class KotlinFileGeneratorTest {
             bottomExternalScriptContent = "val b = 1",
         )
 
+        When
         val result = kotlinFileGenerator.generateCode(template)
 
+        Then
         val expected = """
             package io.ktml.templates
 
@@ -216,8 +225,8 @@ class KotlinFileGeneratorTest {
             val b = 1
 
             private const val RAW_CONTENT_0 = ""${'"'}Hello, World!""${'"'}
-            
+
         """.trimIndent()
-        assertEquals(expected, result)
+        result shouldBe expected
     }
-}
+})

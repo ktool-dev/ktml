@@ -17,6 +17,8 @@ class ContentBuilder {
     private var indent = INDENTATION
 
     fun clear() {
+        currentRawContent.clear()
+        rawContentItems.clear()
         builder.clear().append(INDENTATION)
         writingRaw = false
         indent = INDENTATION

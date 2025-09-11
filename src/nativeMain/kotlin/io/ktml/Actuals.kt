@@ -5,6 +5,7 @@ import okio.Path.Companion.toPath
 
 private fun Path.toOkioPath() = path.toPath()
 
+internal actual val Path.absolute: String get() = toOkioPath().normalized().toString()
 internal actual fun Path.readText(): String = FileSystem.SYSTEM.read(this.toOkioPath()) { readUtf8() }
 internal actual fun Path.writeText(content: String) {
     FileSystem.SYSTEM.write(this.toOkioPath()) { writeUtf8(content) }
