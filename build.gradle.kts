@@ -2,7 +2,7 @@ plugins {
     alias(libs.plugins.kotlin.multiplatform)
 }
 
-group = "io.ktml"
+group = "dev.ktool"
 version = "1.0-SNAPSHOT"
 
 repositories {
