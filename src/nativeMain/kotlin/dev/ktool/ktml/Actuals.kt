@@ -1,4 +1,4 @@
-package dev.ktool.ktml
+package dev.ktml
 
 import okio.FileSystem
 import okio.Path.Companion.toPath

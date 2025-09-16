@@ -1,4 +1,4 @@
-package dev.ktool.ktml
+package dev.ktml
 
 import java.io.OutputStream
 import java.io.OutputStreamWriter

@@ -1,4 +1,4 @@
-package dev.ktool.ktml.compile
+package dev.ktml.compile
 
 import org.jetbrains.kotlin.cli.common.arguments.K2JVMCompilerArguments
 import org.jetbrains.kotlin.cli.common.messages.*

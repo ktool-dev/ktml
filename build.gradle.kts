@@ -33,6 +33,7 @@ kotlin {
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.ksoup.html)
                 implementation(libs.ksoup.entities)
+                implementation(libs.ktool.kotest.bdd)
             }
         }
 

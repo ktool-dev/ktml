@@ -7,3 +7,5 @@ enum class UserType {
 }
 
 data class Item(val name: String)
+
+data class User(val name: String, val type: UserType)

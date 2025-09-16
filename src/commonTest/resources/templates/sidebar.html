@@ -1,7 +1,7 @@
-import dev.ktool.ktml.gen.SideBarItem
+import dev.ktml.gen.SideBarItem
 
 <sidebar ctx-sideBarItems="List<SideBarItem> = listOf()">
     <div class="sidebar">
-        <a each="${item in contextItems}" href="${item.href}">${item.name}</a>
+        <a each="${item in sideBarItems}" href="${item.href}">${item.name}</a>
     </div>
 </sidebar>

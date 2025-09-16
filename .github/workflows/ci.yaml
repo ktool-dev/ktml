@@ -8,7 +8,7 @@ on:
 
 jobs:
   test:
-    name: Test on Ubuntu
+    name: Build and Test
     runs-on: ubuntu-latest
     permissions:
       contents: read
