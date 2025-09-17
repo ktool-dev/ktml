@@ -6,7 +6,8 @@ A type-safe HTML template engine for Kotlin Multiplatform that generates Kotlin 
 
 KTML transforms HTML templates into type-safe Kotlin functions, enabling compile-time verification of template
 parameters and seamless integration with Kotlin code. Templates support parameter binding, conditional rendering, loops,
-and composition.
+and composition, which allows you to break templates down into reusable components with no performance overhead since
+every template call is just a function call.
 
 ## Features
 
@@ -53,10 +54,12 @@ The engine generates type-safe Kotlin functions:
 
 ```kotlin
 // Generated function signature
-fun card(title: String, content: Content): String
+fun Context.writeCard(title: String, content: Content)
 
 // Usage
-val html = card(
+val context = Context()
+
+val html = context.writeCard(
     title = "Welcome",
     content = content { +"Hello, World!" }
 )
@@ -75,6 +78,31 @@ val html = card(
 
 ### Content Parameters
 
+When passing content to a tag, you can use the `content` attribute to define a content parameter. Like this:
+
+```html
+
+<wrapper content="Content">
+    <div class="wrapper">
+        ${content}
+    </div>
+</wrapper>
+```
+
+Then call that tag, you pass the `content` parameter as children. Like this:
+
+```html
+
+<page>
+    <wrapper>
+        <h1>Welcome</h1>
+        <p>Hello, World!</p>
+    </wrapper>
+</page>
+```
+
+You can also define multiple content parameters with different names.
+
 ```html
 
 <layout sidebar="Content" main="Content">
@@ -85,6 +113,27 @@ val html = card(
 </layout>
 ```
 
+To invoke this template and pass content to it, you use nested tags with the name of the content parameter. The content
+of the nested tag is passed to the template as the value of the content parameter.
+
+```html
+
+<page>
+    <layout>
+        <sidebar>
+            <ul>
+                <li>Home</li>
+                <li>About</li>
+            </ul>
+        </sidebar>
+        <main>
+            <h1>Welcome</h1>
+            <p>Hello, World!</p>
+        </main>
+    </layout>
+</page>
+```
+
 ### Conditional Rendering
 
 ```html
@@ -92,7 +141,7 @@ val html = card(
 <user-info name="String" isAdmin="Boolean">
     <div class="user">
         <span>${name}</span>
-        <span if="isAdmin" class="badge">Admin</span>
+        <span if="${isAdmin}" class="badge">Admin</span>
     </div>
 </user-info>
 ```
@@ -103,12 +152,15 @@ val html = card(
 
 <item-list items="List<String>">
     <ul>
-        <li each="item in items">${item}</li>
+        <li each="${item in items}">${item}</li>
     </ul>
 </item-list>
 ```
 
 ### Embedded Kotlin
+
+You can embed Kotlin code in your templates using the `<script type="text/kotlin">` tag. The code is executed in the
+context of the template function at the place the tag is in the flow of the page.
 
 ```html
 
@@ -120,16 +172,20 @@ val html = card(
 </timestamp>
 ```
 
-### Template Composition
+### Importing Types
+
+You can import types in your templates using the `import` statement. These will go at the top of the generated file, so
+the types imported will be available to anything in the template.
 
 ```html
+import my.app.UserType
 
-<page title="String" content="Content">
-    <layout>
-        <header>${title}</header>
-        <body>${content}</body>
-    </layout>
-</page>
+<user-info name="String" userType="UserType">
+    <div class="user">
+        <span>${name}</span>
+        <span if="${userType == UserType.ADMIN}" class="badge">Admin</span>
+    </div>
+</user-info>
 ```
 
 ## Building
