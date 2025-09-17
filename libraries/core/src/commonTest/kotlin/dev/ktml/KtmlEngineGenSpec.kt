@@ -2,11 +2,11 @@ package dev.ktml
 
 import dev.ktml.templates.writeCard
 import dev.ktml.templates.writeDashboard
+import dev.ktml.test.Item
+import dev.ktml.test.User
+import dev.ktml.test.UserType
 import dev.ktool.kotest.BddSpec
 import io.kotest.matchers.shouldBe
-import my.app.Item
-import my.app.User
-import my.app.UserType
 
 class KtmlEngineGenSpec : BddSpec({
     "generated card template" {

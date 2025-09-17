@@ -2,7 +2,7 @@ package dev.ktml.templates
 
 import dev.ktml.Context
 import dev.ktml.templates.elements.writeMyButton
-import my.app.*
+import dev.ktml.test.*
 
 fun Context.writeDashboard(
     userName: String,

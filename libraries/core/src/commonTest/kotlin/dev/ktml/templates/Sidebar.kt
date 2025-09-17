@@ -1,7 +1,7 @@
 package dev.ktml.templates
 
 import dev.ktml.Context
-import dev.ktml.gen.SideBarItem
+import dev.ktml.test.SideBarItem
 
 fun Context.writeSidebar() {
     val sideBarItems: List<SideBarItem> = optional("sideBarItems", listOf())
