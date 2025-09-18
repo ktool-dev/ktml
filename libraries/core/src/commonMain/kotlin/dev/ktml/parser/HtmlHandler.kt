@@ -2,7 +2,7 @@ package dev.ktml.parser
 
 import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlHandler
 
-class HtmlHandler : KsoupHtmlHandler {
+class HtmlHandler(private val selfClosingTags: Collection<String> = emptySet()) : KsoupHtmlHandler {
     private val elementStack = mutableListOf<HtmlElement.Tag>()
     private var _rootElements = mutableListOf<HtmlElement.Tag>()
 
@@ -31,10 +31,15 @@ class HtmlHandler : KsoupHtmlHandler {
             elementStack.last().addChild(element)
         }
 
-        elementStack.add(element)
+        // Don't add self-closing tags to the stack since they can't have content
+        if (!selfClosingTags.contains(name)) {
+            elementStack.add(element)
+        }
     }
 
     override fun onCloseTag(name: String, isImplied: Boolean) {
+        if (selfClosingTags.contains(name)) return
+
         elementStack.removeLastOrNull()
     }
 

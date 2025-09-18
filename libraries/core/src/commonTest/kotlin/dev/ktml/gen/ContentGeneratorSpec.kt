@@ -114,6 +114,7 @@ class ContentGeneratorSpec : BddSpec({
         val template = $$"""
             <tag text="String" onClick="String">
                 <my-button text="Hello" onClick="${onClick}"/>
+                <h1>Hello</h1>
             </tag>
         """.parse()
 
@@ -126,6 +127,7 @@ class ContentGeneratorSpec : BddSpec({
                 onClick = onClick,
                 text = "Hello",
             )
+            raw(${RAW_PREFIX}0)
         """.trimIndent()
     }
 
@@ -296,6 +298,25 @@ class ContentGeneratorSpec : BddSpec({
             writeTag() {
                 raw(${RAW_PREFIX}0)
             }
+        """.trimIndent()
+    }
+
+    "doctype tag printed as doctype directive" {
+        Given
+        val template = $$"""
+            <something>
+                <!DOCTYPE html>
+                <h1>Hello</h1>
+            </something>
+        """.parse()
+
+        When
+        val result = contentGenerator.generateTemplateContent(template)
+
+        Then
+        result.rawConstants[0].content shouldBe """
+            <!DOCTYPE html>
+            <h1>Hello</h1>
         """.trimIndent()
     }
 })

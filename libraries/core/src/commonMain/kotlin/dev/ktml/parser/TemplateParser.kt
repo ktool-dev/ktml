@@ -4,6 +4,8 @@ import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlOptions
 import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlParser
 import dev.ktml.TEMPLATE_PACKAGE
 
+const val DOCTYPE_ERROR_MESSAGE = "<!DOCTYPE> should not be used in templates, use <doctype> tag instead."
+
 /**
  * Main template parser that uses Ksoup to parse HTML templates
  */
@@ -14,9 +16,12 @@ class TemplateParser {
      * Parse template content
      */
     fun parseContent(content: String, packageName: String = ""): ParsedTemplate {
+        val doctype = checkForDoctype(content)
+
         val imports = parseImportStatements(content)
 
-        val handler = HtmlHandler()
+        val handler = HtmlHandler(findSelfClosingTags(content))
+
         KsoupHtmlParser(handler = handler, options = parserOptions).apply {
             write(content)
             end()
@@ -34,13 +39,34 @@ class TemplateParser {
             parameters = extractParameters(rootElement),
             imports = imports,
             root = rootElement,
+            dockTypeDeclaration = doctype,
             topExternalScriptContent = handler.topExternalScriptContent,
             bottomExternalScriptContent = handler.bottomExternalScriptContent,
         )
     }
 
+    private fun checkForDoctype(content: String): String {
+        val start = content.indexOf("<!doctype", ignoreCase = true)
+
+        if (start == -1) return ""
+
+        val end = content.indexOf(">", start)
+        return content.substring(start, end + 1)
+    }
+
     private fun parseImportStatements(content: String): List<String> =
         content.substringBefore("<").lines().filter { it.trim().startsWith("import ") }
+
+    /**
+     * Since Ksoup only handles known HTML self-closing tags, we have to find any other tags that are self-closing and
+     * add them to the list of self-closing tags, so they are parsed correctly.
+     */
+    private fun findSelfClosingTags(content: String): Set<String> {
+        val selfClosingRegex = """<(\w+(?:-\w+)*)[^>]*\s*/>""".toRegex()
+        return selfClosingRegex.findAll(content)
+            .map { it.groupValues[1] }
+            .toSet()
+    }
 
     private fun extractParameters(rootElement: HtmlElement.Tag) = rootElement.attrs.map { (name, typeSpec) ->
         val parts = typeSpec.split("=", limit = 2)

@@ -5,6 +5,14 @@ import dev.ktml.TRIPLE_QUOTE
 
 internal const val RAW_PREFIX = "RAW_CONTENT_"
 
+data class ContentAndRawConstants(val content: String, val rawConstants: List<RawConstant>)
+
+data class RawConstant(val index: Int, val content: String) {
+    override fun toString() = "private const val $RAW_PREFIX$index = ${TRIPLE_QUOTE}$content${TRIPLE_QUOTE}"
+}
+
+fun List<RawConstant>.toContentString() = joinToString("\n") { it.toString() }.trim()
+
 /**
  * Builds the content of a template function. This helps with indentation and grouping raw content together.
  */
@@ -32,6 +40,12 @@ class ContentBuilder {
         currentRawContent.append(content)
     }
 
+    fun doctype(content: String) {
+        currentRawContent.clear()
+        raw(content)
+        currentRawContent.appendLine()
+    }
+
     private fun endRaw() {
         if (writingRaw) {
             rawContentItems.add(currentRawContent.toString())
@@ -40,15 +54,15 @@ class ContentBuilder {
         }
     }
 
-    val templateContent: TemplateContent
+    val templateContent: ContentAndRawConstants
         get() {
             endRaw()
 
             val constants = rawContentItems.mapIndexed { index, it ->
-                "private const val $RAW_PREFIX$index = ${TRIPLE_QUOTE}$it${TRIPLE_QUOTE}"
-            }.joinToString("\n").trim()
+                RawConstant(index, it)
+            }
 
-            return TemplateContent(builder.toString().trimMargin(), constants)
+            return ContentAndRawConstants(builder.toString().trimMargin(), constants)
         }
 
     private fun StringBuilder.newline(): StringBuilder {

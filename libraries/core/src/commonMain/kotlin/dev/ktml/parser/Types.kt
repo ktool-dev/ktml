@@ -13,13 +13,13 @@ data class ParsedTemplate(
     val imports: List<String>,
     val parameters: List<TemplateParameter>,
     val root: HtmlElement.Tag,
+    val dockTypeDeclaration: String = "",
     val topExternalScriptContent: String = "",
     val bottomExternalScriptContent: String = "",
 ) {
     val key = "$packageName.$name"
     val camelCaseName = name.toCamelCase()
     val functionName = "write$camelCaseName"
-    val qualifiedFunctionName = "$packageName.$functionName"
 
     val orderedParameters: List<TemplateParameter> by lazy {
         parameters.sortedWith(compareBy({ it.isContent }, { it.name == "content" }, { it.name }))

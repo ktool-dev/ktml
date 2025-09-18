@@ -1,5 +1,5 @@
 [versions]
-kotlin = "2.2.0"
+kotlin = "2.2.20"
 kotlinx-coroutines = "1.7.3"
 ksoup = "0.6.0"
 kotlin-logging = "7.0.7"
@@ -8,6 +8,7 @@ kotlin-compiler = "2.0.21"
 okio = "3.16.0"
 kotest = "6.0.3"
 kotest-bdd = "2.0.0"
+ksp = "2.2.20-2.0.3"
 
 [libraries]
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
@@ -26,3 +27,5 @@ ktool-kotest-bdd = { module = "dev.ktool:kotest-bdd", version.ref = "kotest-bdd"
 
 [plugins]
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+kotest = { id = "io.kotest", version.ref = "kotest" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }

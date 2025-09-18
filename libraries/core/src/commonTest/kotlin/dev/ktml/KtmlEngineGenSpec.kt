@@ -46,52 +46,53 @@ class KtmlEngineGenSpec : BddSpec({
         )
 
         Then
-        "    $writer".trimIndent() shouldBe """
+        writer.toString().trimIndent() shouldBe """
+            <!DOCTYPE html>
             <html lang="en">
-            <head>
-                <meta charset="UTF-8">>
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">>
-                <title>Dashboard - John Doe</title>
-            </head>
-            <body>
-            <div class="header">
-                
-                    <h1>Dashboard</h1>
-                
-            </div>
-            <div class="content">
-                
-                    <h1>Hello, John Doe!</h1>
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Dashboard - John Doe</title>
+                </head>
+                <body>
+                <div class="header">
                     
-                    <h2>You are a user!</h2>
+                        <h1>Dashboard</h1>
                     
-                    <h2>You are not a guest!</h2>
-                    <div class="card">
-                <div class="card-header">
+                </div>
+                <div class="content">
                     
-                            <h3>Items</h3>
+                        <h1>Hello, John Doe!</h1>
                         
+                        <h2>You are a user!</h2>
+                        
+                        <h2>You are not a guest!</h2>
+                        <div class="card">
+                    <div class="card-header">
+                        
+                                <h3>Items</h3>
+                            
+                    </div>
+                    <div class="card-body">
+                        
+                            <header>
+                                <h3>Items</h3>
+                            </header>
+                            <body>
+                            <ul>
+                                <li>Item 1 - Item 0</li><li>Item 2 - Item 1</li>
+                            </ul>
+                            </body>
+                        
+                    </div>
                 </div>
-                <div class="card-body">
+                        <div class="sidebar">
                     
-                        <header>
-                            <h3>Items</h3>
-                        </header>
-                        <body>
-                        <ul>
-                            <li>Item 1 - Item 0</li><li>Item 2 - Item 1</li>
-                        </ul>
-                        </body>
+                </div><br>
+                        <button onclick="alert&lpar;&apos;Hello World&excl;&apos;&rpar;">Click me&excl;</button>
                     
                 </div>
-            </div>
-                    <div class="sidebar">
-                
-            </div>
-                    <button onclick="alert&lpar;&apos;Hello World&excl;&apos;&rpar;">Click me&excl;</button>
-                
-            </div>
-            </body>
-            </html>""".trimIndent()
+                </body>
+                </html>""".trimIndent()
     }
 })

@@ -163,4 +163,37 @@ class TemplateParserSpec : BddSpec({
         result.topExternalScriptContent shouldBe "val a = 1"
         result.bottomExternalScriptContent shouldBe "val b = 1"
     }
+
+    "should error if DOCTYPE is present" {
+        Given
+        val content = $$"""
+            <!DOCTYPE html>
+            <my-button text="String" onClick="String">
+                <button onclick="${onClick}">${text}</button>
+            </my-button>
+        """.trimIndent()
+
+        When
+        val template = parser.parseContent(content)
+
+        Then
+        template.dockTypeDeclaration shouldBe "<!DOCTYPE html>"
+    }
+
+    "should parse self closing tag properly" {
+        Given
+        val content = """
+            <my-button>
+                <some-tag />
+                <br>
+                <div>Hello</div>
+            </my-button>
+        """.trimIndent()
+
+        When
+        val template = parser.parseContent(content)
+
+        Then
+        template.root.children shouldHaveSize 3
+    }
 })

@@ -14,7 +14,7 @@ class KotlinFileGenerator(templates: Templates) {
         appendLine("package ${template.packageName}")
         appendLine()
 
-        requiredImports(template).plus(contentGenerator.addedImports).sorted().forEach { appendLine(it) }
+        content.imports.forEach { appendLine(it) }
         appendLine()
 
         if (template.topExternalScriptContent.isNotEmpty()) {
@@ -33,16 +33,6 @@ class KotlinFileGenerator(templates: Templates) {
 
         appendLine(rawConstants)
     }
-
-    private fun requiredImports(template: ParsedTemplate) = buildSet {
-        addAll(template.imports)
-
-        if (template.parameters.any { it.type == "Content" }) {
-            add("import dev.ktml.Content")
-        }
-
-        add("import dev.ktml.Context")
-    }.sorted()
 
     private fun generateFunction(template: ParsedTemplate, content: TemplateContent): Pair<String, String> {
         val functionContent = buildString {
@@ -73,6 +63,6 @@ class KotlinFileGenerator(templates: Templates) {
             append("}")
         }
 
-        return functionContent to content.rawConstants
+        return functionContent to content.rawConstants.toContentString()
     }
 }

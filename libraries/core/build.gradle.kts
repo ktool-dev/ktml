@@ -1,21 +1,21 @@
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.kotest)
+    alias(libs.plugins.ksp)
 }
 
 repositories {
     mavenCentral()
 }
 
+tasks.withType<Test>().configureEach {
+    useJUnitPlatform()
+}
+
 kotlin {
     jvmToolchain(22)
 
-    jvm {
-        testRuns.named("test") {
-            executionTask.configure {
-                useJUnitPlatform()
-            }
-        }
-    }
+    jvm()
 
     // Native targets
     linuxX64()
@@ -36,6 +36,7 @@ kotlin {
 
         val commonTest by getting {
             dependencies {
+                implementation(kotlin("test"))
                 implementation(libs.kotlin.test)
                 implementation(libs.kotlinx.coroutines.test)
                 implementation(libs.kotest.framework.engine)

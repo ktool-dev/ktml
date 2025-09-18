@@ -7,7 +7,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
 
-data class TemplateContent(val functionContent: String, val rawConstants: String)
+data class TemplateContent(val imports: List<String>, val functionContent: String, val rawConstants: List<RawConstant>)
 
 /**
  * Generates HtmlWriter method calls from parsed HTML elements
@@ -15,18 +15,40 @@ data class TemplateContent(val functionContent: String, val rawConstants: String
 class ContentGenerator(private val templates: Templates) {
     private val contentBuilder = ContentBuilder()
     private val expressionParser = ExpressionParser()
-    private val _addedImports = mutableListOf<String>()
-
-    val addedImports: List<String> get() = _addedImports.toList()
+    private val imports = mutableListOf<String>()
 
     fun generateTemplateContent(template: ParsedTemplate): TemplateContent {
         logger.debug { "Generating content for template: ${template.name}" }
         contentBuilder.clear()
-        _addedImports.clear()
+
+        initializeImports(template)
         generateContextParams(template)
+
+        if (template.dockTypeDeclaration.isNotBlank()) {
+            contentBuilder.doctype(template.dockTypeDeclaration)
+        }
+
         generateChildContent(template, template.root.children)
+
+        val contentAndConstants = contentBuilder.templateContent
         logger.debug { "Finished generating content for template: ${template.name}" }
-        return contentBuilder.templateContent
+
+        return TemplateContent(
+            imports = imports.sorted(),
+            functionContent = contentAndConstants.content,
+            rawConstants = contentAndConstants.rawConstants,
+        )
+    }
+
+    private fun initializeImports(template: ParsedTemplate) {
+        imports.clear()
+        imports.addAll(template.imports)
+
+        if (template.parameters.any { it.type == "Content" }) {
+            imports.add("import dev.ktml.Content")
+        }
+
+        imports.add("import dev.ktml.Context")
     }
 
     private fun generateContextParams(template: ParsedTemplate) {
@@ -64,7 +86,8 @@ class ContentGenerator(private val templates: Templates) {
     private val controlAttrs = setOf("if", "each")
 
     private fun generateTagContent(template: ParsedTemplate, tag: HtmlElement.Tag) {
-        logger.info { "Generating tag content: ${tag.name}" }
+        logger.debug { "Generating tag content: ${tag.name}" }
+
         val customTag = templates.locate(tag.name, template)
 
         if (customTag != null) return generateCustomTagCall(template, tag, customTag)
@@ -104,8 +127,6 @@ class ContentGenerator(private val templates: Templates) {
             contentBuilder.raw("</${tag.name}>")
         } else if (!SELF_CLOSING_TAGS.contains(tag.name)) {
             contentBuilder.raw(" />")
-        } else {
-            contentBuilder.raw(">")
         }
 
         tag.attrs.filter { it.key in controlAttrs }.forEach { _ ->
@@ -133,7 +154,7 @@ class ContentGenerator(private val templates: Templates) {
         logger.info { "Generating custom tag call: ${customTag.name}" }
 
         if (!template.samePackage(customTag)) {
-            _addedImports.add("import ${customTag.packageName}.${customTag.functionName}")
+            imports.add("import ${customTag.packageName}.${customTag.functionName}")
         }
 
         contentBuilder.startTemplateCall(customTag.functionName)
@@ -205,5 +226,5 @@ private val SELF_CLOSING_TAGS = setOf(
     "embed",
     "source",
     "track",
-    "wbr"
+    "wbr",
 )

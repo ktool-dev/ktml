@@ -17,10 +17,11 @@ fun Context.writePageLayout(
     raw(RAW_CONTENT_3)
 }
 
-private const val RAW_CONTENT_0 = """<html lang="en">
+private const val RAW_CONTENT_0 = """<!DOCTYPE html>
+<html lang="en">
     <head>
-        <meta charset="UTF-8">>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>"""
 private const val RAW_CONTENT_1 = """</title>
     </head>
