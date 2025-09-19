@@ -319,6 +319,24 @@ class ContentGeneratorSpec : BddSpec({
             <h1>Hello</h1>
         """.trimIndent()
     }
+
+    "if a tag calls itself it just prints out the raw content" {
+        Given
+        val template = $$"""
+            <tag>
+                <tag>World</tag>
+            </tag>
+        """.parse()
+
+        When
+        val result = contentGenerator.generateTemplateContent(template)
+
+        Then
+        result.functionContent.trimIndent() shouldBe """
+            raw(${RAW_PREFIX}0)
+        """.trimIndent()
+        result.rawConstants[0].content shouldBe """<tag>World</tag>"""
+    }
 })
 
 private fun String.parse() = parser.parseContent(this.trimIndent()).also { templates.register(it) }

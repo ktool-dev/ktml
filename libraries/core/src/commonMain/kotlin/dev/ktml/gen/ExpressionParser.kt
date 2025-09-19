@@ -3,7 +3,7 @@ package dev.ktml.gen
 import com.mohamedrejeb.ksoup.entities.KsoupEntities.decodeHtml
 
 class ExpressionParser {
-    fun isKotlinExpression(value: String) = value.startsWith($$"${") && value.endsWith("}")
+    fun isKotlinExpression(value: String) = value.trim().startsWith($$"${") && value.endsWith("}")
 
     fun hasKotlinExpression(value: String) = value.contains($$"${") && value.contains("}")
 
@@ -17,6 +17,8 @@ class ExpressionParser {
     }
 
     private fun processTextWithKotlin(text: String, parts: MutableList<Part>) {
+        if (text.isEmpty()) return
+
         if (!text.contains($$"${")) {
             parts.add(Part(text, false))
         } else {
@@ -30,5 +32,5 @@ class ExpressionParser {
         }
     }
 
-    fun extractSingleExpression(value: String) = decodeHtml(value.removeSurrounding($$"${", "}"))
+    fun extractSingleExpression(value: String) = decodeHtml(value.trim().removeSurrounding($$"${", "}"))
 }

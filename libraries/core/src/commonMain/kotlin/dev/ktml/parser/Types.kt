@@ -57,5 +57,5 @@ sealed class HtmlElement {
         }
     }
 
-    data class Text(val content: String) : HtmlElement()
+    data class Text(var content: String) : HtmlElement()
 }

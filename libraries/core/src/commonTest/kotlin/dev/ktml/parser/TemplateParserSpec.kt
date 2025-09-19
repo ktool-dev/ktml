@@ -196,4 +196,21 @@ class TemplateParserSpec : BddSpec({
         Then
         template.root.children shouldHaveSize 3
     }
+
+    "can parse a template with some nested kotlin code" {
+        Given
+        val content = $$"""
+            <my-button text="String" onClick="String">
+                <button onclick="${onClick}">${if(text.size > a && b < c) "less" else "more"}</button>
+            </my-button>
+        """.trimIndent()
+
+        When
+        val template = parser.parseContent(content)
+
+        Then
+        template.root.children shouldHaveSize 1
+        (template.root.children[0] as HtmlElement.Tag).children shouldHaveSize 1
+        (template.root.children[0] as HtmlElement.Tag).children[0] shouldBe HtmlElement.Text($$"""${if(text.size > a && b < c) "less" else "more"}""")
+    }
 })

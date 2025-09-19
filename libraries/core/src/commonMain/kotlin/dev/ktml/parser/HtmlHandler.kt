@@ -5,6 +5,7 @@ import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlHandler
 class HtmlHandler(private val selfClosingTags: Collection<String> = emptySet()) : KsoupHtmlHandler {
     private val elementStack = mutableListOf<HtmlElement.Tag>()
     private var _rootElements = mutableListOf<HtmlElement.Tag>()
+    private var currentTextElement: HtmlElement.Text? = null
 
     val rootElements: List<HtmlElement.Tag>
         get() = _rootElements.filterNot { it.isKotlinScript }
@@ -23,6 +24,7 @@ class HtmlHandler(private val selfClosingTags: Collection<String> = emptySet()) 
         }.trimIndent()
 
     override fun onOpenTag(name: String, attributes: Map<String, String>, isImplied: Boolean) {
+        currentTextElement = null
         val element = HtmlElement.Tag(name, attributes)
 
         if (elementStack.isEmpty()) {
@@ -38,6 +40,7 @@ class HtmlHandler(private val selfClosingTags: Collection<String> = emptySet()) 
     }
 
     override fun onCloseTag(name: String, isImplied: Boolean) {
+        currentTextElement = null
         if (selfClosingTags.contains(name)) return
 
         elementStack.removeLastOrNull()
@@ -46,7 +49,12 @@ class HtmlHandler(private val selfClosingTags: Collection<String> = emptySet()) 
     override fun onText(text: String) {
         // Ignore empty text in root elements
         if (!_rootElements.contains(elementStack.lastOrNull()) || text.isNotBlank()) {
-            elementStack.lastOrNull()?.addChild(HtmlElement.Text(text))
+            if (currentTextElement == null) {
+                currentTextElement = HtmlElement.Text(text)
+                elementStack.lastOrNull()?.addChild(currentTextElement!!)
+            } else {
+                currentTextElement?.content += text
+            }
         }
     }
 
