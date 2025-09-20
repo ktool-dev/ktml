@@ -206,11 +206,9 @@ class ContentGenerator(private val templates: Templates) {
                 } else if (param == lastParam) {
                     contentBuilder.endTemplateCallWithContent()
                     contentBuilder.startEmbeddedContent()
-                    println("Content: $content")
                     generateChildContent(customTag, content)
                     contentBuilder.endEmbeddedContent()
                 } else {
-                    println("Content: $content")
                     contentBuilder.startEmbeddedContent("$paramName = ")
                     generateChildContent(customTag, content)
                     contentBuilder.endEmbeddedContent(",")

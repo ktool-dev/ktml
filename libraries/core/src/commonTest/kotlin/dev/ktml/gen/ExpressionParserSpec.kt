@@ -117,7 +117,6 @@ class ExpressionParserSpec : BddSpec({
         val result = parser.extractMultipleExpressions(content)
 
         Then
-        println(result)
         result.size shouldBe 2
         result[0].text shouldBe "greeting"
         result[0].isKotlin shouldBe true
