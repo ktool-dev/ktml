@@ -2,6 +2,7 @@ package dev.ktml.gen
 
 import dev.ktml.INDENTATION
 import dev.ktml.Templates
+import dev.ktml.escapeIfKeyword
 import dev.ktml.parser.ParsedTemplate
 import dev.ktml.toCamelCase
 
@@ -24,24 +25,27 @@ class KotlinFileGenerator(templates: Templates) {
 
         val (functionContent, rawConstants) = generateFunction(template, content)
         appendLine(functionContent)
-        appendLine()
 
         if (template.bottomExternalScriptContent.isNotEmpty()) {
-            appendLine(template.bottomExternalScriptContent)
             appendLine()
+            appendLine(template.bottomExternalScriptContent)
         }
 
-        appendLine(rawConstants)
+        if (rawConstants.isNotEmpty()) {
+            appendLine()
+            appendLine(rawConstants)
+        }
     }
 
     private fun generateFunction(template: ParsedTemplate, content: TemplateContent): Pair<String, String> {
         val functionContent = buildString {
             append("fun Context.write${template.name.toCamelCase()}(")
 
-            val functionParams = template.parameters.filterNot { it.isContextParam }
+            val functionParams = template.orderedParameters.filterNot { it.isContextParam }
 
             functionParams.forEach { param ->
-                appendLine().append(INDENTATION).append(param.name).append(": ").append(param.type)
+                val paramName = escapeIfKeyword(param.name)
+                appendLine().append(INDENTATION).append(paramName).append(": ").append(param.type)
 
                 if (param.defaultValue != null) {
                     append(" = ")

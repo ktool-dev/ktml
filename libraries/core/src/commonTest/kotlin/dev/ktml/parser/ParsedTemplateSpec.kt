@@ -89,6 +89,26 @@ class ParsedTemplateSpec : BddSpec({
         params[1].name shouldBe "title"
         params[2].name shouldBe "body"
     }
+
+    "ordered parameters with escaped keyword sorts correctly" {
+        Given
+        val template = parsedTemplate(
+            listOf(
+                TemplateParameter("title", "String"),
+                TemplateParameter("content", "Content"),
+                TemplateParameter("else", "Content"),
+            )
+        )
+
+        When
+        val params = template.orderedParameters
+
+        Then
+        params shouldHaveSize 3
+        params[0].name shouldBe "title"
+        params[1].name shouldBe "else"
+        params[2].name shouldBe "content"
+    }
 })
 
 private fun parsedTemplate(parameters: List<TemplateParameter>) = ParsedTemplate(

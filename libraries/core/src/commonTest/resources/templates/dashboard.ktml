@@ -21,6 +21,12 @@ import dev.ktml.test.*
                 </ul>
                 </body>
             </card>
+            <if test="${user.type == UserType.ADMIN}">
+                <h2>You are an admin!</h2>
+                <else>
+                    <h2>You are not an admin!</h2>
+                </else>
+            </if>
             <sidebar/>
             <my-button text="Click me!" onClick="alert('Hello World!')"></my-button>
         </content>

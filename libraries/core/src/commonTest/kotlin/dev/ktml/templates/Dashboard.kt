@@ -5,10 +5,10 @@ import dev.ktml.templates.elements.writeMyButton
 import dev.ktml.test.*
 
 fun Context.writeDashboard(
-    userName: String,
+    items: List<Item>,
     message: String,
     user: User,
-    items: List<Item>,
+    userName: String,
 ) {
     writePageLayout(
         title = "Dashboard - ${user.name}",
@@ -36,28 +36,37 @@ fun Context.writeDashboard(
         }
         raw(RAW_CONTENT_10)
         writeCard(
-            header = {
+            body = {
                 raw(RAW_CONTENT_11)
+                for ((index, item) in items.withIndex()) {
+                    raw(RAW_CONTENT_12)
+                    write(item.name)
+                    raw(RAW_CONTENT_13)
+                    write(index)
+                    raw(RAW_CONTENT_14)
+                }
+                raw(RAW_CONTENT_15)
             },
         ) {
-            raw(RAW_CONTENT_12)
-            for ((index, item) in items.withIndex()) {
-                raw(RAW_CONTENT_13)
-                write(item.name)
-                raw(RAW_CONTENT_14)
-                write(index)
-                raw(RAW_CONTENT_15)
-            }
             raw(RAW_CONTENT_16)
         }
         raw(RAW_CONTENT_17)
+        writeIf(
+            test = user.type == UserType.ADMIN,
+            `else` = {
+                raw(RAW_CONTENT_18)
+            },
+        ) {
+            raw(RAW_CONTENT_19)
+        }
+        raw(RAW_CONTENT_20)
         writeSidebar()
-        raw(RAW_CONTENT_18)
+        raw(RAW_CONTENT_21)
         writeMyButton(
             onClick = "alert('Hello World!')",
             text = "Click me!",
         )
-        raw(RAW_CONTENT_19)
+        raw(RAW_CONTENT_22)
     }
 }
 
@@ -81,25 +90,26 @@ private const val RAW_CONTENT_9 = """<h2>You are not a guest!</h2>"""
 private const val RAW_CONTENT_10 = """
             """
 private const val RAW_CONTENT_11 = """
-                    <h3>Items</h3>
-                """
-private const val RAW_CONTENT_12 = """
-                <header>
-                    <h3>Items</h3>
-                </header>
-                <body>
                 <ul>
                     """
-private const val RAW_CONTENT_13 = """<li>"""
-private const val RAW_CONTENT_14 = """ - Item """
-private const val RAW_CONTENT_15 = """</li>"""
-private const val RAW_CONTENT_16 = """
+private const val RAW_CONTENT_12 = """<li>"""
+private const val RAW_CONTENT_13 = """ - Item """
+private const val RAW_CONTENT_14 = """</li>"""
+private const val RAW_CONTENT_15 = """
                 </ul>
-                </body>
-            """
+                """
+private const val RAW_CONTENT_16 = """
+                    <h3>Items</h3>
+                """
 private const val RAW_CONTENT_17 = """
             """
 private const val RAW_CONTENT_18 = """
+                    <h2>You are not an admin!</h2>
+                """
+private const val RAW_CONTENT_19 = """<h2>You are an admin!</h2>"""
+private const val RAW_CONTENT_20 = """
             """
-private const val RAW_CONTENT_19 = """
+private const val RAW_CONTENT_21 = """
+            """
+private const val RAW_CONTENT_22 = """
         """

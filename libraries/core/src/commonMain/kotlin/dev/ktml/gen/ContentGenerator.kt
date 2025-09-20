@@ -1,8 +1,10 @@
 package dev.ktml.gen
 
 import dev.ktml.Templates
+import dev.ktml.escapeIfKeyword
 import dev.ktml.parser.HtmlElement
 import dev.ktml.parser.ParsedTemplate
+import dev.ktml.parser.removeEmptyText
 import io.github.oshai.kotlinlogging.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
@@ -16,9 +18,11 @@ class ContentGenerator(private val templates: Templates) {
     private val contentBuilder = ContentBuilder()
     private val expressionParser = ExpressionParser()
     private val imports = mutableListOf<String>()
+    private lateinit var rootTemplate: ParsedTemplate
 
     fun generateTemplateContent(template: ParsedTemplate): TemplateContent {
         logger.debug { "Generating content for template: ${template.name}" }
+        rootTemplate = template
         contentBuilder.clear()
 
         initializeImports(template)
@@ -74,24 +78,29 @@ class ContentGenerator(private val templates: Templates) {
         }
     }
 
-    private fun generateChildContent(template: ParsedTemplate, children: List<HtmlElement>) {
+    private fun generateChildContent(
+        template: ParsedTemplate,
+        children: List<HtmlElement>,
+        noInterpolation: Boolean = false
+    ) {
         children.forEach {
             when (it) {
-                is HtmlElement.Tag -> generateTagContent(template, it)
-                is HtmlElement.Text -> generateTextContent(it)
+                is HtmlElement.Tag -> generateTagContent(template, it, noInterpolation)
+                is HtmlElement.Text -> generateTextContent(it, noInterpolation)
             }
         }
     }
 
     private val controlAttrs = setOf("if", "each")
+    private val filteredAttrs = controlAttrs + "ignore-kotlin"
 
-    private fun generateTagContent(template: ParsedTemplate, tag: HtmlElement.Tag) {
+    private fun generateTagContent(template: ParsedTemplate, tag: HtmlElement.Tag, noInterpolation: Boolean = false) {
         logger.debug { "Generating tag content: ${tag.name}" }
 
         val customTag = templates.locate(tag.name, template)
 
         // This prevents a template from calling itself
-        if (customTag != null && customTag != template) return generateCustomTagCall(template, tag, customTag)
+        if (customTag != null && customTag != rootTemplate) return generateCustomTagCall(template, tag, customTag)
 
         if (tag.isKotlinScript) {
             tag.children.joinToString("") { (it as HtmlElement.Text).content.trim() }
@@ -108,10 +117,12 @@ class ContentGenerator(private val templates: Templates) {
             contentBuilder.startControlFlow("for", expressionParser.extractSingleExpression(it))
         }
 
+        val currentNoInterpolation = noInterpolation || tag.attrs.containsKey("ignore-kotlin")
+
         contentBuilder.raw("<${tag.name}")
 
-        tag.attrs.filterNot { it.key in controlAttrs }.forEach { (name, value) ->
-            if (expressionParser.isKotlinExpression(value)) {
+        tag.attrs.filterNot { it.key in filteredAttrs }.forEach { (name, value) ->
+            if (!currentNoInterpolation && expressionParser.isKotlinExpression(value)) {
                 contentBuilder.raw(" $name=\"")
                 contentBuilder.write(expressionParser.extractSingleExpression(value))
                 contentBuilder.raw("\"")
@@ -122,7 +133,7 @@ class ContentGenerator(private val templates: Templates) {
 
         contentBuilder.raw(">")
 
-        generateChildContent(template, tag.children)
+        generateChildContent(template, tag.children, currentNoInterpolation)
 
         if (tag.children.isNotEmpty()) {
             contentBuilder.raw("</${tag.name}>")
@@ -135,10 +146,10 @@ class ContentGenerator(private val templates: Templates) {
         }
     }
 
-    private fun generateTextContent(text: HtmlElement.Text) {
+    private fun generateTextContent(text: HtmlElement.Text, noInterpolation: Boolean = false) {
         logger.debug { "Generating text content: ${text.content}" }
         val content = text.content
-        if (expressionParser.hasKotlinExpression(content)) {
+        if (!noInterpolation && expressionParser.hasKotlinExpression(content)) {
             expressionParser.extractMultipleExpressions(content).forEach { part ->
                 if (part.isKotlin) {
                     contentBuilder.write(part.text)
@@ -173,12 +184,18 @@ class ContentGenerator(private val templates: Templates) {
         }
 
         templateParams.forEach { param ->
+            val paramName = escapeIfKeyword(param.name)
+
             if (param.isContent) {
                 val child = tag.children.filterIsInstance<HtmlElement.Tag>().find { it.name == param.name }
 
                 val content = when {
-                    child != null -> child.children
-                    param.name == "content" -> remainingChildren.toList()
+                    child != null -> {
+                        remainingChildren.remove(child)
+                        child.children
+                    }
+
+                    param.name == "content" -> remainingChildren.removeEmptyText()
                     else -> null
                 }
 
@@ -189,21 +206,37 @@ class ContentGenerator(private val templates: Templates) {
                 } else if (param == lastParam) {
                     contentBuilder.endTemplateCallWithContent()
                     contentBuilder.startEmbeddedContent()
+                    println("Content: $content")
                     generateChildContent(customTag, content)
                     contentBuilder.endEmbeddedContent()
                 } else {
-                    contentBuilder.startEmbeddedContent("${param.name} = ")
+                    println("Content: $content")
+                    contentBuilder.startEmbeddedContent("$paramName = ")
                     generateChildContent(customTag, content)
                     contentBuilder.endEmbeddedContent(",")
                 }
             } else {
-                val attr = tag.attrs[param.name] ?: error("Unknown attribute name '${param.name}'")
-                when {
-                    expressionParser.isKotlinExpression(attr) ->
-                        contentBuilder.kotlin("${param.name} = ${expressionParser.extractSingleExpression(attr)},")
+                val value = if (!tag.attrs.containsKey(param.name)) {
+                    if (param.hasDefault) {
+                        param.defaultValue
+                    } else {
+                        error("Missing required attribute '${param.name}' for tag '${customTag.name}'")
+                    }
+                } else {
+                    tag.attrs[param.name]
+                }
 
-                    param.type == "String" -> contentBuilder.kotlin("${param.name} = \"$attr\",")
-                    else -> contentBuilder.kotlin("${param.name} = $attr,")
+                if (!param.isNullable && (value == null || value == "null")) {
+                    error("Null value passed for non-nullable attribute '${param.name}' for tag '${customTag.name}'")
+                }
+
+                when {
+                    value == null -> contentBuilder.kotlin("$paramName = null,")
+                    expressionParser.isKotlinExpression(value) ->
+                        contentBuilder.kotlin("$paramName = ${expressionParser.extractSingleExpression(value)},")
+
+                    param.type == "String" -> contentBuilder.kotlin("${param.name} = \"$value\",")
+                    else -> contentBuilder.kotlin("$paramName = $value,")
                 }
             }
         }

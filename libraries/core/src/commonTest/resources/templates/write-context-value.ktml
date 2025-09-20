@@ -1,0 +1,3 @@
+<write-context-value ctx-value="String">
+    <div>${value}</div>
+</write-context-value>

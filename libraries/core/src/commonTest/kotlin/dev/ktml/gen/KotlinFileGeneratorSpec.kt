@@ -1,11 +1,11 @@
 package dev.ktml.gen
 
-import dev.ktool.kotest.BddSpec
 import dev.ktml.TEMPLATE_PACKAGE
 import dev.ktml.Templates
 import dev.ktml.parser.HtmlElement
 import dev.ktml.parser.ParsedTemplate
 import dev.ktml.parser.TemplateParameter
+import dev.ktool.kotest.BddSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldNotContain
@@ -33,8 +33,8 @@ class KotlinFileGeneratorSpec : BddSpec({
         result shouldContain "import dev.ktml.Context"
         result shouldContain """
             fun Context.writeMyButton(
-                text: String,
                 onClick: String,
+                text: String,
             ) {""".trimIndent()
     }
 

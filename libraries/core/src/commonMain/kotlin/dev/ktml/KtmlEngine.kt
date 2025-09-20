@@ -7,28 +7,34 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 
 private val log = KotlinLogging.logger {}
 
-class KtmlEngine(val basePath: String) {
+class KtmlEngine {
     private val parser = TemplateParser()
     private val templates = Templates()
     private val fileGenerator = KotlinFileGenerator(templates)
 
-    fun processDirectory(dir: String) {
+    fun processRootDirectories(dirs: List<String>) = dirs.forEach { processRootDirectory(it) }
+
+    fun processRootDirectory(dir: String) = processDirectory(dir, dir)
+
+    fun processDirectory(dir: String, rootPath: String = dir) {
         val path = dir.toPath()
         require(path.isDirectory) { "Path '${path.absolute}' is not a directory" }
 
         path.list().forEach {
             if (it.isDirectory) {
-                processDirectory(it.toString())
+                processDirectory(it.toString(), rootPath)
             } else {
-                processFile(it.toString())
+                processFile(it.toString(), rootPath)
             }
         }
     }
 
-    fun processFile(file: String) {
+    fun processFile(file: String, rootPath: String) {
+        if (!file.endsWith(".ktml")) return
+
         val path = file.toPath()
         log.info { "Processing file: $path" }
-        val packageName = path.path.substringAfter(basePath).substringBeforeLast("/").replace("/", ".")
+        val packageName = path.path.substringAfter(rootPath).substringBeforeLast("/").replace("/", ".")
         processTemplate(path.readText(), packageName.removePrefix("."))
     }
 

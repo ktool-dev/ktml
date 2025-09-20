@@ -33,6 +33,12 @@ class ContentGeneratorSpec : BddSpec({
             </script>
         </if>
     """.parse()
+    $$"""
+        <tag-with-multiple-content first="Content" content="Content">
+            <div>${first}</div>
+            <div>${content}</div>
+        </tag>
+    """.parse()
 
     "basic content generation" {
         Given
@@ -336,6 +342,80 @@ class ContentGeneratorSpec : BddSpec({
             raw(${RAW_PREFIX}0)
         """.trimIndent()
         result.rawConstants[0].content shouldBe """<tag>World</tag>"""
+    }
+
+    "can pass multiple content parameters" {
+        Given
+        val template = """
+            <something>
+                <tag-with-multiple-content>
+                    <first>First</first>
+                    <content>Second</content>
+                </tag-with-multiple-content>
+            </something>
+        """.parse()
+
+        When
+        val result = contentGenerator.generateTemplateContent(template)
+
+        Then
+        result.functionContent.trimIndent() shouldBe """
+            writeTagWithMultipleContent(
+                first = {
+                    raw(RAW_CONTENT_0)
+                },
+            ) {
+                raw(RAW_CONTENT_1)
+            }
+        """.trimIndent()
+        result.rawConstants[0].content shouldBe """First"""
+        result.rawConstants[1].content shouldBe """Second"""
+    }
+
+    "can pass multiple content parameters without nameing second one" {
+        Given
+        val template = """
+            <something>
+                <tag-with-multiple-content>
+                    <first>First</first>
+                    <div>Second</div>
+                </tag-with-multiple-content>
+            </something>
+        """.parse()
+
+        When
+        val result = contentGenerator.generateTemplateContent(template)
+
+        Then
+        result.functionContent.trimIndent() shouldBe """
+            writeTagWithMultipleContent(
+                first = {
+                    raw(RAW_CONTENT_0)
+                },
+            ) {
+                raw(RAW_CONTENT_1)
+            }
+        """.trimIndent()
+        result.rawConstants[0].content shouldBe """First"""
+        result.rawConstants[1].content.trim() shouldBe """<div>Second</div>"""
+    }
+
+    "can flag tag as no interpolation" {
+        Given
+        val template = $$"""
+            <tag text="String">
+                <h1 ignore-kotlin class="${text}">Hello ${text}</h1>
+            </tag>
+        """.parse()
+
+        When
+        val result = contentGenerator.generateTemplateContent(template)
+
+        Then
+        result.rawConstants[0].content shouldBe $$"""<h1 class="${text}">Hello ${text}</h1>"""
+        result.functionContent.trimIndent() shouldBe """
+            raw(${RAW_PREFIX}0)
+        """.trimIndent()
     }
 })
 

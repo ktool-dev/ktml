@@ -4,13 +4,13 @@ import dev.ktml.Content
 import dev.ktml.Context
 
 fun Context.writeCard(
+    body: Content,
     header: Content,
-    content: Content,
 ) {
     raw(RAW_CONTENT_0)
     write(header)
     raw(RAW_CONTENT_1)
-    write(content)
+    write(body)
     raw(RAW_CONTENT_2)
 }
 

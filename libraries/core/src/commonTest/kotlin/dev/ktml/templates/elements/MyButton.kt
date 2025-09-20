@@ -3,8 +3,8 @@ package dev.ktml.templates.elements
 import dev.ktml.Context
 
 fun Context.writeMyButton(
-    text: String,
     onClick: String,
+    text: String,
 ) {
     raw(RAW_CONTENT_0)
     write(onClick)

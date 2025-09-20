@@ -3,15 +3,15 @@ package dev.ktml
 import dev.ktool.kotest.BddSpec
 
 class KtmlEngineSpec : BddSpec({
-    val engine = KtmlEngine("src/commonTest/resources/templates")
+    val engine = KtmlEngine()
 
     "process file" {
         Given
-        val templatesDir = "src/commonTest/resources/templates"
+        val templatesDirs = listOf("src/commonMain/resources/templates", "src/commonTest/resources/templates")
         val outputDir = "src/commonTest/kotlin"
 
         When
-        engine.processDirectory(templatesDir)
+        engine.processRootDirectories(templatesDirs)
         engine.generateTemplateCode(outputDir)
 
         Then

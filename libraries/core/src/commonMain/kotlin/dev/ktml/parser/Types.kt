@@ -22,7 +22,12 @@ data class ParsedTemplate(
     val functionName = "write$camelCaseName"
 
     val orderedParameters: List<TemplateParameter> by lazy {
-        parameters.sortedWith(compareBy({ it.isContent }, { it.name == "content" }, { it.name }))
+        parameters.sortedWith(
+            compareBy(
+                { it.isContent }, // Non-Content (false) comes before Content (true)
+                { it.isContent && it.name == "content" }, // Content "content" parameter goes last
+                { it.name } // Alphabetical within each group
+            ))
     }
 
     fun samePackage(template: ParsedTemplate) = packageName == template.packageName
@@ -36,8 +41,10 @@ data class TemplateParameter(
     val type: String,
     val defaultValue: String? = null
 ) {
-    val isContent = type == "Content"
+    val isContent = type == "Content" || type.startsWith("Content?")
     val isContextParam = name.startsWith("ctx-")
+    val hasDefault = defaultValue != null
+    val isNullable = type.endsWith("?")
 }
 
 /**
@@ -59,3 +66,5 @@ sealed class HtmlElement {
 
     data class Text(var content: String) : HtmlElement()
 }
+
+fun List<HtmlElement>.removeEmptyText() = filterNot { it is HtmlElement.Text && it.content.isBlank() }

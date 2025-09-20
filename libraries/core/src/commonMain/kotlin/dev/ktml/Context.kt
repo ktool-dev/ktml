@@ -52,6 +52,8 @@ class Context(private val writer: ContentWriter, model: Map<String, Any?> = mapO
     fun remove(key: String) {
         _model.remove(key)
     }
+
+    fun copy(params: Map<String, Any?> = emptyMap()) = Context(writer, _model + params)
 }
 
 class StringContentWriter : ContentWriter {

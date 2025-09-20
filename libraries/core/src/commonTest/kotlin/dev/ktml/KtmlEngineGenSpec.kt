@@ -2,6 +2,7 @@ package dev.ktml
 
 import dev.ktml.templates.writeCard
 import dev.ktml.templates.writeDashboard
+import dev.ktml.templates.writeTestContext
 import dev.ktml.test.Item
 import dev.ktml.test.User
 import dev.ktml.test.UserType
@@ -15,8 +16,8 @@ class KtmlEngineGenSpec : BddSpec({
         val context = Context(writer)
 
         When
-        context.writeCard({ write("Hello Header") }) {
-            write("Hello Body")
+        context.writeCard(body = { write("Hello Body") }) {
+            write("Hello Header")
         }
 
         Then
@@ -75,17 +76,15 @@ class KtmlEngineGenSpec : BddSpec({
                     </div>
                     <div class="card-body">
                         
-                            <header>
-                                <h3>Items</h3>
-                            </header>
-                            <body>
                             <ul>
                                 <li>Item 1 - Item 0</li><li>Item 2 - Item 1</li>
                             </ul>
-                            </body>
-                        
+                            
                     </div>
                 </div>
+                        
+                                <h2>You are not an admin!</h2>
+                            
                         <div class="sidebar">
                     
                 </div><br>
@@ -94,5 +93,17 @@ class KtmlEngineGenSpec : BddSpec({
                 </div>
                 </body>
                 </html>""".trimIndent()
+    }
+
+    "generated test-context template" {
+        Given
+        val writer = StringContentWriter()
+        val context = Context(writer)
+
+        When
+        context.writeTestContext()
+
+        Then
+        writer.toString().trimIndent() shouldBe "<div>Outer Context</div><div>Inner 1</div><div>Inner 2</div>"
     }
 })
