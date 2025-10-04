@@ -2,7 +2,6 @@ package dev.ktml.parser
 
 import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlOptions
 import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlParser
-import dev.ktml.TEMPLATE_PACKAGE
 
 const val DOCTYPE_ERROR_MESSAGE = "<!DOCTYPE> should not be used in templates, use <doctype> tag instead."
 
@@ -15,7 +14,7 @@ class TemplateParser {
     /**
      * Parse template content
      */
-    fun parseContent(content: String, packageName: String = ""): ParsedTemplate {
+    fun parseContent(content: String, subPath: String = ""): ParsedTemplate {
         val doctype = checkForDoctype(content)
 
         val imports = parseImportStatements(content)
@@ -35,13 +34,12 @@ class TemplateParser {
 
         return ParsedTemplate(
             name = rootElement.name,
-            packageName = TEMPLATE_PACKAGE + if (packageName.isNotEmpty()) ".$packageName" else "",
+            subPath = subPath,
             parameters = extractParameters(rootElement),
             imports = imports,
             root = rootElement,
             dockTypeDeclaration = doctype,
-            topExternalScriptContent = handler.topExternalScriptContent,
-            bottomExternalScriptContent = handler.bottomExternalScriptContent,
+            externalScriptContent = handler.externalScriptContent,
         )
     }
 
@@ -72,6 +70,11 @@ class TemplateParser {
         val parts = typeSpec.split("=", limit = 2)
         val defaultValue = if (parts.size > 1) parts[1].trim().removeSurrounding("'") else null
 
-        TemplateParameter(name, parts[0].trim(), defaultValue)
-    }
+        ParsedTemplateParameter(name, parts[0].trim(), defaultValue)
+    }.sortedWith(
+        compareBy(
+            { it.isContent }, // Non-Content (false) comes before Content (true)
+            { it.isContent && it.name == "content" }, // Content "content" parameter goes last
+            { it.name } // Alphabetical within each group
+        ))
 }

@@ -1,23 +1,29 @@
 package dev.ktml.gen
 
-import dev.ktml.Templates
-import dev.ktml.escapeIfKeyword
+import dev.ktml.TemplateDefinition
 import dev.ktml.parser.HtmlElement
 import dev.ktml.parser.ParsedTemplate
+import dev.ktml.parser.TemplateDefinitions
 import dev.ktml.parser.removeEmptyText
+import dev.ktml.util.isVoidTag
+import dev.ktml.util.toImport
+import dev.ktool.gen.safe
+import dev.ktool.gen.types.Block
+import dev.ktool.gen.types.Import
+import dev.ktool.gen.types.Property
 import io.github.oshai.kotlinlogging.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
 
-data class TemplateContent(val imports: List<String>, val functionContent: String, val rawConstants: List<RawConstant>)
+data class TemplateContent(val imports: List<Import>, val body: Block, val rawConstants: List<Property>)
 
 /**
  * Generates HtmlWriter method calls from parsed HTML elements
  */
-class ContentGenerator(private val templates: Templates) {
+class ContentGenerator(private val templates: TemplateDefinitions) {
     private val contentBuilder = ContentBuilder()
     private val expressionParser = ExpressionParser()
-    private val imports = mutableListOf<String>()
+    private val imports = mutableListOf<Import>()
     private lateinit var rootTemplate: ParsedTemplate
 
     fun generateTemplateContent(template: ParsedTemplate): TemplateContent {
@@ -38,43 +44,28 @@ class ContentGenerator(private val templates: Templates) {
         logger.debug { "Finished generating content for template: ${template.name}" }
 
         return TemplateContent(
-            imports = imports.sorted(),
-            functionContent = contentAndConstants.content,
+            imports = imports.sortedBy { it.packagePath },
+            body = Block(contentAndConstants.body.replace("() {", " {")),
             rawConstants = contentAndConstants.rawConstants,
         )
     }
 
     private fun initializeImports(template: ParsedTemplate) {
         imports.clear()
-        imports.addAll(template.imports)
+        imports.addAll(template.imports.map { it.toImport() })
 
         if (template.parameters.any { it.type == "Content" }) {
-            imports.add("import dev.ktml.Content")
+            imports.add(Import("dev.ktml.Content"))
         }
 
-        imports.add("import dev.ktml.Context")
+        imports.add(Import("dev.ktml.Context"))
     }
 
     private fun generateContextParams(template: ParsedTemplate) {
         template.parameters.filter { it.isContextParam }.forEach { param ->
             val name = param.name.removePrefix("ctx-")
             logger.debug { "Generating context param: $name" }
-            val defaultValue =
-                if (param.type == "String" && param.defaultValue != null) "\"${param.defaultValue}\"" else param.defaultValue
-
-            when {
-                param.defaultValue != null && param.type.endsWith("?") ->
-                    contentBuilder.kotlin("val $name: ${param.type} = optionalNullable(\"$name\") ?: $defaultValue")
-
-                param.defaultValue != null ->
-                    contentBuilder.kotlin("val $name: ${param.type} = optional(\"$name\", $defaultValue)")
-
-                param.type.endsWith("?") ->
-                    contentBuilder.kotlin("val $name: ${param.type} = requiredNullable(\"$name\")")
-
-                else ->
-                    contentBuilder.kotlin("val $name: ${param.type} = required(\"$name\")")
-            }
+            contentBuilder.kotlin(param.contextParameterDefinition())
         }
     }
 
@@ -95,12 +86,16 @@ class ContentGenerator(private val templates: Templates) {
     private val filteredAttrs = controlAttrs + "ignore-kotlin"
 
     private fun generateTagContent(template: ParsedTemplate, tag: HtmlElement.Tag, noInterpolation: Boolean = false) {
-        logger.debug { "Generating tag content: ${tag.name}" }
+        logger.info { "Generating tag content: ${tag.name}" }
 
-        val customTag = templates.locate(tag.name, template)
+        val customTag = templates.locate(tag.name, template.templateDefinition)
 
         // This prevents a template from calling itself
-        if (customTag != null && customTag != rootTemplate) return generateCustomTagCall(template, tag, customTag)
+        if (customTag != null && !rootTemplate.sameTemplate(customTag)) return generateCustomTagCall(
+            template,
+            tag,
+            customTag
+        )
 
         if (tag.isKotlinScript) {
             tag.children.joinToString("") { (it as HtmlElement.Text).content.trim() }
@@ -137,7 +132,7 @@ class ContentGenerator(private val templates: Templates) {
 
         if (tag.children.isNotEmpty()) {
             contentBuilder.raw("</${tag.name}>")
-        } else if (!SELF_CLOSING_TAGS.contains(tag.name)) {
+        } else if (!tag.name.isVoidTag()) {
             contentBuilder.raw(" />")
         }
 
@@ -147,7 +142,7 @@ class ContentGenerator(private val templates: Templates) {
     }
 
     private fun generateTextContent(text: HtmlElement.Text, noInterpolation: Boolean = false) {
-        logger.debug { "Generating text content: ${text.content}" }
+        logger.info { "Generating text content: '${text.content}'" }
         val content = text.content
         if (!noInterpolation && expressionParser.hasKotlinExpression(content)) {
             expressionParser.extractMultipleExpressions(content).forEach { part ->
@@ -162,16 +157,16 @@ class ContentGenerator(private val templates: Templates) {
         }
     }
 
-    private fun generateCustomTagCall(template: ParsedTemplate, tag: HtmlElement.Tag, customTag: ParsedTemplate) {
+    private fun generateCustomTagCall(template: ParsedTemplate, tag: HtmlElement.Tag, customTag: TemplateDefinition) {
         logger.info { "Generating custom tag call: ${customTag.name}" }
 
         if (!template.samePackage(customTag)) {
-            imports.add("import ${customTag.packageName}.${customTag.functionName}")
+            imports.add(Import("${customTag.packageName}.${customTag.functionName}"))
         }
 
         contentBuilder.startTemplateCall(customTag.functionName)
 
-        val templateParams = customTag.orderedParameters.filterNot { it.isContextParam }
+        val templateParams = customTag.parameters
         val remainingChildren = tag.children.toMutableList()
         val lastParam = templateParams.lastOrNull()
 
@@ -184,7 +179,7 @@ class ContentGenerator(private val templates: Templates) {
         }
 
         templateParams.forEach { param ->
-            val paramName = escapeIfKeyword(param.name)
+            val paramName = param.name.safe
 
             if (param.isContent) {
                 val child = tag.children.filterIsInstance<HtmlElement.Tag>().find { it.name == param.name }
@@ -199,35 +194,20 @@ class ContentGenerator(private val templates: Templates) {
                     else -> null
                 }
 
-                if (content.isNullOrEmpty()) {
-                    if (param.defaultValue != "null") {
-                        error("Missing required content for parameter '${param.name}' for tag '${customTag.name}'")
-                    }
-                } else if (param == lastParam) {
-                    contentBuilder.endTemplateCallWithContent()
-                    contentBuilder.startEmbeddedContent()
-                    generateChildContent(customTag, content)
-                    contentBuilder.endEmbeddedContent()
-                } else {
-                    contentBuilder.startEmbeddedContent("$paramName = ")
-                    generateChildContent(customTag, content)
-                    contentBuilder.endEmbeddedContent(",")
-                }
-            } else {
-                val value = if (!tag.attrs.containsKey(param.name)) {
-                    if (param.hasDefault) {
-                        param.defaultValue
+                if (!content.isNullOrEmpty()) {
+                    if (param == lastParam) {
+                        contentBuilder.endTemplateCallWithContent()
+                        contentBuilder.startEmbeddedContent()
+                        generateChildContent(template, content)
+                        contentBuilder.endEmbeddedContent()
                     } else {
-                        error("Missing required attribute '${param.name}' for tag '${customTag.name}'")
+                        contentBuilder.startEmbeddedContent("$paramName = ")
+                        generateChildContent(template, content)
+                        contentBuilder.endEmbeddedContent(",")
                     }
-                } else {
-                    tag.attrs[param.name]
                 }
-
-                if (!param.isNullable && (value == null || value == "null")) {
-                    error("Null value passed for non-nullable attribute '${param.name}' for tag '${customTag.name}'")
-                }
-
+            } else if (tag.attrs.containsKey(param.name)) {
+                val value = tag.attrs[param.name]
                 when {
                     value == null -> contentBuilder.kotlin("$paramName = null,")
                     expressionParser.isKotlinExpression(value) ->
@@ -244,19 +224,3 @@ class ContentGenerator(private val templates: Templates) {
         }
     }
 }
-
-private val SELF_CLOSING_TAGS = setOf(
-    "br",
-    "hr",
-    "img",
-    "input",
-    "meta",
-    "link",
-    "area",
-    "base",
-    "col",
-    "embed",
-    "source",
-    "track",
-    "wbr",
-)

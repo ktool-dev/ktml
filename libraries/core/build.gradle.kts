@@ -23,6 +23,8 @@ kotlin {
     macosArm64()
     mingwX64()
 
+    applyDefaultHierarchyTemplate()
+
     sourceSets {
         val commonMain by getting {
             dependencies {
@@ -31,6 +33,7 @@ kotlin {
                 implementation(libs.ksoup.html)
                 implementation(libs.ksoup.entities)
                 implementation(libs.ktool.kotest.bdd)
+                implementation(libs.ktool.kotlin.gen)
             }
         }
 
@@ -46,6 +49,7 @@ kotlin {
 
         val jvmMain by getting {
             dependencies {
+                implementation(libs.kotlin.reflect)
                 implementation(libs.slf4j.simple)
                 implementation(libs.kotlin.compiler.embeddable)
             }
@@ -57,7 +61,7 @@ kotlin {
             }
         }
 
-        val nativeMain by creating {
+        val nativeMain by getting {
             dependencies {
                 implementation(libs.okio)
             }

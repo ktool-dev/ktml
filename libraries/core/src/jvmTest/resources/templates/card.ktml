@@ -1,0 +1,10 @@
+<card header="Content? = null" content="Content">
+    <div class="card">
+        <div if="${header != null}" class="card-header">
+            ${header}
+        </div>
+        <div class="card-body">
+            ${content}
+        </div>
+    </div>
+</card>

@@ -1,17 +1,24 @@
 package dev.ktml.gen
 
-import dev.ktml.INDENTATION
-import dev.ktml.TRIPLE_QUOTE
+import dev.ktool.gen.CodeWriter
+import dev.ktool.gen.TRIPLE_QUOTE
+import dev.ktool.gen.types.ExpressionBody
+import dev.ktool.gen.types.Modifier
+import dev.ktool.gen.types.Property
+import dev.ktool.gen.types.StringType
 
 internal const val RAW_PREFIX = "RAW_CONTENT_"
 
-data class ContentAndRawConstants(val content: String, val rawConstants: List<RawConstant>)
+data class ContentAndRawConstants(val body: String, val rawConstants: List<Property>)
 
 data class RawConstant(val index: Int, val content: String) {
-    override fun toString() = "private const val $RAW_PREFIX$index = ${TRIPLE_QUOTE}$content${TRIPLE_QUOTE}"
+    fun toProperty() = Property(
+        name = "$RAW_PREFIX$index",
+        type = StringType,
+        initializer = ExpressionBody("$TRIPLE_QUOTE$content$TRIPLE_QUOTE"),
+        modifiers = listOf(Modifier.Private, Modifier.Const)
+    )
 }
-
-fun List<RawConstant>.toContentString() = joinToString("\n") { it.toString() }.trim()
 
 /**
  * Builds the content of a template function. This helps with indentation and grouping raw content together.
@@ -19,23 +26,21 @@ fun List<RawConstant>.toContentString() = joinToString("\n") { it.toString() }.t
 class ContentBuilder {
     private val rawContentItems = mutableListOf<String>()
     private val currentRawContent = StringBuilder()
-    private val builder = StringBuilder(INDENTATION)
+    private var writer = CodeWriter()
 
     private var writingRaw = false
-    private var indent = INDENTATION
 
     fun clear() {
         currentRawContent.clear()
         rawContentItems.clear()
-        builder.clear().append(INDENTATION)
         writingRaw = false
-        indent = INDENTATION
+        writer = CodeWriter()
     }
 
     fun raw(content: String) {
         if (!writingRaw) {
             writingRaw = true
-            builder.append("raw($RAW_PREFIX${rawContentItems.size})").newline()
+            writer.write("raw($RAW_PREFIX${rawContentItems.size})").newLine()
         }
         currentRawContent.append(content)
     }
@@ -62,91 +67,70 @@ class ContentBuilder {
                 RawConstant(index, it)
             }
 
-            return ContentAndRawConstants(builder.toString().trimMargin(), constants)
+            return ContentAndRawConstants(writer.toString(), constants.map { it.toProperty() })
         }
-
-    private fun StringBuilder.newline(): StringBuilder {
-        appendLine()
-        return append(indent)
-    }
 
     fun write(kotlin: String) {
         endRaw()
-        builder.append("write(").append(kotlin).append(")").newline()
+        writer.write("write(").write(kotlin).write(")").newLine()
     }
 
     fun startControlFlow(type: String, condition: String) {
         endRaw()
-        builder.append("$type ($condition) {")
-        increaseIndentation()
-        builder.newline()
+        writer.write("$type ($condition) {")
+        writer.indent()
+        writer.newLine()
     }
 
     fun endControlFlow() {
         endRaw()
-        decreaseIndentation()
-        removeOneIndention()
-        builder.append("}").newline()
+        writer.unindent()
+        writer.removeLastIndentation()
+        writer.write("}").newLine()
     }
 
     fun startTemplateCall(functionName: String) {
         endRaw()
-        increaseIndentation()
-        builder.append("$functionName(").newline()
+        writer.indent()
+        writer.write("$functionName(").newLine()
     }
 
     fun deleteLastNewLine() {
-        builder.setLength(builder.length - (builder.length - builder.lastIndexOf('\n')))
+        writer.trimEnd()
     }
 
     fun endTemplateCall() {
-        decreaseIndentation()
-        if (builder.endsWith(INDENTATION)) {
-            builder.setLength(builder.length - INDENTATION.length)
-        }
-        builder.append(")").newline()
+        writer.unindent()
+        writer.removeLastIndentation()
+        writer.write(")").newLine()
     }
 
     fun endTemplateCallWithContent() {
-        decreaseIndentation()
-        removeOneIndention()
-        builder.append(") ")
+        writer.unindent()
+        writer.removeLastIndentation()
+        writer.write(") ")
     }
 
     fun startEmbeddedContent(prefix: String = "") {
         endRaw()
-        increaseIndentation()
-        builder.append(prefix).append("{").newline()
+        writer.indent()
+        writer.write(prefix).write("{").newLine()
     }
 
     fun endEmbeddedContent(suffix: String = "") {
         endRaw()
-        decreaseIndentation()
-        removeOneIndention()
-        builder.append("}").append(suffix).newline()
-    }
-
-    private fun removeOneIndention() {
-        if (builder.endsWith(INDENTATION)) {
-            builder.setLength(builder.length - INDENTATION.length)
-        }
+        writer.unindent()
+        writer.removeLastIndentation()
+        writer.write("}").write(suffix).newLine()
     }
 
     fun kotlin(kotlin: String) {
         endRaw()
-        builder.append(kotlin).newline()
+        writer.write(kotlin).newLine()
     }
 
     fun kotlin(kotlin: List<String>) {
         endRaw()
-        kotlin.forEach { builder.append(it.trim()).newline() }
-    }
-
-    private fun increaseIndentation() {
-        indent += INDENTATION
-    }
-
-    private fun decreaseIndentation() {
-        indent = indent.substring(0, indent.length - INDENTATION.length)
+        kotlin.forEach { writer.write(it.trim()).newLine() }
     }
 }

@@ -54,15 +54,16 @@ The engine generates type-safe Kotlin functions:
 
 ```kotlin
 // Generated function signature
-fun Context.writeCard(title: String, content: Content)
+fun Context.writeCard(title: String)
 
 // Usage
-val context = Context()
+val contentWriter = StringContentWriter()
 
-val html = context.writeCard(
-    title = "Welcome",
-    content = content { +"Hello, World!" }
-)
+Context(contentWriter).apply {
+    writeCard(title = "Welcome")
+}
+
+val html = contentWriter.toString()
 ```
 
 ## Template Syntax

@@ -10,12 +10,8 @@ class HtmlHandler(private val selfClosingTags: Collection<String> = emptySet()) 
     val rootElements: List<HtmlElement.Tag>
         get() = _rootElements.filterNot { it.isKotlinScript }
 
-    val topExternalScriptContent: String by lazy {
-        _rootElements.takeWhile { it.isKotlinScript }.extractScriptContent()
-    }
-
-    val bottomExternalScriptContent: String by lazy {
-        _rootElements.takeLastWhile { it.isKotlinScript }.extractScriptContent()
+    val externalScriptContent: String by lazy {
+        _rootElements.filter { it.isKotlinScript }.extractScriptContent()
     }
 
     private fun List<HtmlElement.Tag>.extractScriptContent() =

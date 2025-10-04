@@ -15,12 +15,8 @@ class Context(private val writer: ContentWriter, model: Map<String, Any?> = mapO
     fun write(content: Any?) = if (content == null) this else raw(encodeHtml(content.toString()))
     fun raw(content: String?) = also { if (!content.isNullOrEmpty()) writer.write(content) }
 
-    inline fun <reified T> required(name: String): T {
-        if (!containsKey(name)) error("Missing required context value '$name'")
-        val value = get(name) ?: error("Context value '$name' is null but cannot be null")
-        if (value !is T) error("Context value '$name' is of type ${value::class} but type ${T::class} was expected")
-        return value
-    }
+    inline fun <reified T> required(name: String): T =
+        requiredNullable(name) ?: error("Context value '$name' is null but cannot be null")
 
     inline fun <reified T> requiredNullable(name: String): T? {
         if (!containsKey(name)) error("Missing required context value '$name'")
@@ -30,13 +26,14 @@ class Context(private val writer: ContentWriter, model: Map<String, Any?> = mapO
     }
 
     inline fun <reified T : Any> optional(name: String, defaultValue: T): T {
-        val value = get(name) ?: defaultValue
+        val value = if (containsKey(name)) get(name) else defaultValue
+        if (value == null) error("Context value '$name' is null but cannot be null")
         if (value !is T) error("Context value '$name' is of type ${value::class} but type ${T::class} was expected")
         return value
     }
 
-    inline fun <reified T> optionalNullable(name: String): T? {
-        val value = get(name)
+    inline fun <reified T : Any> optionalNullable(name: String, defaultValue: T?): T? {
+        val value = if (containsKey(name)) get(name) else defaultValue
         if (value != null && value !is T) error("Context value '$name' is of type ${value::class} but type ${T::class} was expected")
         return value
     }
@@ -54,6 +51,8 @@ class Context(private val writer: ContentWriter, model: Map<String, Any?> = mapO
     }
 
     fun copy(params: Map<String, Any?> = emptyMap()) = Context(writer, _model + params)
+
+    fun model(): Map<String, Any?> = _model
 }
 
 class StringContentWriter : ContentWriter {

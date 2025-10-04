@@ -1,72 +1,48 @@
 package dev.ktml.gen
 
-import dev.ktml.INDENTATION
-import dev.ktml.Templates
-import dev.ktml.escapeIfKeyword
 import dev.ktml.parser.ParsedTemplate
-import dev.ktml.toCamelCase
+import dev.ktml.parser.TemplateDefinitions
+import dev.ktml.util.toCamelCase
+import dev.ktool.gen.types.*
 
-class KotlinFileGenerator(templates: Templates) {
+class KotlinFileGenerator(templates: TemplateDefinitions) {
     private val contentGenerator = ContentGenerator(templates)
 
-    fun generateCode(template: ParsedTemplate) = buildString {
+    fun generateCode(template: ParsedTemplate) = KotlinFile(template.packageName) {
         val content = contentGenerator.generateTemplateContent(template)
 
-        appendLine("package ${template.packageName}")
-        appendLine()
+        imports.addAll(content.imports)
 
-        content.imports.forEach { appendLine(it) }
-        appendLine()
-
-        if (template.topExternalScriptContent.isNotEmpty()) {
-            appendLine(template.topExternalScriptContent)
-            appendLine()
+        if (template.nonContextParameters.isNotEmpty()) {
+            generateNoParametersFunction(template)
         }
 
-        val (functionContent, rawConstants) = generateFunction(template, content)
-        appendLine(functionContent)
+        generateFunction(template, content)
 
-        if (template.bottomExternalScriptContent.isNotEmpty()) {
-            appendLine()
-            appendLine(template.bottomExternalScriptContent)
+        if (template.externalScriptContent.isNotEmpty()) {
+            literal(template.externalScriptContent.trim())
         }
 
-        if (rawConstants.isNotEmpty()) {
-            appendLine()
-            appendLine(rawConstants)
-        }
+        members += content.rawConstants
     }
 
-    private fun generateFunction(template: ParsedTemplate, content: TemplateContent): Pair<String, String> {
-        val functionContent = buildString {
-            append("fun Context.write${template.name.toCamelCase()}(")
-
-            val functionParams = template.orderedParameters.filterNot { it.isContextParam }
-
-            functionParams.forEach { param ->
-                val paramName = escapeIfKeyword(param.name)
-                appendLine().append(INDENTATION).append(paramName).append(": ").append(param.type)
-
-                if (param.defaultValue != null) {
-                    append(" = ")
-                    if (param.type == "String") {
-                        append('"').append(param.defaultValue).append('"')
-                    } else {
-                        append(param.defaultValue)
-                    }
+    private fun KotlinFile.generateFunction(template: ParsedTemplate, content: TemplateContent) =
+        function("write${template.name.toCamelCase()}", Type("Context")) {
+            template.nonContextParameters.map { param ->
+                param(name = param.name, type = Type(param.type)) {
+                    defaultValue =
+                        param.defaultValue?.let { ExpressionBody(if (param.type == "String") "\"$it\"" else it) }
                 }
-                append(",")
             }
-
-            if (functionParams.isNotEmpty()) {
-                appendLine()
-            }
-
-            appendLine(") {")
-            appendLine(content.functionContent)
-            append("}")
+            body = FunctionBlock(content.body.statements)
         }
 
-        return functionContent to content.rawConstants.toContentString()
-    }
+    private fun KotlinFile.generateNoParametersFunction(template: ParsedTemplate) =
+        function("write${template.name.toCamelCase()}", Type("Context")) {
+            body = FunctionBlock(
+                FunctionCall(
+                    name = "write${template.name.toCamelCase()}",
+                    args = template.nonContextParameters.map { it.contextParameterCall() }
+                ))
+        }
 }
