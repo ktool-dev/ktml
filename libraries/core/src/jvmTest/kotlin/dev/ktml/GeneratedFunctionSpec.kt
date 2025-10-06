@@ -15,7 +15,7 @@ class GeneratedFunctionSpec : BddSpec({
             "my.templates",
             listOf("src/commonMain/resources/templates", "src/jvmTest/resources/templates"),
             "build/generated/ktml",
-            "build/classes/kotlin/jvm/main",
+            "build/generated/ktml-compiled",
         )
         engine = KtmlEngine(processor)
     }

@@ -34,10 +34,11 @@ class JvmKtmlProcessor(
         processRootDirectories(templatePaths)
         generateTemplateCode()
         compile()
+        
         val className = "$basePackageName.TemplateRegistryImpl"
         try {
             val classLoader = createReloadableClassLoader(listOf(compileDir))
-            val type = Class.forName(className).kotlin
+            val type = Class.forName(className, true, classLoader).kotlin
             if (type.objectInstance == null || type.objectInstance !is TemplateRegistry) {
                 error("The package $basePackageName does not have a valid TemplateRegistry")
             }
@@ -49,8 +50,8 @@ class JvmKtmlProcessor(
 
     private fun createReloadableClassLoader(classpath: List<File>): ClassLoader =
         URLClassLoader(
-            defaultClasspath().map { it.toFile() }.plus(classpath).map { it.toURI().toURL() }.toTypedArray(),
-            null
+            classpath.plus(defaultClasspath().map { it.toFile() }).map { it.toURI().toURL() }.toTypedArray(),
+            Thread.currentThread().contextClassLoader
         )
 
     private fun compile() {
