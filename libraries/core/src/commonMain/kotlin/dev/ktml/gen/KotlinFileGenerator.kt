@@ -8,7 +8,7 @@ import dev.ktool.gen.types.*
 class KotlinFileGenerator(templates: TemplateDefinitions) {
     private val contentGenerator = ContentGenerator(templates)
 
-    fun generateCode(template: ParsedTemplate) = KotlinFile(template.packageName) {
+    fun generateCode(packageName: String, template: ParsedTemplate) = KotlinFile(packageName) {
         val content = contentGenerator.generateTemplateContent(template)
 
         imports.addAll(content.imports)

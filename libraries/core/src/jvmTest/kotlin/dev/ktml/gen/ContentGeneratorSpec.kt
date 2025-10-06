@@ -3,6 +3,7 @@ package dev.ktml.gen
 import dev.ktml.parser.*
 import dev.ktml.parser.HtmlElement.Tag
 import dev.ktml.parser.HtmlElement.Text
+import dev.ktml.toTemplateDefinition
 import dev.ktool.gen.TRIPLE_QUOTE
 import dev.ktool.kotest.BddSpec
 import io.kotest.matchers.shouldBe
@@ -420,7 +421,8 @@ class ContentGeneratorSpec : BddSpec({
     }
 })
 
-private fun String.parse() = parser.parseContent(this.trimIndent()).also { templates.replace(it.templateDefinition) }
+private fun String.parse() =
+    parser.parseContent(this.trimIndent()).also { templates.replace(it.toTemplateDefinition("my.templates")) }
 
 private fun parsedTemplate(
     name: String = "test",

@@ -64,3 +64,5 @@ class StringContentWriter : ContentWriter {
 
     override fun toString() = buffer.toString()
 }
+
+fun content(block: Content) = block

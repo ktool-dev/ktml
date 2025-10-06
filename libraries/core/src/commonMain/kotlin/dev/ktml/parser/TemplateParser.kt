@@ -8,7 +8,7 @@ const val DOCTYPE_ERROR_MESSAGE = "<!DOCTYPE> should not be used in templates, u
 /**
  * Main template parser that uses Ksoup to parse HTML templates
  */
-class TemplateParser {
+class TemplateParser() {
     private val parserOptions = KsoupHtmlOptions.Default.copy(lowerCaseAttributeNames = false)
 
     /**

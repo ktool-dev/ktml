@@ -1,62 +1,53 @@
 package dev.ktml.gen
 
-import dev.ktml.parser.HtmlElement
-import dev.ktml.parser.ParsedTemplate
-import dev.ktml.parser.ParsedTemplateParameter
+import dev.ktml.TemplateDefinition
+import dev.ktml.TemplateParameter
 import dev.ktool.kotest.BddSpec
 import io.kotest.matchers.string.shouldContain
 
 class TemplateRegistryGeneratorSpec : BddSpec({
+    val basePackageName = "dev.ktml.templates"
+
     "generate registry with single template" {
         Given
         val templates = listOf(
-            ParsedTemplate(
+            TemplateDefinition(
+                packageName = basePackageName,
                 name = "button",
-                imports = emptyList(),
-                parameters = listOf(
-                    ParsedTemplateParameter("text", "String")
-                ),
-                root = HtmlElement.Tag("button", emptyMap())
+                parameters = listOf(TemplateParameter("text", "String", false)),
             )
         )
 
         When
-        val generator = TemplateRegistryGenerator(templates)
-        val result = generator.createTemplateRegistry()
+        val result = TemplateRegistryGenerator.createTemplateRegistry(basePackageName, templates)
 
         Then
         result shouldContain "object TemplateRegistryImpl : TemplateRegistry"
         result shouldContain "\"button\" to { writeButton() }"
         result shouldContain "name = \"button\""
-        result shouldContain "functionName = \"writeButton\""
         result shouldContain "TemplateParameter(\"text\", \"String\", false)"
     }
 
     "generate registry with multiple templates" {
         Given
         val templates = listOf(
-            ParsedTemplate(
+            TemplateDefinition(
+                packageName = basePackageName,
                 name = "button",
-                imports = emptyList(),
-                parameters = listOf(
-                    ParsedTemplateParameter("text", "String")
-                ),
-                root = HtmlElement.Tag("button", emptyMap())
+                parameters = listOf(TemplateParameter("text", "String", false)),
             ),
-            ParsedTemplate(
+            TemplateDefinition(
+                packageName = basePackageName,
                 name = "card",
-                imports = emptyList(),
                 parameters = listOf(
-                    ParsedTemplateParameter("title", "String"),
-                    ParsedTemplateParameter("content", "Content")
+                    TemplateParameter("title", "String", false),
+                    TemplateParameter("content", "Content", false),
                 ),
-                root = HtmlElement.Tag("card", emptyMap())
             )
         )
 
         When
-        val generator = TemplateRegistryGenerator(templates)
-        val result = generator.createTemplateRegistry()
+        val result = TemplateRegistryGenerator.createTemplateRegistry(basePackageName, templates)
 
         Then
         result shouldContain "\"button\" to { writeButton() }"
@@ -68,20 +59,18 @@ class TemplateRegistryGeneratorSpec : BddSpec({
     "generate registry with template with default values" {
         Given
         val templates = listOf(
-            ParsedTemplate(
+            TemplateDefinition(
+                packageName = basePackageName,
                 name = "button",
-                imports = emptyList(),
                 parameters = listOf(
-                    ParsedTemplateParameter("text", "String", "Click me"),
-                    ParsedTemplateParameter("disabled", "Boolean", "false")
+                    TemplateParameter("text", "String", true),
+                    TemplateParameter("disabled", "Boolean", true)
                 ),
-                root = HtmlElement.Tag("button", emptyMap())
             )
         )
 
         When
-        val generator = TemplateRegistryGenerator(templates)
-        val result = generator.createTemplateRegistry()
+        val result = TemplateRegistryGenerator.createTemplateRegistry(basePackageName, templates)
 
         Then
         result shouldContain "TemplateParameter(\"text\", \"String\", true)"
@@ -91,20 +80,16 @@ class TemplateRegistryGeneratorSpec : BddSpec({
     "generate registry with template in subpath" {
         Given
         val templates = listOf(
-            ParsedTemplate(
+            TemplateDefinition(
+                packageName = "$basePackageName.components",
                 name = "icon",
                 subPath = "components",
-                imports = emptyList(),
-                parameters = listOf(
-                    ParsedTemplateParameter("name", "String")
-                ),
-                root = HtmlElement.Tag("icon", emptyMap())
+                parameters = listOf(TemplateParameter("name", "String", false)),
             )
         )
 
         When
-        val generator = TemplateRegistryGenerator(templates)
-        val result = generator.createTemplateRegistry()
+        val result = TemplateRegistryGenerator.createTemplateRegistry(basePackageName, templates)
 
         Then
         result shouldContain "\"components/icon\" to { writeComponentsIcon() }"
@@ -116,39 +101,34 @@ class TemplateRegistryGeneratorSpec : BddSpec({
     "generate registry with template without parameters" {
         Given
         val templates = listOf(
-            ParsedTemplate(
+            TemplateDefinition(
+                packageName = basePackageName,
                 name = "header",
-                imports = emptyList(),
                 parameters = emptyList(),
-                root = HtmlElement.Tag("header", emptyMap())
             )
         )
 
         When
-        val generator = TemplateRegistryGenerator(templates)
-        val result = generator.createTemplateRegistry()
+        val result = TemplateRegistryGenerator.createTemplateRegistry(basePackageName, templates)
 
         Then
         result shouldContain "\"header\" to { writeHeader() }"
         result shouldContain "name = \"header\""
-        result shouldContain "functionName = \"writeHeader\""
-        result shouldContain "TemplateDefinition(\n            name = \"header\",\n            packageName = \"dev.ktml.templates\",\n            functionName = \"writeHeader\",\n        )"
+        result shouldContain "TemplateDefinition(\n            name = \"header\",\n            packageName = \"dev.ktml.templates\",\n        )"
     }
 
     "generate registry imports" {
         Given
         val templates = listOf(
-            ParsedTemplate(
+            TemplateDefinition(
+                packageName = basePackageName,
                 name = "button",
-                imports = emptyList(),
                 parameters = emptyList(),
-                root = HtmlElement.Tag("button", emptyMap())
             )
         )
 
         When
-        val generator = TemplateRegistryGenerator(templates)
-        val result = generator.createTemplateRegistry()
+        val result = TemplateRegistryGenerator.createTemplateRegistry(basePackageName, templates)
 
         Then
         result shouldContain "import dev.ktml.Content"
@@ -160,24 +140,21 @@ class TemplateRegistryGeneratorSpec : BddSpec({
     "generate registry with mixed subpaths" {
         Given
         val templates = listOf(
-            ParsedTemplate(
+            TemplateDefinition(
+                packageName = basePackageName,
                 name = "button",
-                imports = emptyList(),
                 parameters = emptyList(),
-                root = HtmlElement.Tag("button", emptyMap())
             ),
-            ParsedTemplate(
+            TemplateDefinition(
+                packageName = "$basePackageName.components",
                 name = "icon",
                 subPath = "components",
-                imports = emptyList(),
                 parameters = emptyList(),
-                root = HtmlElement.Tag("icon", emptyMap())
             )
         )
 
         When
-        val generator = TemplateRegistryGenerator(templates)
-        val result = generator.createTemplateRegistry()
+        val result = TemplateRegistryGenerator.createTemplateRegistry(basePackageName, templates)
 
         Then
         result shouldContain "\"button\" to { writeButton() }"

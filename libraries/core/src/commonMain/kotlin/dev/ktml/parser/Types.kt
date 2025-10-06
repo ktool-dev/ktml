@@ -1,12 +1,8 @@
 package dev.ktml.parser
 
 import dev.ktml.TemplateDefinition
-import dev.ktml.TemplateParameter
-import dev.ktml.util.TEMPLATE_PACKAGE
 import dev.ktml.util.toCamelCase
-import dev.ktml.util.toPascalCase
 import dev.ktool.gen.safe
-
 
 /**
  * Represents a parsed template with its metadata
@@ -20,33 +16,14 @@ data class ParsedTemplate(
     val dockTypeDeclaration: String = "",
     val externalScriptContent: String = "",
 ) {
-    val packageName = if (subPath.isEmpty()) TEMPLATE_PACKAGE else TEMPLATE_PACKAGE + "." +
-            subPath.split("/").joinToString(".") { it.replace("_", "-").toPascalCase() }
-    val fullPath = if (subPath.isEmpty()) name else "$subPath/$name"
-
-    val isRootPackage = packageName == TEMPLATE_PACKAGE
-    private val relativePackage = packageName.substringAfter("$TEMPLATE_PACKAGE.")
-
+    val path = if (subPath.isNotEmpty()) "$subPath/$name" else name
     val camelCaseName = name.toCamelCase()
-    val functionName = "write$camelCaseName"
-    val qualifiedFunctionName = "$packageName.$functionName"
-    val uniqueFunctionName = if (isRootPackage) functionName else
-        "write" + relativePackage.replace(".", "-").toCamelCase() + camelCaseName
-
-    val isTopLevel = parameters.filterNot { it.isContextParam }.isEmpty()
+    val pathCamelCaseName = if (path.isNotEmpty()) "$subPath/$camelCaseName" else camelCaseName
     val nonContextParameters = parameters.filterNot { it.isContextParam }
 
-    val templateDefinition = TemplateDefinition(
-        name = name,
-        subPath = subPath,
-        packageName = packageName,
-        functionName = functionName,
-        parameters = nonContextParameters.map { TemplateParameter(it.name, it.type, it.defaultValue != null) }
-    )
+    fun samePath(template: TemplateDefinition) = subPath == template.subPath
 
-    fun samePackage(template: TemplateDefinition) = packageName == template.packageName
-
-    fun sameTemplate(template: TemplateDefinition) = qualifiedFunctionName == template.qualifiedFunctionName
+    fun sameTemplate(template: TemplateDefinition) = samePath(template) && name == template.name
 }
 
 /**

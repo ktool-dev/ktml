@@ -86,16 +86,14 @@ class ContentGenerator(private val templates: TemplateDefinitions) {
     private val filteredAttrs = controlAttrs + "ignore-kotlin"
 
     private fun generateTagContent(template: ParsedTemplate, tag: HtmlElement.Tag, noInterpolation: Boolean = false) {
-        logger.info { "Generating tag content: ${tag.name}" }
+        logger.debug { "Generating tag content: ${tag.name}" }
 
-        val customTag = templates.locate(tag.name, template.templateDefinition)
+        val customTag = templates.locate(template.subPath, tag.name)
 
         // This prevents a template from calling itself
-        if (customTag != null && !rootTemplate.sameTemplate(customTag)) return generateCustomTagCall(
-            template,
-            tag,
-            customTag
-        )
+        if (customTag != null && !rootTemplate.sameTemplate(customTag)) {
+            return generateCustomTagCall(template, tag, customTag)
+        }
 
         if (tag.isKotlinScript) {
             tag.children.joinToString("") { (it as HtmlElement.Text).content.trim() }
@@ -142,7 +140,7 @@ class ContentGenerator(private val templates: TemplateDefinitions) {
     }
 
     private fun generateTextContent(text: HtmlElement.Text, noInterpolation: Boolean = false) {
-        logger.info { "Generating text content: '${text.content}'" }
+        logger.debug { "Generating text content: '${text.content}'" }
         val content = text.content
         if (!noInterpolation && expressionParser.hasKotlinExpression(content)) {
             expressionParser.extractMultipleExpressions(content).forEach { part ->
@@ -158,9 +156,9 @@ class ContentGenerator(private val templates: TemplateDefinitions) {
     }
 
     private fun generateCustomTagCall(template: ParsedTemplate, tag: HtmlElement.Tag, customTag: TemplateDefinition) {
-        logger.info { "Generating custom tag call: ${customTag.name}" }
+        logger.debug { "Generating custom tag call: ${customTag.name}" }
 
-        if (!template.samePackage(customTag)) {
+        if (!template.samePath(customTag)) {
             imports.add(Import("${customTag.packageName}.${customTag.functionName}"))
         }
 

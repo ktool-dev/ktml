@@ -1,25 +1,37 @@
 package dev.ktml
 
-import dev.ktml.templates.TemplateRegistryImpl
-import dev.ktml.templates.writeCard
 import dev.ktml.test.Item
 import dev.ktml.test.User
 import dev.ktml.test.UserType
+import dev.ktml.util.JvmKtmlProcessor
 import dev.ktool.kotest.BddSpec
 import io.kotest.matchers.shouldBe
 
 class GeneratedFunctionSpec : BddSpec({
-    val engine = KtmlEngine(TemplateRegistryImpl)
+    lateinit var engine: KtmlEngine
+
+    beforeSpec {
+        val processor = JvmKtmlProcessor(
+            "my.templates",
+            listOf("src/commonMain/resources/templates", "src/jvmTest/resources/templates"),
+            "build/generated/ktml",
+            "build/classes/kotlin/jvm/main",
+        )
+        engine = KtmlEngine(processor)
+    }
 
     "generated card template" {
         Given
         val writer = StringContentWriter()
-        val context = Context(writer)
+        val context = Context(
+            writer, mapOf(
+                "header" to content { write("Hello Header") },
+                "content" to content { write("Hello Body") },
+            )
+        )
 
         When
-        context.writeCard(header = { write("Hello Header") }) {
-            write("Hello Body")
-        }
+        engine.writeTemplate(context, "card")
 
         Then
         "    $writer".trimIndent() shouldBe """

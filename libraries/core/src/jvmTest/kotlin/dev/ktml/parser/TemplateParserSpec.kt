@@ -40,7 +40,7 @@ class TemplateParserSpec : BddSpec({
         }
     }
 
-    "package name is set correctly" {
+    "path is set correctly" {
         Given
         val content = $$"""
             <my-button text="String" onClick="String">
@@ -49,10 +49,10 @@ class TemplateParserSpec : BddSpec({
         """.trimIndent()
 
         When
-        val result = parser.parseContent(content, "my.package")
+        val result = parser.parseContent(content, "my/package")
 
         Then
-        "dev.ktml.templates.my.package" shouldBe result.packageName
+        result.subPath shouldBe "my/package"
     }
 
     "get parameters from attributes" {

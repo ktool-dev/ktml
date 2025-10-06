@@ -12,8 +12,6 @@ internal fun String.toPascalCase(): String {
     return toCamelCase().replaceFirstChar { it.lowercase() }
 }
 
-internal const val TEMPLATE_PACKAGE = "dev.ktml.templates"
-
 internal data class Path(val path: String) {
     override fun toString() = path
 }

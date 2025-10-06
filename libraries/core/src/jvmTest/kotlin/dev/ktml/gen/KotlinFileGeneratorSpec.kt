@@ -4,7 +4,6 @@ import dev.ktml.parser.HtmlElement
 import dev.ktml.parser.ParsedTemplate
 import dev.ktml.parser.ParsedTemplateParameter
 import dev.ktml.parser.TemplateDefinitions
-import dev.ktml.util.TEMPLATE_PACKAGE
 import dev.ktool.gen.types.Function
 import dev.ktool.gen.types.KotlinFile
 import dev.ktool.kotest.BddSpec
@@ -12,6 +11,7 @@ import io.kotest.matchers.shouldBe
 
 class KotlinFileGeneratorSpec : BddSpec({
     val kotlinFileGenerator = KotlinFileGenerator(TemplateDefinitions())
+    val basePackageName = "my.templates"
 
     "generate code with basic template" {
         Given
@@ -26,10 +26,10 @@ class KotlinFileGeneratorSpec : BddSpec({
         )
 
         When
-        val file = kotlinFileGenerator.generateCode(template)
+        val file = kotlinFileGenerator.generateCode(basePackageName, template)
 
         Then
-        file.packageName shouldBe TEMPLATE_PACKAGE
+        file.packageName shouldBe basePackageName
         file.imports.size shouldBe 1
         file.imports[0].packagePath shouldBe "dev.ktml.Context"
         file.members.size shouldBe 2
@@ -53,7 +53,7 @@ class KotlinFileGeneratorSpec : BddSpec({
         )
 
         When
-        val file = kotlinFileGenerator.generateCode(template)
+        val file = kotlinFileGenerator.generateCode(basePackageName, template)
 
         Then
         file.imports[0].packagePath shouldBe "dev.ktml.Context"
@@ -74,7 +74,7 @@ class KotlinFileGeneratorSpec : BddSpec({
         )
 
         When
-        val file = kotlinFileGenerator.generateCode(template)
+        val file = kotlinFileGenerator.generateCode(basePackageName, template)
 
         Then
         file.imports[0].packagePath shouldBe "dev.ktml.Content"
@@ -102,7 +102,7 @@ class KotlinFileGeneratorSpec : BddSpec({
         )
 
         When
-        val file = kotlinFileGenerator.generateCode(template)
+        val file = kotlinFileGenerator.generateCode(basePackageName, template)
 
         Then
         file.writerFunction.parameters[0].name shouldBe "text"
@@ -131,7 +131,7 @@ class KotlinFileGeneratorSpec : BddSpec({
         )
 
         When
-        val file = kotlinFileGenerator.generateCode(template)
+        val file = kotlinFileGenerator.generateCode(basePackageName, template)
 
         Then
         file.imports[0].packagePath shouldBe "dev.ktml.Content"
@@ -158,7 +158,7 @@ class KotlinFileGeneratorSpec : BddSpec({
         )
 
         When
-        val file = kotlinFileGenerator.generateCode(template)
+        val file = kotlinFileGenerator.generateCode(basePackageName, template)
 
         Then
         val function = file.noArgWriterFunction
@@ -175,7 +175,7 @@ class KotlinFileGeneratorSpec : BddSpec({
         )
 
         When
-        val file = kotlinFileGenerator.generateCode(template)
+        val file = kotlinFileGenerator.generateCode(basePackageName, template)
 
         Then
         file.noArgWriterFunction.name shouldBe "writeButton"
@@ -191,7 +191,7 @@ class KotlinFileGeneratorSpec : BddSpec({
         )
 
         When
-        val file = kotlinFileGenerator.generateCode(template)
+        val file = kotlinFileGenerator.generateCode(basePackageName, template)
 
         Then
         file.noArgWriterFunction.name shouldBe "writeHeader"
@@ -214,10 +214,10 @@ class KotlinFileGeneratorSpec : BddSpec({
         )
 
         When
-        val file = kotlinFileGenerator.generateCode(template)
+        val file = kotlinFileGenerator.generateCode(basePackageName, template)
 
         Then
-        file.packageName shouldBe "dev.ktml.templates"
+        file.packageName shouldBe "my.templates"
         file.imports[0].packagePath shouldBe "dev.ktml.Context"
         file.imports[1].packagePath shouldBe "kotlin.String"
 

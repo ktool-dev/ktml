@@ -26,7 +26,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Build with Gradle
-        run: ./gradlew jvmTest
+        run: ./gradlew build
 
       - name: Test Report
         if: (success() || failure())

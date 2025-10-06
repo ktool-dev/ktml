@@ -20,18 +20,20 @@ class TemplateDefinitions {
         templates[template.path] = template
     }
 
-    fun locate(name: String, template: TemplateDefinition): TemplateDefinition? {
+    operator fun get(path: String): TemplateDefinition? = templates[path]
+
+    fun locate(referencePath: String, name: String): TemplateDefinition? {
         val allMatches = all.filter { it.name == name }
 
         if (allMatches.size < 2) return allMatches.firstOrNull()
 
-        val sameDirectory = allMatches.firstOrNull { it.packageName == template.packageName }
+        val sameDirectory = allMatches.firstOrNull { it.subPath == referencePath }
         if (sameDirectory != null) return sameDirectory
 
-        val subTemplates = allMatches.filter { it.packageName.startsWith(template.packageName) }
+        val subTemplates = allMatches.filter { it.subPath.startsWith(referencePath) }
         if (subTemplates.size == 1) return subTemplates.first()
 
-        val parentTemplates = allMatches.filter { template.packageName.startsWith(it.packageName) }
+        val parentTemplates = allMatches.filter { referencePath.startsWith(it.subPath) }
         if (parentTemplates.size == 1) return parentTemplates.first()
 
         error(
