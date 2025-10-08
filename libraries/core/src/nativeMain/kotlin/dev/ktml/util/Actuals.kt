@@ -1,5 +1,7 @@
 package dev.ktml.util
 
+import io.ktor.client.*
+import io.ktor.client.engine.curl.*
 import okio.FileSystem
 import okio.Path.Companion.toPath
 
@@ -26,3 +28,5 @@ internal actual fun Path.mkDirs(): Path {
 
     return this
 }
+
+internal actual fun createHttpClient() = HttpClient(Curl)

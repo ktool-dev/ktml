@@ -72,7 +72,11 @@ class ContentBuilder {
 
     fun write(kotlin: String) {
         endRaw()
-        writer.write("write(").write(kotlin).write(")").newLine()
+        if (kotlin.trim().startsWith("raw(")) {
+            writer.write(kotlin).newLine()
+        } else {
+            writer.write("write(").write(kotlin).write(")").newLine()
+        }
     }
 
     fun startControlFlow(type: String, condition: String) {

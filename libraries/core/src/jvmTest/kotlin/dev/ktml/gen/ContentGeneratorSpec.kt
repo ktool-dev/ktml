@@ -3,13 +3,12 @@ package dev.ktml.gen
 import dev.ktml.parser.*
 import dev.ktml.parser.HtmlElement.Tag
 import dev.ktml.parser.HtmlElement.Text
-import dev.ktml.toTemplateDefinition
 import dev.ktool.gen.TRIPLE_QUOTE
 import dev.ktool.kotest.BddSpec
 import io.kotest.matchers.shouldBe
 
-private val parser = TemplateParser()
-private val templates = TemplateDefinitions()
+private val parser = TemplateParser("")
+private val templates = Templates()
 
 class ContentGeneratorSpec : BddSpec({
     val contentGenerator = ContentGenerator(templates)
@@ -305,25 +304,6 @@ class ContentGeneratorSpec : BddSpec({
         """.trimIndent()
     }
 
-    "doctype tag printed as doctype directive" {
-        Given
-        val template = $$"""
-            <something>
-                <!DOCTYPE html>
-                <h1>Hello</h1>
-            </something>
-        """.parse()
-
-        When
-        val result = contentGenerator.generateTemplateContent(template)
-
-        Then
-        result.rawConstants[0].initializer?.expression?.replace(TRIPLE_QUOTE, "") shouldBe """
-            <!DOCTYPE html>
-            <h1>Hello</h1>
-        """.trimIndent()
-    }
-
     "if a tag calls itself it just prints out the raw content" {
         Given
         val template = $$"""
@@ -422,7 +402,8 @@ class ContentGeneratorSpec : BddSpec({
 })
 
 private fun String.parse() =
-    parser.parseContent(this.trimIndent()).also { templates.replace(it.toTemplateDefinition("my.templates")) }
+    parser.parseContent("file", this.trimIndent(), "mine").also { parsed -> parsed.forEach { templates.replace(it) } }
+        .first()
 
 private fun parsedTemplate(
     name: String = "test",
@@ -431,6 +412,7 @@ private fun parsedTemplate(
     parameters: List<ParsedTemplateParameter> = listOf(),
 ) = ParsedTemplate(
     name = name,
+    subPath = "",
     imports = imports,
     parameters = parameters,
     root = Tag("root", emptyMap(), children),

@@ -1,9 +1,9 @@
 package dev.ktml.gen
 
-import dev.ktml.TemplateDefinition
+import dev.ktml.TagDefinition
 import dev.ktml.parser.HtmlElement
 import dev.ktml.parser.ParsedTemplate
-import dev.ktml.parser.TemplateDefinitions
+import dev.ktml.parser.Templates
 import dev.ktml.parser.removeEmptyText
 import dev.ktml.util.isVoidTag
 import dev.ktml.util.toImport
@@ -20,7 +20,7 @@ data class TemplateContent(val imports: List<Import>, val body: Block, val rawCo
 /**
  * Generates HtmlWriter method calls from parsed HTML elements
  */
-class ContentGenerator(private val templates: TemplateDefinitions) {
+class ContentGenerator(private val templates: Templates) {
     private val contentBuilder = ContentBuilder()
     private val expressionParser = ExpressionParser()
     private val imports = mutableListOf<Import>()
@@ -155,9 +155,10 @@ class ContentGenerator(private val templates: TemplateDefinitions) {
         }
     }
 
-    private fun generateCustomTagCall(template: ParsedTemplate, tag: HtmlElement.Tag, customTag: TemplateDefinition) {
+    private fun generateCustomTagCall(template: ParsedTemplate, tag: HtmlElement.Tag, customTag: TagDefinition) {
         logger.debug { "Generating custom tag call: ${customTag.name}" }
 
+        logger.debug { "Custom tag: ${customTag.path}, Template: ${template.path}" }
         if (!template.samePath(customTag)) {
             imports.add(Import("${customTag.packageName}.${customTag.functionName}"))
         }

@@ -1,19 +1,20 @@
 package dev.ktml
 
 import dev.ktml.gen.KotlinFileGenerator
-import dev.ktml.gen.TemplateRegistryGenerator
+import dev.ktml.gen.KtmlRegistryGenerator
 import dev.ktml.parser.ParsedTemplate
-import dev.ktml.parser.TemplateDefinitions
 import dev.ktml.parser.TemplateParser
+import dev.ktml.parser.Templates
 import dev.ktml.util.*
 import io.github.oshai.kotlinlogging.KotlinLogging
 
 private val log = KotlinLogging.logger {}
 
-open class KtmlProcessor(val basePackageName: String, val outputDirectory: String) {
-    private val parser = TemplateParser()
-    private val templates = TemplateDefinitions()
-    private val parsedTemplates = mutableListOf<ParsedTemplate>()
+open class KtmlProcessor(private val moduleName: String = "", outputDirectory: String) {
+    val basePackageName = if (moduleName.isNotEmpty()) "$ROOT_PACKAGE.$moduleName" else ROOT_PACKAGE
+    private val parser = TemplateParser(moduleName)
+    private val templates = Templates()
+    private val parsedTemplates = mutableMapOf<String, ParsedTemplate>()
     private val fileGenerator = KotlinFileGenerator(templates)
     private val basePath = "$outputDirectory/${basePackageName.replace(".", "/")}"
 
@@ -21,7 +22,7 @@ open class KtmlProcessor(val basePackageName: String, val outputDirectory: Strin
 
     fun processRootDirectory(dir: String) = processDirectory(dir, dir)
 
-    fun processDirectory(dir: String, rootPath: String = dir) {
+    private fun processDirectory(dir: String, rootPath: String = dir) {
         val path = dir.toPath()
         require(path.isDirectory) { "Path '${path.absolute}' is not a directory" }
 
@@ -34,44 +35,56 @@ open class KtmlProcessor(val basePackageName: String, val outputDirectory: Strin
         }
     }
 
-    fun processFile(file: String, rootPath: String) {
+    fun processFile(file: String, rootPath: String, replaceExisting: Boolean = false) {
         if (!file.endsWith(".ktml")) return
 
+        val fileName = file.substringAfterLast("/").substringBeforeLast(".ktml")
         val path = file.toPath()
+        val modulePath = path.path.substringAfter("$rootPath/").substringBeforeLast("/", "").removeSuffix("/")
         log.info { "Processing file: $path" }
-        val subPath = path.path.substringAfter(rootPath).substringBeforeLast("/").removePrefix("/")
-        processTemplate(path.readText(), subPath)
+        val subPath = when {
+            modulePath.isEmpty() && moduleName.isEmpty() -> ""
+            modulePath.isEmpty() -> moduleName
+            moduleName.isEmpty() -> modulePath
+            else -> "$modulePath/$moduleName"
+        }
+
+        if (replaceExisting) {
+            replaceTemplate(fileName, path.readText(), subPath)
+        } else {
+            processTemplate(fileName, path.readText(), subPath)
+        }
     }
 
-    fun processTemplate(content: String, subPath: String = "") = parser.parseContent(content, subPath).also {
-        parsedTemplates.add(it)
-        templates.register(it.toTemplateDefinition(basePackageName))
+    private fun processTemplate(fileName: String, content: String, subPath: String) {
+        parser.parseContent(fileName, content, subPath).forEach {
+            parsedTemplates[it.path] = it
+            templates.register(it)
+        }
+    }
+
+    open fun replaceTemplate(fileName: String, content: String, subPath: String = "") {
+        parser.parseContent(fileName, content, subPath).forEach {
+            parsedTemplates[it.path] = it
+            templates.replace(it)
+            generateTemplateCodeFile(it)
+            generateRegistry()
+        }
     }
 
     fun generateTemplateCode() {
-        parsedTemplates.map { generateTemplateCodeFile(it) }
-        val definitions = parsedTemplates.map { findDefinition(it) }
-        val content = TemplateRegistryGenerator.createTemplateRegistry(basePackageName, definitions)
-        Path("$basePath/TemplateRegistry.kt").mkDirs().writeText(content)
+        parsedTemplates.map { generateTemplateCodeFile(it.value) }
+        generateRegistry()
     }
 
-    private fun findDefinition(template: ParsedTemplate) =
-        templates[template.path] ?: error("Could not find template '${template.path}'")
+    private fun generateRegistry() {
+        val content = KtmlRegistryGenerator.createKtmlRegistry(basePackageName, templates)
+        Path("$basePath/KtmlRegistryImpl.kt").mkDirs().writeText(content)
+    }
 
     fun generateTemplateCodeFile(template: ParsedTemplate) {
-        log.info { "Generating code for template: ${template.name}" }
+        log.debug { "Generating code for template: ${template.name}" }
         val filePath = "$basePath/${template.pathCamelCaseName}.kt"
-        Path(filePath).mkDirs().writeText(generateTemplateCode(template).render())
+        Path(filePath).mkDirs().writeText(fileGenerator.generateCode(template).render())
     }
-
-    fun generateTemplateCode(template: ParsedTemplate) =
-        fileGenerator.generateCode(findDefinition(template).packageName, template)
 }
-
-internal fun ParsedTemplate.toTemplateDefinition(basePackageName: String) = TemplateDefinition(
-    name = name,
-    subPath = subPath,
-    packageName = if (subPath.isEmpty()) basePackageName else basePackageName + "." +
-            subPath.split("/").joinToString(".") { it.replace("_", "-").toPascalCase() },
-    parameters = nonContextParameters.map { TemplateParameter(it.name, it.type, it.defaultValue != null) }
-)

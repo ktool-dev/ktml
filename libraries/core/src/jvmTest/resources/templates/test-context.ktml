@@ -1,11 +1,11 @@
-<test-context>
-    <context values='mapOf("value" to "Outer Context")'>
+<html>
+<context values='mapOf("value" to "Outer Context")'>
+    <write-context-value/>
+    <context values='mapOf("value" to "Inner 1")'>
         <write-context-value/>
-        <context values='mapOf("value" to "Inner 1")'>
-            <write-context-value/>
-        </context>
-        <context values='mapOf("value" to "Inner 2")'>
-            <write-context-value/>
-        </context>
     </context>
-</test-context>
+    <context values='mapOf("value" to "Inner 2")'>
+        <write-context-value/>
+    </context>
+</context>
+</html>

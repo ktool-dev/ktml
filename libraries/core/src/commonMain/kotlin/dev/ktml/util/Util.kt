@@ -25,6 +25,8 @@ internal fun String.toImport() = Import(
     alias = if (contains(" as ")) substringAfter(" as ") else null
 )
 
+const val ROOT_PACKAGE = "dev.ktml.templates"
+
 private val VOID_TAGS = setOf(
     "br",
     "hr",

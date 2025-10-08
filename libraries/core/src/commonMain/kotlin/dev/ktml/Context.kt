@@ -3,17 +3,22 @@ package dev.ktml
 import com.mohamedrejeb.ksoup.entities.KsoupEntities.encodeHtml
 
 interface ContentWriter {
-    fun write(content: String)
+    suspend fun write(content: String)
 }
 
-typealias Content = Context.() -> Unit
+typealias Content = suspend Context.() -> Unit
 
-class Context(private val writer: ContentWriter, model: Map<String, Any?> = mapOf()) {
+class Context(
+    private val writer: ContentWriter,
+    model: Map<String, Any?> = mapOf(),
+    queryParams: Map<String, List<String>> = mapOf(),
+    pathParams: Map<String, List<String>> = mapOf()
+) {
     private val _model = model.toMutableMap()
 
-    fun write(content: Content?) = also { if (content != null) content(it) }
-    fun write(content: Any?) = if (content == null) this else raw(encodeHtml(content.toString()))
-    fun raw(content: String?) = also { if (!content.isNullOrEmpty()) writer.write(content) }
+    suspend fun write(content: Content?) = also { content?.invoke(it) }
+    suspend fun write(content: Any?) = if (content == null) this else raw(encodeHtml(content.toString()))
+    suspend fun raw(content: String?) = also { if (!content.isNullOrEmpty()) writer.write(content) }
 
     inline fun <reified T> required(name: String): T =
         requiredNullable(name) ?: error("Context value '$name' is null but cannot be null")
@@ -58,11 +63,13 @@ class Context(private val writer: ContentWriter, model: Map<String, Any?> = mapO
 class StringContentWriter : ContentWriter {
     private val buffer = StringBuilder()
 
-    override fun write(content: String) {
+    override suspend fun write(content: String) {
         buffer.append(content)
     }
 
     override fun toString() = buffer.toString()
+
+    fun clear() = buffer.clear()
 }
 
 fun content(block: Content) = block

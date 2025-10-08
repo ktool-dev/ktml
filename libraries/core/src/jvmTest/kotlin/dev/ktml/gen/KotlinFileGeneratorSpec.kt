@@ -1,40 +1,39 @@
 package dev.ktml.gen
 
 import dev.ktml.parser.HtmlElement
+import dev.ktml.parser.HtmlElement.Tag
 import dev.ktml.parser.ParsedTemplate
 import dev.ktml.parser.ParsedTemplateParameter
-import dev.ktml.parser.TemplateDefinitions
+import dev.ktml.parser.Templates
 import dev.ktool.gen.types.Function
 import dev.ktool.gen.types.KotlinFile
 import dev.ktool.kotest.BddSpec
 import io.kotest.matchers.shouldBe
 
 class KotlinFileGeneratorSpec : BddSpec({
-    val kotlinFileGenerator = KotlinFileGenerator(TemplateDefinitions())
+    val kotlinFileGenerator = KotlinFileGenerator(Templates())
     val basePackageName = "my.templates"
 
     "generate code with basic template" {
         Given
-        val template = ParsedTemplate(
+        val template = parsed(
             name = "my-button",
             imports = emptyList(),
             parameters = listOf(
                 ParsedTemplateParameter("text", "String"),
                 ParsedTemplateParameter("onClick", "String")
             ),
-            root = HtmlElement.Tag("my-button", emptyMap())
+            root = Tag("my-button", emptyMap())
         )
 
         When
-        val file = kotlinFileGenerator.generateCode(basePackageName, template)
+        val file = kotlinFileGenerator.generateCode(template)
 
         Then
-        file.packageName shouldBe basePackageName
+        file.packageName shouldBe "dev.ktml.templates"
         file.imports.size shouldBe 1
         file.imports[0].packagePath shouldBe "dev.ktml.Context"
-        file.members.size shouldBe 2
-        file.noArgWriterFunction.name shouldBe "writeMyButton"
-        file.noArgWriterFunction.parameters.size shouldBe 0
+        file.members.size shouldBe 1
         file.writerFunction.name shouldBe "writeMyButton"
         file.writerFunction.parameters.size shouldBe 2
         file.writerFunction.parameters[0].name shouldBe "text"
@@ -45,15 +44,15 @@ class KotlinFileGeneratorSpec : BddSpec({
 
     "generate code with imports" {
         Given
-        val template = ParsedTemplate(
+        val template = parsed(
             name = "custom-component",
             imports = listOf("import kotlinx.datetime.LocalDate", "import kotlin.collections.List"),
             parameters = emptyList(),
-            root = HtmlElement.Tag("custom-component", emptyMap())
+            root = Tag("custom-component", emptyMap())
         )
 
         When
-        val file = kotlinFileGenerator.generateCode(basePackageName, template)
+        val file = kotlinFileGenerator.generateCode(template)
 
         Then
         file.imports[0].packagePath shouldBe "dev.ktml.Context"
@@ -63,18 +62,18 @@ class KotlinFileGeneratorSpec : BddSpec({
 
     "generate code with content parameter" {
         Given
-        val template = ParsedTemplate(
+        val template = parsed(
             name = "card",
             imports = emptyList(),
             parameters = listOf(
                 ParsedTemplateParameter("title", "String"),
                 ParsedTemplateParameter("content", "Content")
             ),
-            root = HtmlElement.Tag("card", emptyMap())
+            root = Tag("card", emptyMap())
         )
 
         When
-        val file = kotlinFileGenerator.generateCode(basePackageName, template)
+        val file = kotlinFileGenerator.generateCode(template)
 
         Then
         file.imports[0].packagePath shouldBe "dev.ktml.Content"
@@ -90,7 +89,7 @@ class KotlinFileGeneratorSpec : BddSpec({
 
     "generate code with default values" {
         Given
-        val template = ParsedTemplate(
+        val template = parsed(
             name = "button",
             imports = emptyList(),
             parameters = listOf(
@@ -98,11 +97,11 @@ class KotlinFileGeneratorSpec : BddSpec({
                 ParsedTemplateParameter("disabled", "Boolean", "false"),
                 ParsedTemplateParameter("count", "Int", "0")
             ),
-            root = HtmlElement.Tag("button", emptyMap())
+            root = Tag("button", emptyMap())
         )
 
         When
-        val file = kotlinFileGenerator.generateCode(basePackageName, template)
+        val file = kotlinFileGenerator.generateCode(template)
 
         Then
         file.writerFunction.parameters[0].name shouldBe "text"
@@ -118,7 +117,7 @@ class KotlinFileGeneratorSpec : BddSpec({
 
     "generate code with mixed parameters" {
         Given
-        val template = ParsedTemplate(
+        val template = parsed(
             name = "form-input",
             imports = listOf("import kotlinx.serialization.Serializable"),
             parameters = listOf(
@@ -127,11 +126,11 @@ class KotlinFileGeneratorSpec : BddSpec({
                 ParsedTemplateParameter("required", "Boolean", "true"),
                 ParsedTemplateParameter("content", "Content")
             ),
-            root = HtmlElement.Tag("form-input", emptyMap())
+            root = Tag("form-input", emptyMap())
         )
 
         When
-        val file = kotlinFileGenerator.generateCode(basePackageName, template)
+        val file = kotlinFileGenerator.generateCode(template)
 
         Then
         file.imports[0].packagePath shouldBe "dev.ktml.Content"
@@ -150,62 +149,61 @@ class KotlinFileGeneratorSpec : BddSpec({
 
     "to camel case conversion" {
         Given
-        val template = ParsedTemplate(
+        val template = parsed(
             name = "my-custom-button",
             imports = emptyList(),
             parameters = emptyList(),
-            root = HtmlElement.Tag("my-custom-button", emptyMap())
+            root = Tag("my-custom-button", emptyMap())
         )
 
         When
-        val file = kotlinFileGenerator.generateCode(basePackageName, template)
+        val file = kotlinFileGenerator.generateCode(template)
 
         Then
-        val function = file.noArgWriterFunction
-        function.name shouldBe "writeMyCustomButton"
+        file.writerFunction.name shouldBe "writeMyCustomButton"
     }
 
     "to camel case with single word" {
         Given
-        val template = ParsedTemplate(
+        val template = parsed(
             name = "button",
             imports = emptyList(),
             parameters = emptyList(),
-            root = HtmlElement.Tag("button", emptyMap())
+            root = Tag("button", emptyMap())
         )
 
         When
-        val file = kotlinFileGenerator.generateCode(basePackageName, template)
+        val file = kotlinFileGenerator.generateCode(template)
 
         Then
-        file.noArgWriterFunction.name shouldBe "writeButton"
+        file.writerFunction.name shouldBe "writeButton"
     }
 
     "generate code with no parameters" {
         Given
-        val template = ParsedTemplate(
+        val template = parsed(
             name = "header",
             imports = emptyList(),
             parameters = emptyList(),
-            root = HtmlElement.Tag("header", emptyMap())
+            root = Tag("header", emptyMap())
         )
 
         When
-        val file = kotlinFileGenerator.generateCode(basePackageName, template)
+        val file = kotlinFileGenerator.generateCode(template)
 
         Then
-        file.noArgWriterFunction.name shouldBe "writeHeader"
+        file.writerFunction.name shouldBe "writeHeader"
         file.imports.size shouldBe 1
         file.imports[0].packagePath shouldBe "dev.ktml.Context"
     }
 
     "generate code structure" {
         Given
-        val template = ParsedTemplate(
+        val template = parsed(
             name = "test-component",
             imports = listOf("import kotlin.String"),
             parameters = listOf(ParsedTemplateParameter("value", "String")),
-            root = HtmlElement.Tag(
+            root = Tag(
                 "test-component", emptyMap(), mutableListOf(
                     HtmlElement.Text("Hello, World!")
                 )
@@ -214,14 +212,14 @@ class KotlinFileGeneratorSpec : BddSpec({
         )
 
         When
-        val file = kotlinFileGenerator.generateCode(basePackageName, template)
+        val file = kotlinFileGenerator.generateCode(template)
 
         Then
-        file.packageName shouldBe "my.templates"
+        file.packageName shouldBe "dev.ktml.templates"
         file.imports[0].packagePath shouldBe "dev.ktml.Context"
         file.imports[1].packagePath shouldBe "kotlin.String"
 
-        file.members.size shouldBe 4
+        file.members.size shouldBe 3
         file.writerFunction.name shouldBe "writeTestComponent"
         file.writerFunction.parameters.size shouldBe 1
         file.writerFunction.parameters[0].name shouldBe "value"
@@ -229,5 +227,23 @@ class KotlinFileGeneratorSpec : BddSpec({
     }
 })
 
-private val KotlinFile.noArgWriterFunction: Function get() = members[0] as Function
-private val KotlinFile.writerFunction: Function get() = members[1] as Function
+private val KotlinFile.writerFunction: Function get() = members[0] as Function
+
+private fun parsed(
+    name: String = "test",
+    subPath: String = "",
+    isPage: Boolean = false,
+    children: MutableList<HtmlElement> = mutableListOf(),
+    imports: List<String> = listOf(),
+    parameters: List<ParsedTemplateParameter> = listOf(),
+    root: Tag = Tag("root", emptyMap(), children),
+    externalScriptContent: String = "",
+) = ParsedTemplate(
+    name = name,
+    isPage = isPage,
+    subPath = subPath,
+    imports = imports,
+    parameters = parameters,
+    root = root,
+    externalScriptContent = externalScriptContent,
+)

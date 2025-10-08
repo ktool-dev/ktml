@@ -1,33 +1,32 @@
 package dev.ktml.gen
 
-import dev.ktml.TemplateDefinition
-import dev.ktml.util.toCamelCase
+import dev.ktml.parser.Templates
 import dev.ktool.gen.types.*
 
-object TemplateRegistryGenerator {
+object KtmlRegistryGenerator {
     /**
-     * This will generate an object that implements the TemplateRegistry interface that can be used to look up templates.
+     * This will generate an object that implements the KtmlRegistry interface that can be used to look up templates.
      */
-    fun createTemplateRegistry(basePackageName: String, templates: List<TemplateDefinition>) =
+    fun createKtmlRegistry(basePackageName: String, templates: Templates) =
         KotlinFile(basePackageName) {
             import("dev.ktml.Content")
-            import("dev.ktml.TemplateDefinition")
-            import("dev.ktml.TemplateRegistry")
-            import("dev.ktml.TemplateParameter")
+            import("dev.ktml.TagDefinition")
+            import("dev.ktml.KtmlRegistry")
+            import("dev.ktml.TagParameter")
 
-            templates.filter { it.subPath.isNotEmpty() }.forEach { template ->
+            templates.allPages.filter { it.subPath.isNotEmpty() }.forEach { template ->
                 import(template.qualifiedFunctionName, template.uniqueFunctionName)
             }
 
-            obj("TemplateRegistryImpl") {
-                superType("TemplateRegistry")
+            obj("KtmlRegistryImpl") {
+                superType("KtmlRegistry")
 
-                property(name = "functions", type = Type("Map", typeArguments = listOf(StringType, Type("Content")))) {
+                property(name = "pages", type = Type("Map", typeArguments = listOf(StringType, Type("Content")))) {
                     modifier(Modifier.Override)
                     initializer = ExpressionBody {
                         write("mapOf(")
                         withIndent {
-                            templates.forEach {
+                            templates.allPages.forEach {
                                 newLine(""""${it.path}" to { ${it.uniqueFunctionName}() },""")
                             }
                         }
@@ -35,13 +34,13 @@ object TemplateRegistryGenerator {
                     }
                 }
 
-                property(name = "templates", type = Type("List", typeArguments = listOf(Type("TemplateDefinition")))) {
+                property(name = "tags", type = Type("List", typeArguments = listOf(Type("TagDefinition")))) {
                     modifier(Modifier.Override)
                     initializer = ExpressionBody {
                         write("listOf(")
                         withIndent {
-                            templates.forEach { template ->
-                                newLine("TemplateDefinition(")
+                            templates.allTags.forEach { template ->
+                                newLine("TagDefinition(")
                                 withIndent {
                                     newLine("name = \"${template.name}\",")
                                     if (template.subPath.isNotEmpty()) {
@@ -52,7 +51,7 @@ object TemplateRegistryGenerator {
                                         newLine("parameters = listOf(")
                                         withIndent {
                                             template.parameters.forEach { param ->
-                                                newLine("TemplateParameter(\"${param.name}\", \"${param.type}\", ${param.hasDefault}),")
+                                                newLine("TagParameter(\"${param.name}\", \"${param.type}\", ${param.hasDefault}),")
                                             }
                                         }
                                         newLine(")")
@@ -67,7 +66,3 @@ object TemplateRegistryGenerator {
             }
         }.render()
 }
-
-private val TemplateDefinition.uniqueFunctionName: String
-    get() = if (subPath.isEmpty()) functionName else
-        "write" + subPath.replace("/", "-").toCamelCase() + functionName.substringAfter("write")

@@ -1,5 +1,7 @@
 package dev.ktml.util
 
+import io.ktor.client.*
+import io.ktor.client.engine.okhttp.*
 import java.io.File
 
 private fun Path.toFile() =
@@ -23,3 +25,12 @@ internal actual fun Path.mkDirs(): Path {
 
     return this
 }
+
+internal actual fun createHttpClient() = HttpClient(OkHttp) {
+    engine {
+        config {
+            followRedirects(true)
+        }
+    }
+}
+

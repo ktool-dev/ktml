@@ -21,7 +21,11 @@ object KotlinCompile {
      * @param rootDir Root directory to search for .kt files
      * @param outputDir Where .class files go
      */
-    fun compileFilesToDir(rootDir: Path, outputDir: Path): List<CompilerError> {
+    fun compileFilesToDir(
+        rootDir: Path,
+        outputDir: Path,
+        jvmTarget: String = getCurrentJvmTarget()
+    ): List<CompilerError> {
         outputDir.createDirectories()
 
         val sources = Files.walk(rootDir).filter { it.toString().endsWith(".kt") }.toList()
@@ -31,7 +35,7 @@ object KotlinCompile {
             this.classpath = defaultClasspath().joinToString(File.pathSeparator) { it.toAbsolutePath().toString() }
             destination = outputDir.toAbsolutePath().toString()
             noReflect = true
-            this.jvmTarget = getCurrentJvmTarget()
+            this.jvmTarget = jvmTarget
             this.noStdlib = true
         }
 

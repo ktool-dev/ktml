@@ -1,123 +1,121 @@
 package dev.ktml
 
-import dev.ktml.test.Item
-import dev.ktml.test.User
-import dev.ktml.test.UserType
-import dev.ktml.util.JvmKtmlProcessor
 import dev.ktool.kotest.BddSpec
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
+
+enum class UserType {
+    ADMIN,
+    USER,
+    GUEST,
+}
+
+data class Item(val name: String)
+
+data class User(val name: String, val type: UserType)
+
+data class SideBarItem(val name: String, val href: String)
 
 class GeneratedFunctionSpec : BddSpec({
     lateinit var engine: KtmlEngine
+    val processor = JvmKtmlProcessor(
+        "src/jvmTest/resources/templates",
+        "build/generated/ktml",
+        "build/generated/ktml-compiled",
+    )
 
     beforeSpec {
-        val processor = JvmKtmlProcessor(
-            "my.templates",
-            listOf("src/commonMain/resources/templates", "src/jvmTest/resources/templates"),
-            "build/generated/ktml",
-            "build/generated/ktml-compiled",
-        )
         engine = KtmlEngine(processor)
     }
 
-    "generated card template" {
-        Given
+    suspend fun writePage(name: String, data: Map<String, Any?> = mapOf()): String {
         val writer = StringContentWriter()
-        val context = Context(
-            writer, mapOf(
-                "header" to content { write("Hello Header") },
-                "content" to content { write("Hello Body") },
-            )
-        )
-
-        When
-        engine.writeTemplate(context, "card")
-
-        Then
-        "    $writer".trimIndent() shouldBe """
-            <div class="card">
-                <div class="card-header">
-                    Hello Header
-                </div>
-                <div class="card-body">
-                    Hello Body
-                </div>
-            </div>
-        """.trimIndent()
+        engine.writePage(Context(writer, data), name)
+        return writer.toString()
     }
 
     "generated dashboard template" {
         Given
-        val writer = StringContentWriter()
-        val context = Context(
-            writer,
-            mapOf(
-                "userName" to "John Doe",
-                "message" to "Hello, World!",
-                "user" to User("John Doe", UserType.USER),
-                "items" to listOf(Item("Item 1"), Item("Item 2"))
-            )
+        val data = mapOf(
+            "userName" to "John Doe",
+            "message" to "Hello, World!",
+            "user" to User("John Doe", UserType.USER),
+            "items" to listOf(Item("Item 1"), Item("Item 2"))
         )
 
         When
-        engine.writeTemplate(context, "dashboard")
+        val result = writePage("dashboard", data)
 
         Then
-        writer.toString().trimIndent() shouldBe """
+        result.trimIndent() shouldBe """
             <!DOCTYPE html>
-            <html lang="en">
-                <head>
+            <html lang="en"><head>
                     <meta charset="UTF-8">
                     <meta name="viewport" content="width=device-width, initial-scale=1.0">
                     <title>Dashboard - John Doe</title>
-                </head>
-                <body>
+                </head><body>
                 <div class="header">
                     
-                        <h1>Dashboard</h1>
-                    
+                    <h1>Dashboard</h1>
+                
                 </div>
                 <div class="content">
                     
-                        <h1>Hello, John Doe!</h1>
-                        
-                        <h2>You are a user!</h2>
-                        
-                        <h2>You are not a guest!</h2>
-                        <div class="card">
+                    <h1>Hello, John Doe!</h1>
+                    
+                    <h2>You are a user!</h2>
+                    
+                    <h2>You are not a guest!</h2>
+                    <div class="card">
                     <div class="card-header">
                         
-                                <h3>Items</h3>
-                            
+                            <h3>Items</h3>
+                        
                     </div>
                     <div class="card-body">
                         <ul>
-                                <li>Item 1 - Item 0</li><li>Item 2 - Item 1</li>
-                            </ul>
+                            <li>Item 1 - Item 0</li><li>Item 2 - Item 1</li>
+                        </ul>
                     </div>
                 </div>
+                    
+                            <h2>You are not an admin!</h2>
                         
-                                <h2>You are not an admin!</h2>
-                            
-                        <div class="sidebar">
+                    <div class="sidebar">
                     
                 </div><br>
-                        <button onclick="alert&lpar;&apos;Hello World&excl;&apos;&rpar;">Click me&excl;</button>
-                    
+                    <button onclick="alert('Hello World!')">Click me&excl;</button>
+                
                 </div>
-                </body>
-                </html>""".trimIndent()
+                </body></html>""".trimIndent()
     }
 
     "generated test-context template" {
-        Given
-        val writer = StringContentWriter()
-        val context = Context(writer)
-
         When
-        engine.writeTemplate(context, "test-context")
+        val result = writePage("test-context")
 
         Then
-        writer.toString().trimIndent() shouldBe "<div>Outer Context</div><div>Inner 1</div><div>Inner 2</div>"
+        result.trimIndent() shouldContain "<div>Outer Context</div><div>Inner 1</div><div>Inner 2</div>"
+    }
+
+    "reloads templates when a template is changed" {
+        Given
+        val templateName = "regenerated-template"
+
+        When
+        val beforeContent = writePage(templateName)
+        processor.replaceTemplate(
+            templateName,
+            """
+                <html>
+                <div>Hello After</div>
+                </html>
+            """.trimIndent()
+        )
+        val afterContent = writePage(templateName)
+
+        Then
+        beforeContent shouldContain "Hello Before"
+        afterContent shouldContain "Hello After"
     }
 })

@@ -1,7 +1,9 @@
 package dev.ktml.parser
 
-import dev.ktml.TemplateDefinition
+import dev.ktml.TagDefinition
+import dev.ktml.util.ROOT_PACKAGE
 import dev.ktml.util.toCamelCase
+import dev.ktml.util.toPascalCase
 import dev.ktool.gen.safe
 
 /**
@@ -9,6 +11,7 @@ import dev.ktool.gen.safe
  */
 data class ParsedTemplate(
     val name: String,
+    val isPage: Boolean = false,
     val subPath: String = "",
     val imports: List<String>,
     val parameters: List<ParsedTemplateParameter>,
@@ -20,10 +23,15 @@ data class ParsedTemplate(
     val camelCaseName = name.toCamelCase()
     val pathCamelCaseName = if (path.isNotEmpty()) "$subPath/$camelCaseName" else camelCaseName
     val nonContextParameters = parameters.filterNot { it.isContextParam }
+    val functionName = "write${name.toCamelCase()}"
+    val packageName = if (subPath.isEmpty()) ROOT_PACKAGE else ROOT_PACKAGE + "." +
+            subPath.split("/").joinToString(".") { it.replace("_", "-").toPascalCase() }
+    val qualifiedFunctionName = "$packageName.$functionName"
+    val uniqueFunctionName = "write" + subPath.replace("/", "-").toCamelCase() + functionName.substringAfter("write")
 
-    fun samePath(template: TemplateDefinition) = subPath == template.subPath
+    fun samePath(template: TagDefinition) = subPath == template.subPath
 
-    fun sameTemplate(template: TemplateDefinition) = samePath(template) && name == template.name
+    fun sameTemplate(template: TagDefinition) = template.uniqueFunctionName == uniqueFunctionName
 }
 
 /**

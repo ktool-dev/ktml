@@ -1,4 +1,4 @@
-import dev.ktml.test.SideBarItem
+import dev.ktml.SideBarItem
 
 <sidebar ctx-sideBarItems="List<SideBarItem> = listOf()">
     <div class="sidebar">

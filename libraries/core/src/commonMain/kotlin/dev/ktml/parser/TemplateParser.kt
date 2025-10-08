@@ -3,19 +3,17 @@ package dev.ktml.parser
 import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlOptions
 import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlParser
 
-const val DOCTYPE_ERROR_MESSAGE = "<!DOCTYPE> should not be used in templates, use <doctype> tag instead."
-
 /**
  * Main template parser that uses Ksoup to parse HTML templates
  */
-class TemplateParser() {
+class TemplateParser(private val moduleName: String = "") {
     private val parserOptions = KsoupHtmlOptions.Default.copy(lowerCaseAttributeNames = false)
 
     /**
      * Parse template content
      */
-    fun parseContent(content: String, subPath: String = ""): ParsedTemplate {
-        val doctype = checkForDoctype(content)
+    fun parseContent(fileName: String?, rawContent: String, subPath: String = moduleName): List<ParsedTemplate> {
+        val (doctype, content) = checkForDoctype(rawContent)
 
         val imports = parseImportStatements(content)
 
@@ -28,28 +26,45 @@ class TemplateParser() {
 
         val rootElements = handler.rootElements
 
-        require(rootElements.size == 1) { "KTML parsing error: Found ${rootElements.size} custom tags in content: \n$content" }
+        if (rootElements.any { it.name == "html" }) {
+            if (rootElements.size != 1) error("The file $fileName has two html roots in it, you can only have a single html root in a file.")
 
-        val rootElement = rootElements.first()
+            val rootElement = rootElements.first()
+            val contextParams = rootElement.attrs.filter { (key, _) -> key.startsWith("ctx-") }
+            val filteredElement =
+                rootElement.copy(attrs = rootElement.attrs.filter { (key, _) -> !key.startsWith("ctx-") })
 
-        return ParsedTemplate(
-            name = rootElement.name,
-            subPath = subPath,
-            parameters = extractParameters(rootElement),
-            imports = imports,
-            root = rootElement,
-            dockTypeDeclaration = doctype,
-            externalScriptContent = handler.externalScriptContent,
-        )
+            return ParsedTemplate(
+                name = fileName ?: "index",
+                isPage = true,
+                subPath = subPath,
+                parameters = extractParameters(contextParams),
+                imports = imports,
+                root = HtmlElement.Tag("index", mapOf(), mutableListOf(filteredElement)),
+                dockTypeDeclaration = doctype,
+                externalScriptContent = handler.externalScriptContent,
+            ).let(::listOf)
+        }
+
+        return rootElements.map {
+            ParsedTemplate(
+                name = it.name,
+                subPath = subPath,
+                parameters = extractParameters(it.attrs),
+                imports = imports,
+                root = it,
+                externalScriptContent = handler.externalScriptContent,
+            )
+        }
     }
 
-    private fun checkForDoctype(content: String): String {
+    private fun checkForDoctype(content: String): Pair<String, String> {
         val start = content.indexOf("<!doctype", ignoreCase = true)
 
-        if (start == -1) return ""
+        if (start == -1) return "<!DOCTYPE html>" to content
 
         val end = content.indexOf(">", start)
-        return content.substring(start, end + 1)
+        return content.substring(start, end + 1) to content.substring(end + 1)
     }
 
     private fun parseImportStatements(content: String): List<String> =
@@ -66,7 +81,7 @@ class TemplateParser() {
             .toSet()
     }
 
-    private fun extractParameters(rootElement: HtmlElement.Tag) = rootElement.attrs.map { (name, typeSpec) ->
+    private fun extractParameters(attrs: Map<String, String>) = attrs.map { (name, typeSpec) ->
         val parts = typeSpec.split("=", limit = 2)
         val defaultValue = if (parts.size > 1) parts[1].trim().removeSurrounding("'") else null
 

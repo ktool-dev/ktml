@@ -6,7 +6,13 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 
 class TemplateParserSpec : BddSpec({
-    val parser = TemplateParser()
+    val parser = TemplateParser("mine")
+
+    fun parse(content: String, subPath: String = "mine", fileName: String? = null) =
+        parser.parseContent(fileName, content, subPath).first()
+
+    fun parseAll(content: String, subPath: String = "mine", fileName: String? = null) =
+        parser.parseContent(fileName, content, subPath)
 
     "get template name from tag" {
         Given
@@ -17,13 +23,14 @@ class TemplateParserSpec : BddSpec({
         """.trimIndent()
 
         When
-        val result = parser.parseContent(content)
+        val result = parse(content)
 
         Then
         "my-button" shouldBe result.name
+        result.path shouldBe "mine/my-button"
     }
 
-    "get multiple root elements should fail" {
+    "can have multiple roots in a file" {
         Given
         val content = $$"""
             <my-button-one text="String" onClick="String">
@@ -34,10 +41,13 @@ class TemplateParserSpec : BddSpec({
             </my-button-two>
         """.trimIndent()
 
-        Expect
-        shouldThrow<IllegalArgumentException> {
-            parser.parseContent(content)
-        }
+        When
+        val result = parseAll(content)
+
+        Then
+        result.size shouldBe 2
+        result[0].name shouldBe "my-button-one"
+        result[1].name shouldBe "my-button-two"
     }
 
     "path is set correctly" {
@@ -49,10 +59,10 @@ class TemplateParserSpec : BddSpec({
         """.trimIndent()
 
         When
-        val result = parser.parseContent(content, "my/package")
+        val result = parse(content, "mine/my/package")
 
         Then
-        result.subPath shouldBe "my/package"
+        result.subPath shouldBe "mine/my/package"
     }
 
     "get parameters from attributes" {
@@ -64,7 +74,7 @@ class TemplateParserSpec : BddSpec({
         """.trimIndent()
 
         When
-        val result = parser.parseContent(content)
+        val result = parse(content)
 
         Then
         result.parameters shouldHaveSize 2
@@ -83,7 +93,7 @@ class TemplateParserSpec : BddSpec({
         """.trimIndent()
 
         When
-        val result = parser.parseContent(content)
+        val result = parse(content)
 
         Then
         result.parameters[0].name shouldBe "text"
@@ -102,7 +112,7 @@ class TemplateParserSpec : BddSpec({
         """.trimIndent()
 
         When
-        val result = parser.parseContent(content)
+        val result = parse(content)
 
         Then
         result.name shouldBe "my-button"
@@ -119,7 +129,7 @@ class TemplateParserSpec : BddSpec({
         """.trimIndent()
 
         When
-        val result = parser.parseContent(content)
+        val result = parse(content)
 
         Then
         result.name shouldBe "my-button"
@@ -135,7 +145,7 @@ class TemplateParserSpec : BddSpec({
         """.trimIndent()
 
         When
-        val result = parser.parseContent(content)
+        val result = parse(content)
 
         Then
         val tag = result.root.children.find { it is HtmlElement.Tag && it.name == "button" } as HtmlElement.Tag
@@ -157,26 +167,55 @@ class TemplateParserSpec : BddSpec({
         """.trimIndent()
 
         When
-        val result = parser.parseContent(content)
+        val result = parse(content)
 
         Then
         result.externalScriptContent shouldBe "val a = 1\nval b = 1"
     }
 
-    "should error if DOCTYPE is present" {
+    "should parse DOCTYPE is present" {
         Given
         val content = $$"""
             <!DOCTYPE html>
-            <my-button text="String" onClick="String">
-                <button onclick="${onClick}">${text}</button>
-            </my-button>
+            
+            import my.stuff.Here
+            
+            <html>
+            <body>
+                <h1>Here</h1>
+            </body>
+            </html>
         """.trimIndent()
 
         When
-        val template = parser.parseContent(content)
+        val template = parse(content, "sub-folder", "my-file")
 
         Then
+        template.imports shouldHaveSize 1
         template.dockTypeDeclaration shouldBe "<!DOCTYPE html>"
+        template.name shouldBe "my-file"
+        template.subPath shouldBe "sub-folder"
+    }
+
+    "two html roots gets an error" {
+        Given
+        val content = $$"""
+            <!DOCTYPE html>
+            
+            <html>
+            <body>
+            </body>
+            </html>
+            <html>
+            <body>
+            </body>
+            </html>
+        """.trimIndent()
+
+        Expect
+        shouldThrow<IllegalStateException> {
+            parse(content)
+        }
     }
 
     "should parse self closing tag properly" {
@@ -190,7 +229,7 @@ class TemplateParserSpec : BddSpec({
         """.trimIndent()
 
         When
-        val template = parser.parseContent(content)
+        val template = parse(content)
 
         Then
         template.root.children shouldHaveSize 3
@@ -205,7 +244,7 @@ class TemplateParserSpec : BddSpec({
         """.trimIndent()
 
         When
-        val template = parser.parseContent(content)
+        val template = parse(content)
 
         Then
         template.root.children shouldHaveSize 1

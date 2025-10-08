@@ -34,6 +34,10 @@ kotlin {
                 implementation(libs.ksoup.entities)
                 implementation(libs.ktool.kotest.bdd)
                 implementation(libs.ktool.kotlin.gen)
+                implementation(libs.ktor.server.core)
+                implementation(libs.ktor.client.core)
+                implementation(libs.ktor.server.cio)
+                implementation(libs.ktor.server.status)
             }
         }
 
@@ -52,6 +56,7 @@ kotlin {
                 implementation(libs.kotlin.reflect)
                 implementation(libs.slf4j.simple)
                 implementation(libs.kotlin.compiler.embeddable)
+                implementation(libs.ktor.client.okhttp)
             }
         }
 
@@ -64,6 +69,7 @@ kotlin {
         val nativeMain by getting {
             dependencies {
                 implementation(libs.okio)
+                implementation(libs.ktor.client.curl)
             }
         }
     }
