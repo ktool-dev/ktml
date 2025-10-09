@@ -13,7 +13,7 @@ class BuildStandardTemplatesSpec : BddSpec({
 
         When
         File("src/commonMain/resources/templates").listFiles().forEach { file ->
-            processor.processFile(file.path, file.parent, replaceExisting = true)
+            processor.processFile(file.path, file.parent)
         }
         processor.generateTemplateCode()
 

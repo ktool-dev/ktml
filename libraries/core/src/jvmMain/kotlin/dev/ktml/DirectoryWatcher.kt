@@ -4,20 +4,28 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.nio.file.*
+import kotlin.io.path.absolutePathString
+import kotlin.io.path.name
 
-class DirectoryWatcher(val dir: String, val onChange: (String) -> Unit) {
+class DirectoryWatcher(val dir: String, val onChange: (String, Boolean) -> Unit) {
     fun start() {
         val watchService = FileSystems.getDefault().newWatchService()
 
+        fun Path.register() {
+            register(
+                watchService,
+                StandardWatchEventKinds.ENTRY_CREATE,
+                StandardWatchEventKinds.ENTRY_MODIFY,
+                StandardWatchEventKinds.ENTRY_DELETE
+            )
+        }
+
         Files.walk(Paths.get(dir))
-            .filter { Files.isDirectory(it) }
+            .filter { Files.isDirectory(it) && !it.absolutePathString().contains("/.") }
             .forEach { dir ->
-                dir.register(
-                    watchService,
-                    StandardWatchEventKinds.ENTRY_CREATE,
-                    StandardWatchEventKinds.ENTRY_MODIFY,
-                    StandardWatchEventKinds.ENTRY_DELETE
-                )
+                if (dir.name != ".ktml") {
+                    dir.register()
+                }
             }
 
         CoroutineScope(Dispatchers.IO).launch {
@@ -27,13 +35,14 @@ class DirectoryWatcher(val dir: String, val onChange: (String) -> Unit) {
 
                 for (event in key.pollEvents()) {
                     val fileName = event.context().toString()
-                    val fullPath = dir.resolve(fileName).toString()
+                    val path = dir.resolve(fileName)
 
-                    if (fileName.endsWith(".ktml")) {
+                    if (event.kind() == StandardWatchEventKinds.ENTRY_CREATE && Files.isDirectory(path)) {
+                        path.register()
+                    } else if (fileName.endsWith(".ktml") && !Files.isDirectory(path)) {
                         runCatching {
-                            onChange(fullPath)
+                            onChange(path.toString(), event.kind() == StandardWatchEventKinds.ENTRY_DELETE)
                         }
-                        break
                     }
                 }
 

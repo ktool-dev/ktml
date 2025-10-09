@@ -12,7 +12,7 @@ class TemplateParser(private val moduleName: String = "") {
     /**
      * Parse template content
      */
-    fun parseContent(fileName: String?, rawContent: String, subPath: String = moduleName): List<ParsedTemplate> {
+    fun parseContent(fileName: String, rawContent: String, subPath: String = moduleName): List<ParsedTemplate> {
         val (doctype, content) = checkForDoctype(rawContent)
 
         val imports = parseImportStatements(content)
@@ -35,7 +35,8 @@ class TemplateParser(private val moduleName: String = "") {
                 rootElement.copy(attrs = rootElement.attrs.filter { (key, _) -> !key.startsWith("ctx-") })
 
             return ParsedTemplate(
-                name = fileName ?: "index",
+                file = fileName,
+                name = fileName,
                 isPage = true,
                 subPath = subPath,
                 parameters = extractParameters(contextParams),
@@ -48,6 +49,7 @@ class TemplateParser(private val moduleName: String = "") {
 
         return rootElements.map {
             ParsedTemplate(
+                file = fileName,
                 name = it.name,
                 subPath = subPath,
                 parameters = extractParameters(it.attrs),
@@ -83,7 +85,7 @@ class TemplateParser(private val moduleName: String = "") {
 
     private fun extractParameters(attrs: Map<String, String>) = attrs.map { (name, typeSpec) ->
         val parts = typeSpec.split("=", limit = 2)
-        val defaultValue = if (parts.size > 1) parts[1].trim().removeSurrounding("'") else null
+        val defaultValue = if (parts.size > 1) parts[1].trim() else null
 
         ParsedTemplateParameter(name, parts[0].trim(), defaultValue)
     }.sortedWith(

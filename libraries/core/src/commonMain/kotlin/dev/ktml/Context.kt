@@ -11,8 +11,8 @@ typealias Content = suspend Context.() -> Unit
 class Context(
     private val writer: ContentWriter,
     model: Map<String, Any?> = mapOf(),
-    queryParams: Map<String, List<String>> = mapOf(),
-    pathParams: Map<String, List<String>> = mapOf()
+    val queryParams: Map<String, List<String>> = mapOf(),
+    val pathParams: Map<String, List<String>> = mapOf()
 ) {
     private val _model = model.toMutableMap()
 
@@ -58,6 +58,9 @@ class Context(
     fun copy(params: Map<String, Any?> = emptyMap()) = Context(writer, _model + params)
 
     fun model(): Map<String, Any?> = _model
+
+    fun pathParam(key: String) = pathParams[key]?.firstOrNull()
+    fun queryParam(key: String) = queryParams[key]?.firstOrNull()
 }
 
 class StringContentWriter : ContentWriter {

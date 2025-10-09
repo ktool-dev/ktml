@@ -1,7 +1,11 @@
 package dev.ktml
 
-class KtmlEngine(private val templateRegistry: KtmlRegistry) {
+import dev.ktml.templates.DefaultKtmlRegistry
+
+class KtmlEngine(ktmlRegistry: KtmlRegistry) {
+    private val ktmlRegistry = ktmlRegistry.join(DefaultKtmlRegistry)
+
     suspend fun writePage(context: Context, path: String) {
-        templateRegistry.pages[path]?.invoke(context) ?: error("No page found for path: $path")
+        ktmlRegistry.pages[path]?.invoke(context) ?: error("No page found for path: $path")
     }
 }

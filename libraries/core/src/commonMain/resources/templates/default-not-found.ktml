@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 
-<html ctx-error="Throwable">
+<html>
 <head>
-    <title>Server Error</title>
+    <title>Not Found</title>
 </head>
 <body>
 <div>

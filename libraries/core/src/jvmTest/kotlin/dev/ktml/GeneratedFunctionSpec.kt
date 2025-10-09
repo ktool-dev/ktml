@@ -3,6 +3,7 @@ package dev.ktml
 import dev.ktool.kotest.BddSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
+import java.io.File
 
 enum class UserType {
     ADMIN,
@@ -16,10 +17,12 @@ data class User(val name: String, val type: UserType)
 
 data class SideBarItem(val name: String, val href: String)
 
+private const val templateDir = "src/jvmTest/resources/templates"
+
 class GeneratedFunctionSpec : BddSpec({
     lateinit var engine: KtmlEngine
     val processor = JvmKtmlProcessor(
-        "src/jvmTest/resources/templates",
+        templateDir,
         "build/generated/ktml",
         "build/generated/ktml-compiled",
     )
@@ -101,21 +104,21 @@ class GeneratedFunctionSpec : BddSpec({
     "reloads templates when a template is changed" {
         Given
         val templateName = "regenerated-template"
+        val templateFile = File("$templateDir/regenerated-template.ktml")
 
         When
         val beforeContent = writePage(templateName)
-        processor.replaceTemplate(
-            templateName,
-            """
-                <html>
-                <div>Hello After</div>
-                </html>
-            """.trimIndent()
-        )
+        templateFile.modifyContent { replace("Before", "After") }
+        processor.reprocessFile(templateFile.absolutePath, false)
         val afterContent = writePage(templateName)
+        templateFile.modifyContent { replace("After", "Before") }
 
         Then
         beforeContent shouldContain "Hello Before"
         afterContent shouldContain "Hello After"
     }
 })
+
+private fun File.modifyContent(mod: String.() -> String) {
+    writeText(readText().mod())
+}

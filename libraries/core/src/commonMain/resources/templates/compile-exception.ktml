@@ -6,6 +6,8 @@
 </head>
 <body>
 <h1>Compiler Error</h1>
-<pre>${exception.message}</pre>
+<div style="color: darkred; font-weight: bold; line-height: 20px">
+    <pre>${exception.message}</pre>
+</div>
 </body>
 </html>

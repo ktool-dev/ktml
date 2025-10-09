@@ -8,10 +8,10 @@ import io.kotest.matchers.shouldBe
 class TemplateParserSpec : BddSpec({
     val parser = TemplateParser("mine")
 
-    fun parse(content: String, subPath: String = "mine", fileName: String? = null) =
+    fun parse(content: String, subPath: String = "mine", fileName: String = "Test.ktml") =
         parser.parseContent(fileName, content, subPath).first()
 
-    fun parseAll(content: String, subPath: String = "mine", fileName: String? = null) =
+    fun parseAll(content: String, subPath: String = "mine", fileName: String = "Test.ktml") =
         parser.parseContent(fileName, content, subPath)
 
     "get template name from tag" {
@@ -87,7 +87,7 @@ class TemplateParserSpec : BddSpec({
     "get parameters with default values" {
         Given
         val content = $$"""
-            <my-button text="String = 'Default Text'">
+            <my-button text='String = "Default Text"'>
                 <button onclick="${onClick}">${text}</button>
             </my-button>
         """.trimIndent()
@@ -98,7 +98,7 @@ class TemplateParserSpec : BddSpec({
         Then
         result.parameters[0].name shouldBe "text"
         result.parameters[0].type shouldBe "String"
-        result.parameters[0].defaultValue shouldBe "Default Text"
+        result.parameters[0].defaultValue shouldBe "\"Default Text\""
     }
 
     "allow imports above root element" {

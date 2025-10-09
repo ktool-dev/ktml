@@ -27,8 +27,7 @@ class KotlinFileGenerator(templates: Templates) {
             modifier(Modifier.Suspend)
             template.nonContextParameters.map { param ->
                 param(name = param.name, type = Type(param.type)) {
-                    defaultValue =
-                        param.defaultValue?.let { ExpressionBody(if (param.type == "String") "\"$it\"" else it) }
+                    defaultValue = param.defaultValue?.let { ExpressionBody(it) }
                 }
             }
             body = FunctionBlock(content.body.statements)

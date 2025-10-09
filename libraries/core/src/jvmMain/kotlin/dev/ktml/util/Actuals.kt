@@ -13,6 +13,7 @@ internal actual fun Path.writeText(content: String) = toFile().writeText(content
 internal actual fun Path.list(): List<Path> = toFile().listFiles().map { Path(it.path) }
 internal actual val Path.isDirectory: Boolean get() = toFile().isDirectory
 internal actual val Path.exists: Boolean get() = toFile().exists()
+internal actual fun Path.remove(): Boolean = toFile().delete()
 
 internal actual fun Path.mkDirs(): Path {
     if (exists) return this

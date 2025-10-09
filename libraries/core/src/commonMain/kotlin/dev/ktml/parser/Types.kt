@@ -10,6 +10,7 @@ import dev.ktool.gen.safe
  * Represents a parsed template with its metadata
  */
 data class ParsedTemplate(
+    val file: String,
     val name: String,
     val isPage: Boolean = false,
     val subPath: String = "",
@@ -25,7 +26,7 @@ data class ParsedTemplate(
     val nonContextParameters = parameters.filterNot { it.isContextParam }
     val functionName = "write${name.toCamelCase()}"
     val packageName = if (subPath.isEmpty()) ROOT_PACKAGE else ROOT_PACKAGE + "." +
-            subPath.split("/").joinToString(".") { it.replace("_", "-").toPascalCase() }
+            subPath.split("/").joinToString(".") { it.toPascalCase() }
     val qualifiedFunctionName = "$packageName.$functionName"
     val uniqueFunctionName = "write" + subPath.replace("/", "-").toCamelCase() + functionName.substringAfter("write")
 
@@ -44,7 +45,6 @@ data class ParsedTemplateParameter(
 ) {
     val isContextParam = name.startsWith("ctx-")
     val isContent = type == "Content" || type == "Content?"
-    val isString = type == "String" || type == "String?"
     val hasDefault = defaultValue != null
     val isNullable = type.endsWith("?")
     private val paramName = name.removePrefix("ctx-")
@@ -65,7 +65,6 @@ data class ParsedTemplateParameter(
     }
 
     private fun defaultValue(): String? = when {
-        isString && hasDefault -> "\"$defaultValue}\""
         hasDefault && defaultValue == "null" -> "null as $type"
         else -> defaultValue
     }

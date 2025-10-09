@@ -2,6 +2,11 @@ package dev.ktml
 
 import dev.ktml.compile.KotlinCompile
 import dev.ktml.compile.defaultClasspath
+import dev.ktml.templates.DefaultKtmlRegistry
+import dev.ktml.util.CompileException
+import dev.ktml.util.ROOT_PACKAGE_PATH
+import dev.ktml.util.toKebabCase
+import dev.ktml.web.WebApp
 import java.io.File
 import java.net.URLClassLoader
 import kotlin.io.path.createTempDirectory
@@ -16,29 +21,44 @@ class JvmKtmlProcessor(
     private val compileDir: File = File(compiledDirectory)
     private val outputDir: File = File(outputDirectory)
     private var exception: Exception? = null
+    private var webApp: WebApp? = null
 
-    override val pages: Map<String, Content> get() = templateRegistry.pages
-    override val tags: List<TagDefinition> get() = templateRegistry.tags
+    override val pages: Map<String, Content> get() = ktmlRegistry.pages
+    override val tags: List<TagDefinition> get() = ktmlRegistry.tags
 
     init {
-        DirectoryWatcher(templateDir) {
-            processFile(it, templateDir, replaceExisting = true)
+        DirectoryWatcher(templateDir) { file, itemDeleted ->
+            reprocessFile(file, itemDeleted)
         }.start()
     }
 
-    private val templateRegistry: KtmlRegistry
+    override fun createWebApp(): WebApp {
+        webApp = super.createWebApp()
+        return webApp!!
+    }
+
+    private val ktmlRegistry: KtmlRegistry
         get() {
             if (_templateRegistry == null) _templateRegistry = loadTemplateRegistry()
             if (exception != null) throw exception!!
             return _templateRegistry!!
         }
 
-    override fun replaceTemplate(fileName: String, content: String, subPath: String) =
-        super.replaceTemplate(fileName, content, subPath).also {
-            _templateRegistry = compileTemplates()
+    fun reprocessFile(file: String, itemDeleted: Boolean) {
+        val pathsBefore = pagePaths
+        removeFile(file, templateDir)
+        if (!itemDeleted) {
+            val templates = processFile(file, templateDir)
+            templates.forEach { generateTemplateCodeFile(it) }
         }
+        generateRegistry()
+        _templateRegistry = compileTemplates()
+        if (pagePaths != pathsBefore) {
+            webApp?.reloadRoutes()
+        }
+    }
 
-    fun loadTemplateRegistry(): KtmlRegistry {
+    private fun loadTemplateRegistry(): KtmlRegistry {
         outputDir.deleteRecursively()
         outputDir.mkdirs()
         processRootDirectories(listOf(templateDir))
@@ -56,7 +76,7 @@ class JvmKtmlProcessor(
             if (type.objectInstance == null || type.objectInstance !is KtmlRegistry) {
                 error("The package $basePackageName does not have a valid KtmlRegistry")
             }
-            return type.objectInstance as KtmlRegistry
+            return (type.objectInstance as KtmlRegistry).join(DefaultKtmlRegistry)
         } catch (_: ClassNotFoundException) {
             error("The package $basePackageName does not have a valid KtmlRegistry")
         }
@@ -70,9 +90,16 @@ class JvmKtmlProcessor(
 
     private fun compile() {
         exception = null
+        compileDir.deleteRecursively()
         val errors = KotlinCompile.compileFilesToDir(outputDir.toPath(), compileDir.toPath())
         if (errors.isNotEmpty()) {
-            exception = Exception("Failed to compile templates with errors: ${errors.joinToString("\n")}")
+            val convertedErrors = errors.map {
+                val path = it.filePath.substringAfter(ROOT_PACKAGE_PATH)
+                val folder = path.substringBeforeLast("/")
+                val fileName = path.substringAfterLast("/").substringBeforeLast(".").toKebabCase()
+                it.copy(filePath = "$folder/$fileName.ktml".removePrefix("/"))
+            }
+            exception = CompileException(convertedErrors)
             exception?.printStackTrace()
         }
     }

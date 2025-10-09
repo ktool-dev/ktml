@@ -25,11 +25,19 @@ class Templates(ktmlRegistries: List<KtmlRegistry> = listOf()) {
 
     fun register(template: ParsedTemplate) {
         if (template.isPage) {
-            require(!pages.containsKey(template.name)) { "The directory '${template.subPath}' already has a page defined in it. You can only define one page for a directory." }
+            require(!pages.containsKey(template.path)) { "The directory '${template.subPath}' already has a page defined in it. You can only define one page for a directory." }
 
             pages[template.path] = template
         } else {
             register(template.toTagDefinition())
+        }
+    }
+
+    fun remove(template: ParsedTemplate) {
+        if (template.isPage) {
+            pages.remove(template.path)
+        } else {
+            tags.remove(template.path)
         }
     }
 

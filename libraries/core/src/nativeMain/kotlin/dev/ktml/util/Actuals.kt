@@ -16,6 +16,10 @@ internal actual fun Path.writeText(content: String) {
 internal actual fun Path.list(): List<Path> = FileSystem.SYSTEM.list(this.toOkioPath()).map { Path(it.toString()) }
 internal actual val Path.isDirectory: Boolean get() = FileSystem.SYSTEM.metadataOrNull(this.toOkioPath())?.isDirectory == true
 internal actual val Path.exists: Boolean get() = FileSystem.SYSTEM.exists(this.toOkioPath())
+internal actual fun Path.remove(): Boolean {
+    FileSystem.SYSTEM.delete(toOkioPath(), false)
+    return !exists
+}
 
 internal actual fun Path.mkDirs(): Path {
     if (exists) return this

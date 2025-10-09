@@ -93,7 +93,7 @@ class KotlinFileGeneratorSpec : BddSpec({
             name = "button",
             imports = emptyList(),
             parameters = listOf(
-                ParsedTemplateParameter("text", "String", "Click me"),
+                ParsedTemplateParameter("text", "String", "\"Click me\""),
                 ParsedTemplateParameter("disabled", "Boolean", "false"),
                 ParsedTemplateParameter("count", "Int", "0")
             ),
@@ -122,7 +122,7 @@ class KotlinFileGeneratorSpec : BddSpec({
             imports = listOf("import kotlinx.serialization.Serializable"),
             parameters = listOf(
                 ParsedTemplateParameter("label", "String"),
-                ParsedTemplateParameter("placeholder", "String", "Enter text"),
+                ParsedTemplateParameter("placeholder", "String", "\"Enter text\""),
                 ParsedTemplateParameter("required", "Boolean", "true"),
                 ParsedTemplateParameter("content", "Content")
             ),
@@ -239,6 +239,7 @@ private fun parsed(
     root: Tag = Tag("root", emptyMap(), children),
     externalScriptContent: String = "",
 ) = ParsedTemplate(
+    file = "testFile",
     name = name,
     isPage = isPage,
     subPath = subPath,

@@ -6,6 +6,7 @@ import dev.ktml.parser.ParsedTemplate
 import dev.ktml.parser.Templates
 import dev.ktml.parser.removeEmptyText
 import dev.ktml.util.isVoidTag
+import dev.ktml.util.requiresCloseTag
 import dev.ktml.util.toImport
 import dev.ktool.gen.safe
 import dev.ktool.gen.types.Block
@@ -115,23 +116,29 @@ class ContentGenerator(private val templates: Templates) {
         contentBuilder.raw("<${tag.name}")
 
         tag.attrs.filterNot { it.key in filteredAttrs }.forEach { (name, value) ->
-            if (!currentNoInterpolation && expressionParser.isKotlinExpression(value)) {
+            if (!currentNoInterpolation && expressionParser.hasKotlinExpression(value)) {
                 contentBuilder.raw(" $name=\"")
-                contentBuilder.write(expressionParser.extractSingleExpression(value))
+                expressionParser.extractMultipleExpressions(value).forEach { part ->
+                    if (part.isKotlin) {
+                        contentBuilder.write(part.text)
+                    } else {
+                        contentBuilder.raw(part.text)
+                    }
+                }
                 contentBuilder.raw("\"")
             } else {
                 contentBuilder.raw(" $name=\"$value\"")
             }
         }
 
-        contentBuilder.raw(">")
-
-        generateChildContent(template, tag.children, currentNoInterpolation)
-
-        if (tag.children.isNotEmpty()) {
+        if (tag.children.isNotEmpty() || tag.name.requiresCloseTag()) {
+            contentBuilder.raw(">")
+            generateChildContent(template, tag.children, currentNoInterpolation)
             contentBuilder.raw("</${tag.name}>")
         } else if (!tag.name.isVoidTag()) {
             contentBuilder.raw(" />")
+        } else {
+            contentBuilder.raw(">")
         }
 
         tag.attrs.filter { it.key in controlAttrs }.forEach { _ ->

@@ -1,5 +1,6 @@
 package dev.ktml.compile
 
+import dev.ktml.util.CompilerError
 import org.jetbrains.kotlin.cli.common.arguments.K2JVMCompilerArguments
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSourceLocation
@@ -11,8 +12,6 @@ import java.net.URLClassLoader
 import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.io.path.createDirectories
-
-data class CompilerError(val message: String, val filePath: String, val line: Int, val column: Int)
 
 object KotlinCompile {
     /**

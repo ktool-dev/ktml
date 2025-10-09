@@ -14,7 +14,9 @@ private const val RAW_CONTENT_0: String = """<!DOCTYPE html>
     <title>KTML Compiler Error</title>
 </head><body>
 <h1>Compiler Error</h1>
-<pre>"""
+<div style="color: darkred; font-weight: bold; line-height: 20px">
+    <pre>"""
 
 private const val RAW_CONTENT_1: String = """</pre>
+</div>
 </body></html>"""

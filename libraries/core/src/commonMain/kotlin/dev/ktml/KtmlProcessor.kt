@@ -18,6 +18,8 @@ open class KtmlProcessor(private val moduleName: String = "", outputDirectory: S
     private val fileGenerator = KotlinFileGenerator(templates)
     private val basePath = "$outputDirectory/${basePackageName.replace(".", "/")}"
 
+    val pagePaths: List<String> get() = templates.allPages.map { it.path }.sorted()
+
     fun processRootDirectories(dirs: List<String>) = dirs.forEach { processRootDirectory(it) }
 
     fun processRootDirectory(dir: String) = processDirectory(dir, dir)
@@ -35,13 +37,18 @@ open class KtmlProcessor(private val moduleName: String = "", outputDirectory: S
         }
     }
 
-    fun processFile(file: String, rootPath: String, replaceExisting: Boolean = false) {
-        if (!file.endsWith(".ktml")) return
-
-        val fileName = file.substringAfterLast("/").substringBeforeLast(".ktml")
+    fun processFile(file: String, rootPath: String): List<ParsedTemplate> {
         val path = file.toPath()
-        val modulePath = path.path.substringAfter("$rootPath/").substringBeforeLast("/", "").removeSuffix("/")
+        if (!file.endsWith(".ktml") || path.isDirectory) return listOf()
+        val (fileName, subPath) = parseFilePath(file, rootPath)
         log.info { "Processing file: $path" }
+        return processTemplate(fileName, path.readText(), subPath)
+    }
+
+    private fun parseFilePath(file: String, rootPath: String): Pair<String, String> {
+        val fileName = file.substringAfterLast("/").substringBeforeLast(".ktml")
+        val modulePath = file.substringAfter("$rootPath/").substringBeforeLast("/", "").removeSuffix("/")
+
         val subPath = when {
             modulePath.isEmpty() && moduleName.isEmpty() -> ""
             modulePath.isEmpty() -> moduleName
@@ -49,27 +56,27 @@ open class KtmlProcessor(private val moduleName: String = "", outputDirectory: S
             else -> "$modulePath/$moduleName"
         }
 
-        if (replaceExisting) {
-            replaceTemplate(fileName, path.readText(), subPath)
-        } else {
-            processTemplate(fileName, path.readText(), subPath)
-        }
+        return Pair(fileName, subPath)
     }
 
-    private fun processTemplate(fileName: String, content: String, subPath: String) {
-        parser.parseContent(fileName, content, subPath).forEach {
-            parsedTemplates[it.path] = it
-            templates.register(it)
+    private fun processTemplate(fileName: String, content: String, subPath: String) =
+        parser.parseContent(fileName, content, subPath).apply {
+            forEach {
+                parsedTemplates[it.path] = it
+                templates.register(it)
+            }
         }
-    }
 
-    open fun replaceTemplate(fileName: String, content: String, subPath: String = "") {
-        parser.parseContent(fileName, content, subPath).forEach {
-            parsedTemplates[it.path] = it
-            templates.replace(it)
-            generateTemplateCodeFile(it)
-            generateRegistry()
+    fun removeFile(file: String, rootPath: String): Boolean {
+        var pathFound = false
+        val (fileName, subPath) = parseFilePath(file, rootPath)
+        parsedTemplates.values.filter { it.file == fileName && it.subPath == subPath }.forEach {
+            pathFound = true
+            parsedTemplates.remove(it.path)
+            templates.remove(it)
+            templateCodeFile(it).remove()
         }
+        return pathFound
     }
 
     fun generateTemplateCode() {
@@ -77,14 +84,15 @@ open class KtmlProcessor(private val moduleName: String = "", outputDirectory: S
         generateRegistry()
     }
 
-    private fun generateRegistry() {
+    protected fun generateRegistry() {
         val content = KtmlRegistryGenerator.createKtmlRegistry(basePackageName, templates)
         Path("$basePath/KtmlRegistryImpl.kt").mkDirs().writeText(content)
     }
 
     fun generateTemplateCodeFile(template: ParsedTemplate) {
         log.debug { "Generating code for template: ${template.name}" }
-        val filePath = "$basePath/${template.pathCamelCaseName}.kt"
-        Path(filePath).mkDirs().writeText(fileGenerator.generateCode(template).render())
+        templateCodeFile(template).mkDirs().writeText(fileGenerator.generateCode(template).render())
     }
+
+    private fun templateCodeFile(template: ParsedTemplate) = Path("$basePath/${template.pathCamelCaseName}.kt")
 }

@@ -182,6 +182,7 @@ private fun template(
     imports: List<String> = listOf(),
     parameters: List<ParsedTemplateParameter> = listOf(),
 ) = ParsedTemplate(
+    file = "testFile",
     name = name,
     isPage = isPage,
     subPath = subPath,

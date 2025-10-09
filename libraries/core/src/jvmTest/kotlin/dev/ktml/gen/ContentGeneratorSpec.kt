@@ -411,6 +411,7 @@ private fun parsedTemplate(
     imports: List<String> = listOf(),
     parameters: List<ParsedTemplateParameter> = listOf(),
 ) = ParsedTemplate(
+    file = "testFile",
     name = name,
     subPath = "",
     imports = imports,

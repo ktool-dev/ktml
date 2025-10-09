@@ -21,7 +21,6 @@ data class TagParameter(
     val hasDefault: Boolean,
 ) {
     val isContent = type == "Content" || type == "Content?"
-    val isString = type == "String" || type == "String?"
     val isNullable = type.endsWith("?")
 }
 
@@ -33,9 +32,11 @@ interface KtmlRegistry {
     fun hasPage(path: String): Boolean = pages.containsKey(path)
 }
 
-class KtmlRegistryList(val registries: List<KtmlRegistry>) : KtmlRegistry {
-    override val pages: Map<String, Content> =
-        registries.fold(mapOf()) { map, registry -> map + registry.pages }
-    override val tags: List<TagDefinition> =
-        registries.fold(listOf()) { list, registry -> list + registry.tags }
+fun KtmlRegistry.join(vararg registries: KtmlRegistry) = KtmlRegistryList(listOf(this) + registries)
+
+class KtmlRegistryList(private val registries: List<KtmlRegistry>) : KtmlRegistry {
+    override val pages: Map<String, Content>
+        get() = buildMap { registries.forEach { putAll(it.pages) } }
+    override val tags: List<TagDefinition>
+        get() = registries.flatMap { it.tags }
 }
