@@ -17,7 +17,6 @@ kotlin {
 
     jvm()
 
-    // Native targets
     linuxX64()
     macosX64()
     macosArm64()
