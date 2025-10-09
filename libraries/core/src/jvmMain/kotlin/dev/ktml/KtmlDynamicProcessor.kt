@@ -11,7 +11,7 @@ import java.io.File
 import java.net.URLClassLoader
 import kotlin.io.path.createTempDirectory
 
-class JvmKtmlProcessor(
+class KtmlDynamicProcessor(
     val templateDir: String,
     outputDirectory: String = createTempDirectory("ktml").toString(),
     compiledDirectory: String = createTempDirectory("ktml-compile").toString()
@@ -27,7 +27,7 @@ class JvmKtmlProcessor(
     override val tags: List<TagDefinition> get() = ktmlRegistry.tags
 
     init {
-        DirectoryWatcher(templateDir) { file, itemDeleted ->
+        KtmlFileWatcher(templateDir) { file, itemDeleted ->
             reprocessFile(file, itemDeleted)
         }.start()
     }
@@ -46,13 +46,17 @@ class JvmKtmlProcessor(
 
     fun reprocessFile(file: String, itemDeleted: Boolean) {
         val pathsBefore = pagePaths
-        removeFile(file, templateDir)
-        if (!itemDeleted) {
+        if (itemDeleted) {
+            // We have to rebuild everything make sure the removal didn't break anything
+            clear()
+            _templateRegistry = loadTemplateRegistry()
+        } else {
+            removeFile(file, templateDir)
             val templates = processFile(file, templateDir)
             templates.forEach { generateTemplateCodeFile(it) }
+            generateRegistry()
+            _templateRegistry = compileTemplates()
         }
-        generateRegistry()
-        _templateRegistry = compileTemplates()
         if (pagePaths != pathsBefore) {
             webApp?.reloadRoutes()
         }

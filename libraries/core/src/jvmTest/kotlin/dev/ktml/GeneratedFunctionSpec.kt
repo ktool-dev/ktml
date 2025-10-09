@@ -21,7 +21,7 @@ private const val templateDir = "src/jvmTest/resources/templates"
 
 class GeneratedFunctionSpec : BddSpec({
     lateinit var engine: KtmlEngine
-    val processor = JvmKtmlProcessor(
+    val processor = KtmlDynamicProcessor(
         templateDir,
         "build/generated/ktml",
         "build/generated/ktml-compiled",

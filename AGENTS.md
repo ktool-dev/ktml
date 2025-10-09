@@ -46,7 +46,7 @@ The core workflow follows this pipeline:
 - Generates Kotlin code files for each template via `KotlinFileGenerator`
 - Outputs to `dev.ktml.templates` package (or `dev.ktml.templates.<moduleName>`)
 
-**JvmKtmlProcessor** (`JvmKtmlProcessor.kt`)
+**KtmlDynamicProcessor** (`KtmlDynamicProcessor.kt`)
 
 - JVM-specific processor that extends `KtmlProcessor`
 - Compiles generated Kotlin code at runtime using embedded Kotlin compiler
@@ -110,7 +110,7 @@ libraries/core/src/
 │   ├── gen/                              # Code generation
 │   └── web/WebApp.kt                     # Ktor web server
 ├── jvmMain/kotlin/dev/ktml/
-│   ├── JvmKtmlProcessor.kt               # JVM processor with compilation
+│   ├── KtmlDynamicProcessor.kt               # JVM processor with compilation
 │   ├── DirectoryWatcher.kt               # File watcher for hot reload
 │   ├── compile/KotlinCompile.kt          # Kotlin compiler integration
 │   └── Main.kt                           # CLI entry point
@@ -127,7 +127,8 @@ The `main()` function in `Main.kt` starts a Ktor server that:
 - Serves templates as web pages on `http://localhost:8080`
 
 **Running tests:**
-Tests use a custom Kotest BDD framework (`dev.ktool.kotest.BddSpec`). Test specs initialize `JvmKtmlProcessor` with test
+Tests use a custom Kotest BDD framework (`dev.ktool.kotest.BddSpec`). Test specs initialize `KtmlDynamicProcessor` with
+test
 templates from `src/jvmTest/resources/templates/`.
 
 **Hot Reloading:**

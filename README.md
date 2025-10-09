@@ -45,7 +45,7 @@ Create a `.ktml` file with a custom root element defining parameters as attribut
 On JVM, templates are compiled automatically at runtime:
 
 ```kotlin
-val processor = JvmKtmlProcessor(
+val processor = KtmlDynamicProcessor(
     templateDir = "templates/",
     outputDirectory = "build/generated/ktml",
     compiledDirectory = "build/generated/ktml-compiled"
@@ -63,7 +63,7 @@ val html = writer.toString()
 Start the built-in Ktor server with hot-reloading:
 
 ```kotlin
-JvmKtmlProcessor("templates/").createWebApp().start(port = 8080)
+KtmlDynamicProcessor("templates/").createWebApp().start(port = 8080)
 ```
 
 Or use the CLI:

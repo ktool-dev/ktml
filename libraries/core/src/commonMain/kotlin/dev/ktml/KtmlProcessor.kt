@@ -18,6 +18,11 @@ open class KtmlProcessor(private val moduleName: String = "", outputDirectory: S
     private val fileGenerator = KotlinFileGenerator(templates)
     private val basePath = "$outputDirectory/${basePackageName.replace(".", "/")}"
 
+    protected fun clear() {
+        templates.clear()
+        parsedTemplates.clear()
+    }
+
     val pagePaths: List<String> get() = templates.allPages.map { it.path }.sorted()
 
     fun processRootDirectories(dirs: List<String>) = dirs.forEach { processRootDirectory(it) }

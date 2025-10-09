@@ -14,6 +14,11 @@ class Templates(ktmlRegistries: List<KtmlRegistry> = listOf()) {
     private val pages = mutableMapOf<String, ParsedTemplate>()
     private val ktmlRegistry: KtmlRegistry = KtmlRegistryList(ktmlRegistries.plus(DefaultKtmlRegistry))
 
+    fun clear() {
+        tags.clear()
+        pages.clear()
+    }
+
     val allTags: Collection<TagDefinition> get() = tags.values
     val allPages: Collection<ParsedTemplate> get() = pages.values
 
