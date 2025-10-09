@@ -21,6 +21,7 @@ data class TagParameter(
     val hasDefault: Boolean,
 ) {
     val isContent = type == "Content" || type == "Content?"
+    val isString = type == "String" || type == "String?"
     val isNullable = type.endsWith("?")
 }
 

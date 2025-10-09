@@ -219,7 +219,7 @@ class ContentGenerator(private val templates: Templates) {
                     expressionParser.isKotlinExpression(value) ->
                         contentBuilder.kotlin("$paramName = ${expressionParser.extractSingleExpression(value)},")
 
-                    param.type == "String" -> contentBuilder.kotlin("${param.name} = \"$value\",")
+                    param.isString -> contentBuilder.kotlin("${param.name} = \"$value\",")
                     else -> contentBuilder.kotlin("$paramName = $value,")
                 }
             }
