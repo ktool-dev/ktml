@@ -1,6 +1,6 @@
 # KTML - Kotlin Multiplatform HTML Template Engine
 
-A type-safe HTML template engine for Kotlin Multiplatform that generates Kotlin functions from HTML template files.
+A type-safe HTML template engine for Kotlin Multiplatform that generates Kotlin functions from `.ktml` template files.
 
 ## Overview
 
@@ -15,22 +15,23 @@ every template call is just a function call.
 - **Multiplatform** - Works on JVM and Native platforms
 - **Template Composition** - Nest templates and reuse components
 - **Kotlin Integration** - Embed Kotlin expressions directly in templates
-- **Conditional Rendering** - Use `if` attributes for dynamic content
+- **Conditional Rendering** - Use `if` attributes and `<if>` tags for dynamic content
 - **Loop Support** - Iterate over collections with `each` attributes
 - **Content Parameters** - Pass HTML content blocks as parameters
+- **Web Server** - Built-in Ktor server with hot-reloading during development
 
 ## Quick Start
 
 ### 1. Define a Template
 
-Create an HTML file with a custom root element defining parameters as attributes:
+Create a `.ktml` file with a custom root element defining parameters as attributes:
 
 ```html
-<!-- card.html -->
-<card title="String" content="Content">
+<!-- card.ktml -->
+<card header="Content? = null" content="Content">
     <div class="card">
-        <div class="card-header">
-            <h3>${title}</h3>
+        <div if="${header != null}" class="card-header">
+            ${header}
         </div>
         <div class="card-body">
             ${content}
@@ -39,129 +40,184 @@ Create an HTML file with a custom root element defining parameters as attributes
 </card>
 ```
 
-### 2. Generate Kotlin Functions
+### 2. Generate and Execute Templates
 
-Use the KTML engine to process your templates:
+On JVM, templates are compiled automatically at runtime:
 
 ```kotlin
-val engine = KtmlEngine()
-engine.processDirectory("templates/", "output/")
+val processor = JvmKtmlProcessor(
+    templateDir = "templates/",
+    outputDirectory = "build/generated/ktml",
+    compiledDirectory = "build/generated/ktml-compiled"
+)
+val engine = KtmlEngine(processor)
+
+// Render a page
+val writer = StringContentWriter()
+engine.writePage(Context(writer, mapOf("userName" to "John")), "dashboard")
+val html = writer.toString()
 ```
 
-### 3. Use Generated Functions
+### 3. Run the Web Server
 
-The engine generates type-safe Kotlin functions:
+Start the built-in Ktor server with hot-reloading:
 
 ```kotlin
-// Generated function signature
-fun Context.writeCard(title: String)
+JvmKtmlProcessor("templates/").createWebApp().start(port = 8080)
+```
 
-// Usage
-val contentWriter = StringContentWriter()
+Or use the CLI:
 
-Context(contentWriter).apply {
-    writeCard(title = "Welcome")
-}
+```bash
+# Run with current directory as template root
+./gradlew run
 
-val html = contentWriter.toString()
+# Or specify a template directory
+./gradlew run --args="/path/to/templates"
 ```
 
 ## Template Syntax
 
-### Basic Parameters
+### Parameters
+
+**Basic Parameters:**
 
 ```html
 
-<greeting name="String" age="Int">
-    <p>Hello ${name}, you are ${age} years old!</p>
-</greeting>
+<my-button text="String" onClick="String">
+    <button onclick="${raw(onClick)}">${text}</button>
+</my-button>
+```
+
+**Parameters with Default Values:**
+
+```html
+
+<page-layout title='String = "No Title"' header="Content" content="Content">
+    <head>
+        <title>${title}</title>
+    </head>
+    <body>
+    <div class="header">${header}</div>
+    <div class="content">${content}</div>
+    </body>
+</page-layout>
+```
+
+**Context Parameters:**
+Use the `ctx-` prefix to pass data from the Context model:
+
+```html
+
+<sidebar ctx-sideBarItems="List<SideBarItem> = listOf()">
+    <div class="sidebar">
+        <a each="${item in sideBarItems}" href="${item.href}">${item.name}</a>
+    </div>
+</sidebar>
+```
+
+Then pass data via the Context:
+
+```kotlin
+val data = mapOf("sideBarItems" to listOf(SideBarItem("Home", "/")))
+engine.writePage(Context(writer, data), "sidebar")
 ```
 
 ### Content Parameters
 
-When passing content to a tag, you can use the `content` attribute to define a content parameter. Like this:
+Content parameters allow you to pass HTML blocks as parameters:
+
+**Parameters with Default Values:**
 
 ```html
 
-<wrapper content="Content">
-    <div class="wrapper">
-        ${content}
+<page-layout title='String = "No Title"' header="Content" content="Content">
+    <head>
+        <title>${title}</title>
+    </head>
+    <body>
+    <div class="header">${header}</div>
+    <div class="content">${content}</div>
+    </body>
+</page-layout>
+```
+
+**Context Parameters:**
+Use the `ctx-` prefix to pass data from the Context model:
+
+```html
+
+<card header="Content? = null" content="Content">
+    <div class="card">
+        <div if="${header != null}" class="card-header">
+            ${header}
+        </div>
+        <div class="card-body">
+            ${content}
+        </div>
     </div>
-</wrapper>
+</card>
 ```
 
-Then call that tag, you pass the `content` parameter as children. Like this:
+Call templates with named content blocks:
 
 ```html
 
-<page>
-    <wrapper>
-        <h1>Welcome</h1>
-        <p>Hello, World!</p>
-    </wrapper>
-</page>
-```
-
-You can also define multiple content parameters with different names.
-
-```html
-
-<layout sidebar="Content" main="Content">
-    <div class="container">
-        <aside class="sidebar">${sidebar}</aside>
-        <main class="content">${main}</main>
-    </div>
-</layout>
-```
-
-To invoke this template and pass content to it, you use nested tags with the name of the content parameter. The content
-of the nested tag is passed to the template as the value of the content parameter.
-
-```html
-
-<page>
-    <layout>
-        <sidebar>
-            <ul>
-                <li>Home</li>
-                <li>About</li>
-            </ul>
-        </sidebar>
-        <main>
-            <h1>Welcome</h1>
-            <p>Hello, World!</p>
-        </main>
-    </layout>
-</page>
+<card>
+    <header>
+        <h3>Items</h3>
+    </header>
+    <ul>
+        <li>Item 1</li>
+        <li>Item 2</li>
+    </ul>
+</card>
 ```
 
 ### Conditional Rendering
 
+**Using `if` attribute:**
+
+```html
+<h2 if="${user.type == UserType.ADMIN}">You are an admin!</h2>
+<h2 if="${user.type != UserType.GUEST}">You are not a guest!</h2>
+```
+
+**Using `<if>` tag with `<else>`:**
+
 ```html
 
-<user-info name="String" isAdmin="Boolean">
-    <div class="user">
-        <span>${name}</span>
-        <span if="${isAdmin}" class="badge">Admin</span>
-    </div>
-</user-info>
+<if test="${user.type == UserType.ADMIN}">
+    <h2>You are an admin!</h2>
+    <else>
+        <h2>You are not an admin!</h2>
+    </else>
+</if>
 ```
 
 ### Loops
 
+**Basic iteration:**
+
 ```html
 
-<item-list items="List<String>">
-    <ul>
-        <li each="${item in items}">${item}</li>
-    </ul>
-</item-list>
+<sidebar ctx-sideBarItems="List<SideBarItem> = listOf()">
+    <a each="${item in sideBarItems}" href="${item.href}">${item.name}</a>
+</sidebar>
+```
+
+**Iteration with index:**
+
+```html
+
+<ul>
+    <li each="${(index, item) in items.withIndex()}">${item.name} - Item ${index}</li>
+</ul>
 ```
 
 ### Embedded Kotlin
 
-You can embed Kotlin code in your templates using the `<script type="text/kotlin">` tag. The code is executed in the
-context of the template function at the place the tag is in the flow of the page.
+You can embed Kotlin code in your templates using the `<script type="text/kotlin">` tag:
 
 ```html
 
@@ -175,18 +231,50 @@ context of the template function at the place the tag is in the flow of the page
 
 ### Importing Types
 
-You can import types in your templates using the `import` statement. These will go at the top of the generated file, so
-the types imported will be available to anything in the template.
+Import types at the top of your template file:
 
 ```html
-import my.app.UserType
+import dev.ktml.User
+import dev.ktml.UserType
 
-<user-info name="String" userType="UserType">
-    <div class="user">
-        <span>${name}</span>
-        <span if="${userType == UserType.ADMIN}" class="badge">Admin</span>
-    </div>
-</user-info>
+<html lang="en" ctx-user="User">
+<h1>Hello, ${user.name}!</h1>
+<h2 if="${user.type == UserType.ADMIN}">You are an admin!</h2>
+</html>
+```
+
+### HTML Pages
+
+Root templates with `<html>` as the root element become pages accessible via web routes:
+
+```html
+<!DOCTYPE html>
+
+import dev.ktml.*
+
+<html lang="en" ctx-userName="String" ctx-user="User">
+<page-layout title="Dashboard - ${user.name}">
+    <header>
+        <h1>Dashboard</h1>
+    </header>
+    <content>
+        <h1>Hello, ${user.name}!</h1>
+    </content>
+</page-layout>
+</html>
+```
+
+File path `templates/dashboard.ktml` becomes accessible at `http://localhost:8080/dashboard`.
+
+### Raw Output
+
+Use `raw()` to output unescaped HTML:
+
+```html
+
+<my-button text="String" onClick="String">
+    <button onclick="${raw(onClick)}">${text}</button>
+</my-button>
 ```
 
 ## Building
