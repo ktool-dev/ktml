@@ -1,4 +1,6 @@
-# KTML - Kotlin Multiplatform HTML Template Engine
+![KTML](https://github.com/ktool-dev/.github/blob/main/KTML%20Logo.png?raw=true "KT")
+
+# Kotlin Multiplatform HTML Template Engine
 
 A type-safe HTML template engine for Kotlin Multiplatform that generates Kotlin functions from `.ktml` template files.
 
