@@ -1,0 +1,5 @@
+<context values="Map<String, Any?>" content="Content">
+    <script type="text/kotlin">
+        copy(values).write(content)
+    </script>
+</context>

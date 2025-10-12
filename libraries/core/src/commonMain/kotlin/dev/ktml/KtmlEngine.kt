@@ -6,6 +6,6 @@ class KtmlEngine(ktmlRegistry: KtmlRegistry) {
     private val ktmlRegistry = ktmlRegistry.join(DefaultKtmlRegistry)
 
     suspend fun writePage(context: Context, path: String) {
-        ktmlRegistry.pages[path]?.invoke(context) ?: error("No page found for path: $path")
+        ktmlRegistry.templates[path]?.invoke(context) ?: error("No page found for path: $path")
     }
 }

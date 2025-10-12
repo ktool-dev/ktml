@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+
+<html ctx-error="Throwable">
+<head>
+    <title>Server Error</title>
+</head>
+<body>
+<div>
+    <h1>Error</h1>
+    <h3>${error.message}</h3>
+    <pre>${error.stackTraceToString()}</pre>
+</div>
+</body>
+</html>

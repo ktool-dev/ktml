@@ -27,16 +27,7 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation(libs.kotlin.logging)
                 implementation(libs.kotlinx.coroutines.core)
-                implementation(libs.ksoup.html)
-                implementation(libs.ksoup.entities)
-                implementation(libs.ktool.kotest.bdd)
-                implementation(libs.ktool.kotlin.gen)
-                implementation(libs.ktor.server.core)
-                implementation(libs.ktor.client.core)
-                implementation(libs.ktor.server.cio)
-                implementation(libs.ktor.server.status)
             }
         }
 
@@ -47,28 +38,13 @@ kotlin {
                 implementation(libs.kotlinx.coroutines.test)
                 implementation(libs.kotest.framework.engine)
                 implementation(libs.kotest.assertions.core)
-            }
-        }
-
-        val jvmMain by getting {
-            dependencies {
-                implementation(libs.kotlin.reflect)
-                implementation(libs.slf4j.simple)
-                implementation(libs.kotlin.compiler.embeddable)
-                implementation(libs.ktor.client.okhttp)
+                implementation(libs.ktool.kotest.bdd)
             }
         }
 
         val jvmTest by getting {
             dependencies {
                 implementation(libs.kotest.runner.junit5)
-            }
-        }
-
-        val nativeMain by getting {
-            dependencies {
-                implementation(libs.okio)
-                implementation(libs.ktor.client.curl)
             }
         }
     }

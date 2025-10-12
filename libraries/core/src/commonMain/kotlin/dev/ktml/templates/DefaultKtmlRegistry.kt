@@ -6,9 +6,11 @@ import dev.ktml.TagDefinition
 import dev.ktml.TagParameter
 
 object DefaultKtmlRegistry : KtmlRegistry {
-    override val pages: Map<String, Content> = mapOf(
+    override val templates: Map<String, Content> = mapOf(
         "default-not-found" to { writeDefaultNotFound() },
+
         "compile-exception" to { writeCompileException() },
+
         "default-error" to { writeDefaultError() },
     )
 

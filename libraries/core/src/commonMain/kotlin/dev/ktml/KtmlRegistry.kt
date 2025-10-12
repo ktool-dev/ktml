@@ -1,8 +1,5 @@
 package dev.ktml
 
-import dev.ktml.util.toCamelCase
-import dev.ktml.web.WebApp
-
 data class TagDefinition(
     val name: String,
     val subPath: String = "",
@@ -26,18 +23,24 @@ data class TagParameter(
 }
 
 interface KtmlRegistry {
-    val pages: Map<String, Content>
+    val templates: Map<String, Content>
     val tags: List<TagDefinition>
 
-    fun createWebApp(): WebApp = WebApp(this)
-    fun hasPage(path: String): Boolean = pages.containsKey(path)
+    fun hasPath(path: String): Boolean = templates.containsKey(path)
+    fun hasTag(path: String): Boolean = tags.any { it.path == path }
 }
 
 fun KtmlRegistry.join(vararg registries: KtmlRegistry) = KtmlRegistryList(listOf(this) + registries)
 
 class KtmlRegistryList(private val registries: List<KtmlRegistry>) : KtmlRegistry {
-    override val pages: Map<String, Content>
-        get() = buildMap { registries.forEach { putAll(it.pages) } }
+    override val templates: Map<String, Content>
+        get() = buildMap { registries.forEach { putAll(it.templates) } }
     override val tags: List<TagDefinition>
         get() = registries.flatMap { it.tags }
+}
+
+private fun String.toCamelCase(): String {
+    return split("-").joinToString("") { word ->
+        word.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+    }
 }

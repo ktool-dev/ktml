@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+
+<html class="something" ctx-exception="Throwable">
+<head>
+    <title>KTML Compiler Error</title>
+</head>
+<body>
+<h1>Compiler Error</h1>
+<div style="color: darkred; font-weight: bold; line-height: 20px">
+    <pre>${exception.message}</pre>
+</div>
+</body>
+</html>
