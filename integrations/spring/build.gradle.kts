@@ -4,7 +4,7 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":core"))
+    implementation(project(":runtime"))
     compileOnly(libs.spring.webmvc)
     compileOnly(libs.jakarta.servlet.api)
     implementation(libs.kotlinx.coroutines.core)

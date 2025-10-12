@@ -1,7 +1,5 @@
 package dev.ktml
 
-import com.mohamedrejeb.ksoup.entities.KsoupEntities.encodeHtml
-
 interface ContentWriter {
     suspend fun write(content: String)
 }
@@ -17,8 +15,8 @@ class Context(
     private val _model = model.toMutableMap()
 
     suspend fun write(content: Content?) = also { content?.invoke(it) }
-    suspend fun write(content: Any?) = if (content == null) this else raw(encodeHtml(content.toString()))
-    suspend fun raw(content: String?) = also { if (!content.isNullOrEmpty()) writer.write(content) }
+    suspend fun write(content: Any?) = raw(encodeHtml(content?.toString()))
+    suspend fun raw(content: Any?) = apply { content?.toString()?.also { writer.write(it) } }
 
     inline fun <reified T> required(name: String): T =
         requiredNullable(name) ?: error("Context value '$name' is null but cannot be null")

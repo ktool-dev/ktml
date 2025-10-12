@@ -87,7 +87,7 @@ class GeneratedFunctionSpec : BddSpec({
                     <div class="sidebar">
                     
                 </div><br>
-                    <button onclick="alert('Hello World!')">Click me&excl;</button>
+                    <button onclick="alert('Hello World!')">Click me!</button>
                 
                 </div>
                 </body></html>""".trimIndent()

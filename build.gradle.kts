@@ -3,3 +3,9 @@ plugins {
     alias(libs.plugins.kotest) apply false
     alias(libs.plugins.ksp) apply false
 }
+
+allprojects {
+    tasks.withType<Test>().configureEach {
+        useJUnitPlatform()
+    }
+}

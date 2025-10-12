@@ -15,7 +15,7 @@ dependencyResolutionManagement {
 
 rootProject.name = "ktml"
 
-library("core")
+library("runtime")
 library("dev-mode")
 library("generator")
 

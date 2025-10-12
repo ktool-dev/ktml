@@ -4,15 +4,17 @@ import dev.ktool.kotest.BddSpec
 import io.kotest.matchers.shouldBe
 import java.io.File
 
+private const val RUNTIME_PATH = "../runtime/src/commonMain"
+
 class BuildStandardTemplatesSpec : BddSpec({
     "build" {
         Given
-        val output = "../core/src/commonMain/kotlin"
+        val output = "$RUNTIME_PATH/kotlin"
         val outputPackage = "$output/dev/ktml/templates"
         val processor = KtmlProcessor(outputDirectory = output)
 
         When
-        File("../core/src/commonMain/resources/templates").listFiles().forEach { file ->
+        File("$RUNTIME_PATH/resources/templates").listFiles().forEach { file ->
             processor.processFile(file.path, file.parent)
         }
         processor.generateTemplateCode()

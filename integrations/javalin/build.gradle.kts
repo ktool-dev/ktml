@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":core"))
+    implementation(project(":runtime"))
     compileOnly(libs.javalin)
     implementation(libs.kotlinx.coroutines.core)
 }

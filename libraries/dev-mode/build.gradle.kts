@@ -7,7 +7,7 @@ repositories {
 }
 
 dependencies {
-    implementation(project(":core"))
+    implementation(project(":runtime"))
     implementation(project(":generator"))
     implementation(libs.kotlin.compiler.embeddable)
     implementation(libs.kotlinx.coroutines.core)

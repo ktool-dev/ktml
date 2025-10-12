@@ -16,7 +16,7 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(project(":core"))
+            implementation(project(":runtime"))
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.ktor.server.core)
         }
