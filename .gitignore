@@ -10,6 +10,8 @@ build/
 *.iml
 *.ipr
 out/
+*.hprof
+.intellijPlatform
 !**/src/main/**/out/
 !**/src/test/**/out/
 
