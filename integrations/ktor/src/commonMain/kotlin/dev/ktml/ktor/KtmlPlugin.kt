@@ -19,11 +19,11 @@ val KtmlPlugin = createApplicationPlugin(name = "KTML", createConfiguration = ::
     application.attributes.put(ktmlEngineKey, KtmlEngine(pluginConfig.registry))
 }
 
-private val ktmlEngineKey = AttributeKey<KtmlEngine>("KtmlEngine")
+val ktmlEngineKey = AttributeKey<KtmlEngine>("KtmlEngine")
 
-private suspend fun RoutingCall.respondKtml(
+suspend fun RoutingCall.respondKtml(
     path: String,
-    model: Map<String, Any?>,
+    model: Map<String, Any?> = mapOf(),
     status: HttpStatusCode = HttpStatusCode.OK
 ) {
     respondKtml(
@@ -31,16 +31,16 @@ private suspend fun RoutingCall.respondKtml(
         model = model,
         status = status,
         queryParameters = queryParameters.toMap(),
-        pathParameters = pathParameters.toMap()
+        pathParameters = pathParameters.toMap().mapValues { it.value.firstOrNull().toString() }
     )
 }
 
-private suspend fun ApplicationCall.respondKtml(
+suspend fun ApplicationCall.respondKtml(
     path: String,
     status: HttpStatusCode = HttpStatusCode.OK,
     model: Map<String, Any?> = mapOf(),
     queryParameters: Map<String, List<String>> = mapOf(),
-    pathParameters: Map<String, List<String>> = mapOf(),
+    pathParameters: Map<String, String> = mapOf(),
 ) {
     val engine = application.attributes[ktmlEngineKey]
 

@@ -2,15 +2,25 @@ package dev.ktml.gradle
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
+import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSet
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 class KtmlPlugin : Plugin<Project> {
     override fun apply(project: Project) {
+        val extension = project.extensions.create("ktml", KtmlExtension::class.java)
+
         project.plugins.withId("org.jetbrains.kotlin.jvm") {
-            configurePlugin(project)
+            project.extensions.findByType(KotlinJvmProjectExtension::class.java)?.apply {
+                configurePlugin(project, extension.moduleName, sourceSets.toList())
+            }
         }
+
         project.plugins.withId("org.jetbrains.kotlin.multiplatform") {
-            configurePlugin(project)
+            project.extensions.getByType(KotlinMultiplatformExtension::class.java).apply {
+                configurePlugin(project, extension.moduleName, sourceSets.toList())
+            }
         }
 
         project.afterEvaluate {
@@ -25,18 +35,29 @@ class KtmlPlugin : Plugin<Project> {
         }
     }
 
-    private fun configurePlugin(project: Project) {
-        val extension = project.extensions.create("ktml", KtmlExtension::class.java)
-        extension.moduleName.convention("")
-        extension.templateDirectories.convention(listOf("src/main/ktml"))
+    private fun configurePlugin(project: Project, moduleName: String, sourceSets: List<KotlinSourceSet>) {
+        val outputDir = project.layout.buildDirectory.asFile.get().resolve("ktml")
+
+        val dirSets = sourceSets.mapNotNull { src ->
+            val ktmlDir = src.kotlin.srcDirs.firstOrNull()?.resolveSibling("ktml")?.takeIf { it.exists() }
+            if (ktmlDir != null) {
+                SourceInfo(src, ktmlDir.absolutePath, outputDir.resolve(src.name).absolutePath)
+            } else {
+                null
+            }
+        }
 
         val generateTask = project.tasks.register("generateKtml", KtmlGenerateTask::class.java) {
-            it.moduleName.set(extension.moduleName)
-            it.templateDirectories.set(extension.templateDirectories)
+            it.moduleName = moduleName
+            it.dirSets = dirSets
         }
 
         project.tasks.withType(KotlinCompile::class.java).configureEach {
             it.dependsOn(generateTask)
+        }
+
+        project.afterEvaluate {
+            dirSets.forEach { it.sourceSet.kotlin.srcDir(it.outputDir) }
         }
     }
 }

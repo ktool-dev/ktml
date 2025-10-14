@@ -10,7 +10,7 @@ import kotlinx.coroutines.runBlocking
 import org.springframework.web.servlet.HandlerMapping
 import org.springframework.web.servlet.View
 import org.springframework.web.servlet.ViewResolver
-import java.io.PrintWriter
+import java.io.OutputStream
 import java.util.*
 
 class KtmlViewResolver(ktmlRegistry: KtmlRegistry) : ViewResolver {
@@ -26,7 +26,7 @@ class KtmlView(private val engine: KtmlEngine, private val path: String) : View 
         response.contentType = contentType
 
         val context = Context(
-            writer = ServletContentWriter(response.writer),
+            writer = OutputStreamWriter(response.outputStream),
             model = model ?: emptyMap(),
             queryParams = request.parameterMap.mapValues { it.value.toList() },
             pathParams = request.urlParameters
@@ -38,13 +38,12 @@ class KtmlView(private val engine: KtmlEngine, private val path: String) : View 
     }
 
     @Suppress("unchecked_cast")
-    private val HttpServletRequest.urlParameters: Map<String, List<String>>
-        get() = (getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE) as? Map<String, String>)
-            ?.mapValues { listOf(it.value) } ?: emptyMap()
+    private val HttpServletRequest.urlParameters: Map<String, String>
+        get() = (getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE) as? Map<String, String>) ?: emptyMap()
 }
 
-class ServletContentWriter(private val writer: PrintWriter) : ContentWriter {
+private class OutputStreamWriter(private val out: OutputStream) : ContentWriter {
     override suspend fun write(content: String) {
-        writer.write(content)
+        out.write(content.encodeToByteArray())
     }
 }

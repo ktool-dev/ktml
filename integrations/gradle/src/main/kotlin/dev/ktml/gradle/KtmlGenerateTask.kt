@@ -2,38 +2,23 @@ package dev.ktml.gradle
 
 import dev.ktml.KtmlProcessor
 import org.gradle.api.DefaultTask
-import org.gradle.api.provider.ListProperty
-import org.gradle.api.provider.Property
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputFiles
-import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
-import java.io.File
+import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSet
 
-abstract class KtmlGenerateTask : DefaultTask() {
+data class SourceInfo(val sourceSet: KotlinSourceSet, val ktmlDir: String, val outputDir: String)
 
-    @get:Input
-    abstract val moduleName: Property<String>
-
-    @get:Input
-    abstract val templateDirectories: ListProperty<String>
-
-    @get:OutputDirectory
-    val outputDirectory: File = project.file("src/main/kotlin")
+class KtmlGenerateTask : DefaultTask() {
+    lateinit var moduleName: String
+    lateinit var dirSets: List<SourceInfo>
 
     @TaskAction
     fun generate() {
-        val processor = KtmlProcessor(
-            moduleName = moduleName.get(),
-            outputDirectory = outputDirectory.absolutePath
-        )
-
-        val dirs = templateDirectories.get().map {
-            project.file(it).absolutePath
+        dirSets.forEach { (_, ktmlDir, outputDir) ->
+            KtmlProcessor(moduleName = moduleName, outputDirectory = outputDir).apply {
+                processRootDirectory(ktmlDir)
+                generateTemplateCode()
+            }
         }
-
-        processor.processRootDirectories(dirs)
-        processor.generateTemplateCode()
 
         logger.lifecycle("KTML code generation completed")
     }

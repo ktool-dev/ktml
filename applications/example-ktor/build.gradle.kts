@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
+
 }
 
 kotlin {
@@ -15,10 +16,13 @@ kotlin {
     applyDefaultHierarchyTemplate()
 
     sourceSets {
-        commonMain.dependencies {
+        jvmMain.dependencies {
             implementation(project(":runtime"))
+            implementation(project(":ktor"))
+            implementation(project(":dev-mode"))
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.ktor.server.core)
+            implementation(libs.ktor.server.cio)
         }
 
         jvmTest.dependencies {

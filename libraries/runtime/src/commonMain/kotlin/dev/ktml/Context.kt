@@ -10,7 +10,7 @@ class Context(
     private val writer: ContentWriter,
     model: Map<String, Any?> = mapOf(),
     val queryParams: Map<String, List<String>> = mapOf(),
-    val pathParams: Map<String, List<String>> = mapOf()
+    val pathParams: Map<String, String> = mapOf()
 ) {
     private val _model = model.toMutableMap()
 
@@ -57,7 +57,7 @@ class Context(
 
     fun model(): Map<String, Any?> = _model
 
-    fun pathParam(key: String) = pathParams[key]?.firstOrNull()
+    fun pathParam(key: String) = pathParams[key]
     fun queryParam(key: String) = queryParams[key]?.firstOrNull()
 }
 
