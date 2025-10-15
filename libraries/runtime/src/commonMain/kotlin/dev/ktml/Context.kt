@@ -1,7 +1,8 @@
 package dev.ktml
 
 interface ContentWriter {
-    suspend fun write(content: String)
+    suspend fun write(content: String) = write(content, 0, content.length)
+    suspend fun write(content: String, offset: Int, length: Int)
 }
 
 typealias Content = suspend Context.() -> Unit
@@ -17,6 +18,7 @@ class Context(
     suspend fun write(content: Content?) = also { content?.invoke(it) }
     suspend fun write(content: Any?) = raw(encodeHtml(content?.toString()))
     suspend fun raw(content: Any?) = apply { content?.toString()?.also { writer.write(it) } }
+    suspend fun raw(content: String, offset: Int, length: Int) = apply { writer.write(content, offset, length) }
 
     inline fun <reified T> required(name: String): T =
         requiredNullable(name) ?: error("Context value '$name' is null but cannot be null")
@@ -64,8 +66,8 @@ class Context(
 class StringContentWriter : ContentWriter {
     private val buffer = StringBuilder()
 
-    override suspend fun write(content: String) {
-        buffer.append(content)
+    override suspend fun write(content: String, offset: Int, length: Int) {
+        buffer.append(content, offset, offset + length)
     }
 
     override fun toString() = buffer.toString()

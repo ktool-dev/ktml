@@ -24,9 +24,10 @@ class KtmlView(private val engine: KtmlEngine, private val path: String) : View 
 
     override fun render(model: MutableMap<String, *>?, request: HttpServletRequest, response: HttpServletResponse) {
         response.contentType = contentType
+        val out = OutputStreamWriter(response.outputStream)
 
         val context = Context(
-            writer = OutputStreamWriter(response.outputStream),
+            writer = out,
             model = model ?: emptyMap(),
             queryParams = request.parameterMap.mapValues { it.value.toList() },
             pathParams = request.urlParameters
@@ -34,6 +35,7 @@ class KtmlView(private val engine: KtmlEngine, private val path: String) : View 
 
         runBlocking {
             engine.writePage(context, path)
+            out.flush()
         }
     }
 
@@ -42,8 +44,14 @@ class KtmlView(private val engine: KtmlEngine, private val path: String) : View 
         get() = (getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE) as? Map<String, String>) ?: emptyMap()
 }
 
-private class OutputStreamWriter(private val out: OutputStream) : ContentWriter {
-    override suspend fun write(content: String) {
-        out.write(content.encodeToByteArray())
+private class OutputStreamWriter(out: OutputStream) : ContentWriter {
+    private val writer = out.bufferedWriter(Charsets.UTF_8)
+
+    override suspend fun write(content: String, offset: Int, length: Int) {
+        writer.write(content, offset, length)
+    }
+
+    fun flush() {
+        writer.flush()
     }
 }

@@ -28,6 +28,7 @@ class KotlinFileGeneratorSpec : BddSpec({
 
         When
         val file = kotlinFileGenerator.generateCode(template)
+        println(file.render())
 
         Then
         file.packageName shouldBe "dev.ktml.templates"

@@ -8,6 +8,7 @@ import dev.ktml.parser.removeEmptyText
 import dev.ktml.util.isVoidTag
 import dev.ktml.util.requiresCloseTag
 import dev.ktml.util.toImport
+import dev.ktool.gen.TRIPLE_QUOTE
 import dev.ktool.gen.safe
 import dev.ktool.gen.types.Block
 import dev.ktool.gen.types.Import
@@ -16,7 +17,9 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
 
-data class TemplateContent(val imports: List<Import>, val body: Block, val rawConstants: List<Property>)
+data class TemplateContent(val imports: List<Import>, val body: Block, val templateConstant: Property) {
+    val templateConstantIsNotEmpty = templateConstant.initializer?.expression != "$TRIPLE_QUOTE$TRIPLE_QUOTE"
+}
 
 /**
  * Generates HtmlWriter method calls from parsed HTML elements
@@ -47,7 +50,7 @@ class ContentGenerator(private val templates: Templates) {
         return TemplateContent(
             imports = imports.sortedBy { it.packagePath },
             body = Block(contentAndConstants.body.replace("() {", " {")),
-            rawConstants = contentAndConstants.rawConstants,
+            templateConstant = contentAndConstants.templateConstant,
         )
     }
 

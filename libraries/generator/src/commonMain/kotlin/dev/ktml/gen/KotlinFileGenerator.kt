@@ -19,7 +19,9 @@ class KotlinFileGenerator(templates: Templates) {
             addLiteral(template.externalScriptContent.trim())
         }
 
-        members += content.rawConstants
+        if(content.templateConstantIsNotEmpty) {
+            members += content.templateConstant
+        }
     }
 
     private fun KotlinFile.generateFunction(template: ParsedTemplate, content: TemplateContent) =

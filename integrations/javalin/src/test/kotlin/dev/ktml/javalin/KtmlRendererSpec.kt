@@ -49,7 +49,7 @@ class KtmlRendererSpec : BddSpec({
 
         Then
         out.toString() shouldBe "Hello World"
-        verify { ctx.contentType("text/plain; charset=utf-8") }
+        verify { ctx.contentType("text/html; charset=utf-8") }
     }
 
     "should render page with model data" {

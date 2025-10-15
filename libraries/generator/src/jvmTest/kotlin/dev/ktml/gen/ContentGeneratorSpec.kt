@@ -50,7 +50,7 @@ class ContentGeneratorSpec : BddSpec({
         val result = contentGenerator.generateTemplateContent(template)
 
         Then
-        result.body.statements.first().toString().trim().trim() shouldBe "raw(${RAW_PREFIX}0)"
+        result.body.statements.first().toString().trim().trim() shouldBe "raw($TEMPLATE_CONSTANT, 0, 20)"
     }
 
     "tag with kotlin attribute" {
@@ -66,9 +66,9 @@ class ContentGeneratorSpec : BddSpec({
 
         Then
         result.body.statements.first().toString().trim() shouldBe """
-            raw(${RAW_PREFIX}0)
+            raw($TEMPLATE_CONSTANT, 0, 17)
             write(onClick)
-            raw(${RAW_PREFIX}1)
+            raw($TEMPLATE_CONSTANT, 17, 16)
         """.trimIndent()
     }
 
@@ -85,9 +85,9 @@ class ContentGeneratorSpec : BddSpec({
 
         Then
         result.body.statements.first().toString().trim() shouldBe """
-            raw(${RAW_PREFIX}0)
+            raw($TEMPLATE_CONSTANT, 0, 10)
             write(text)
-            raw(${RAW_PREFIX}1)
+            raw($TEMPLATE_CONSTANT, 10, 6)
         """.trimIndent()
     }
 
@@ -104,11 +104,11 @@ class ContentGeneratorSpec : BddSpec({
 
         Then
         result.body.statements.first().toString().trim() shouldBe """
-            raw(${RAW_PREFIX}0)
+            raw($TEMPLATE_CONSTANT, 0, 10)
             write(text)
-            raw(${RAW_PREFIX}1)
+            raw($TEMPLATE_CONSTANT, 10, 3)
             write(text)
-            raw(${RAW_PREFIX}2)
+            raw($TEMPLATE_CONSTANT, 13, 6)
         """.trimIndent()
     }
 
@@ -130,7 +130,7 @@ class ContentGeneratorSpec : BddSpec({
                 onClick = onClick,
                 text = "Hello",
             )
-            raw(${RAW_PREFIX}0)
+            raw($TEMPLATE_CONSTANT, 0, 14)
         """.trimIndent()
     }
 
@@ -150,9 +150,9 @@ class ContentGeneratorSpec : BddSpec({
         Then
         result.body.statements.first().toString().trim() shouldBe """
             writeTagWithContent {
-                raw(${RAW_PREFIX}0)
+                raw($TEMPLATE_CONSTANT, 0, 10)
                 write(text)
-                raw(${RAW_PREFIX}1)
+                raw($TEMPLATE_CONSTANT, 10, 6)
             }
         """.trimIndent()
     }
@@ -176,13 +176,13 @@ class ContentGeneratorSpec : BddSpec({
 
         Then
         result.body.statements.first().toString().trim() shouldBe """
-            raw(${RAW_PREFIX}0)
+            raw($TEMPLATE_CONSTANT, 0, 19)
             writeTagWithContent {
-                raw(${RAW_PREFIX}1)
+                raw($TEMPLATE_CONSTANT, 19, 32)
                 write(text)
-                raw(${RAW_PREFIX}2)
+                raw($TEMPLATE_CONSTANT, 51, 25)
             }
-            raw(${RAW_PREFIX}3)
+            raw($TEMPLATE_CONSTANT, 76, 17)
         """.trimIndent()
     }
 
@@ -206,9 +206,9 @@ class ContentGeneratorSpec : BddSpec({
         Then
         result.body.statements.first().toString().trim() shouldBe """
             val a = 1
-            raw(${RAW_PREFIX}0)
+            raw($TEMPLATE_CONSTANT, 0, 10)
             write(text)
-            raw(${RAW_PREFIX}1)
+            raw($TEMPLATE_CONSTANT, 10, 6)
             val b = 1
         """.trimIndent()
     }
@@ -227,9 +227,9 @@ class ContentGeneratorSpec : BddSpec({
         Then
         result.body.statements.first().toString().trim() shouldBe """
             if (text == "Hello") {
-                raw(${RAW_PREFIX}0)
+                raw($TEMPLATE_CONSTANT, 0, 10)
                 write(text)
-                raw(${RAW_PREFIX}1)
+                raw($TEMPLATE_CONSTANT, 10, 6)
             }
         """.trimIndent()
     }
@@ -248,9 +248,9 @@ class ContentGeneratorSpec : BddSpec({
         Then
         result.body.statements.first().toString().trim() shouldBe """
             for (item in items) {
-                raw(${RAW_PREFIX}0)
+                raw($TEMPLATE_CONSTANT, 0, 10)
                 write(item)
-                raw(${RAW_PREFIX}1)
+                raw($TEMPLATE_CONSTANT, 10, 6)
             }
         """.trimIndent()
     }
@@ -270,9 +270,9 @@ class ContentGeneratorSpec : BddSpec({
         result.body.statements.first().toString().trim() shouldBe """
             if (items.size > 1) {
                 for (item in items) {
-                    raw(${RAW_PREFIX}0)
+                    raw($TEMPLATE_CONSTANT, 0, 10)
                     write(item)
-                    raw(${RAW_PREFIX}1)
+                    raw($TEMPLATE_CONSTANT, 10, 6)
                 }
             }
         """.trimIndent()
@@ -299,7 +299,7 @@ class ContentGeneratorSpec : BddSpec({
         Then
         result.body.statements.first().toString().trim() shouldBe """
             writeTag {
-                raw(${RAW_PREFIX}0)
+                raw($TEMPLATE_CONSTANT, 0, 5)
             }
         """.trimIndent()
     }
@@ -317,9 +317,9 @@ class ContentGeneratorSpec : BddSpec({
 
         Then
         result.body.statements.first().toString().trim() shouldBe """
-            raw(${RAW_PREFIX}0)
+            raw($TEMPLATE_CONSTANT, 0, 16)
         """.trimIndent()
-        result.rawConstants[0].initializer?.expression?.replace(TRIPLE_QUOTE, "") shouldBe """<tag>World</tag>"""
+        result.templateConstant.initializer?.expression?.replace(TRIPLE_QUOTE, "") shouldBe """<tag>World</tag>"""
     }
 
     "can pass multiple content parameters" {
@@ -340,14 +340,13 @@ class ContentGeneratorSpec : BddSpec({
         result.body.statements.first().toString().trim() shouldBe """
             writeTagWithMultipleContent(
                 first = {
-                    raw(RAW_CONTENT_0)
+                    raw(TEMPLATE_HTML, 0, 5)
                 },
             ) {
-                raw(RAW_CONTENT_1)
+                raw(TEMPLATE_HTML, 5, 6)
             }
         """.trimIndent()
-        result.rawConstants[0].initializer?.expression?.replace(TRIPLE_QUOTE, "") shouldBe """First"""
-        result.rawConstants[1].initializer?.expression?.replace(TRIPLE_QUOTE, "") shouldBe """Second"""
+        result.templateConstant.initializer?.expression?.replace(TRIPLE_QUOTE, "") shouldBe """FirstSecond"""
     }
 
     "can pass multiple content parameters without nameing second one" {
@@ -368,15 +367,13 @@ class ContentGeneratorSpec : BddSpec({
         result.body.statements.first().toString().trim() shouldBe """
             writeTagWithMultipleContent(
                 first = {
-                    raw(RAW_CONTENT_0)
+                    raw(TEMPLATE_HTML, 0, 5)
                 },
             ) {
-                raw(RAW_CONTENT_1)
+                raw(TEMPLATE_HTML, 5, 17)
             }
         """.trimIndent()
-        result.rawConstants[0].initializer?.expression?.replace(TRIPLE_QUOTE, "") shouldBe """First"""
-        result.rawConstants[1].initializer?.expression?.replace(TRIPLE_QUOTE, "")
-            ?.trim() shouldBe """<div>Second</div>"""
+        result.templateConstant.initializer?.expression?.replace(TRIPLE_QUOTE, "") shouldBe """First<div>Second</div>"""
     }
 
     "can flag tag as no interpolation" {
@@ -391,12 +388,12 @@ class ContentGeneratorSpec : BddSpec({
         val result = contentGenerator.generateTemplateContent(template)
 
         Then
-        result.rawConstants[0].initializer?.expression?.replace(
+        result.templateConstant.initializer?.expression?.replace(
             TRIPLE_QUOTE,
             ""
         ) shouldBe $$"""<h1 class="${text}">Hello ${text}</h1>"""
         result.body.statements.first().toString().trim() shouldBe """
-            raw(${RAW_PREFIX}0)
+            raw($TEMPLATE_CONSTANT, 0, 38)
         """.trimIndent()
     }
 })

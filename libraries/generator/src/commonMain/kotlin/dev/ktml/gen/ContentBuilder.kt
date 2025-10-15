@@ -7,24 +7,15 @@ import dev.ktool.gen.types.Modifier
 import dev.ktool.gen.types.Property
 import dev.ktool.gen.types.StringType
 
-internal const val RAW_PREFIX = "RAW_CONTENT_"
+internal const val TEMPLATE_CONSTANT = "TEMPLATE_HTML"
 
-data class ContentAndRawConstants(val body: String, val rawConstants: List<Property>)
-
-data class RawConstant(val index: Int, val content: String) {
-    fun toProperty() = Property(
-        name = "$RAW_PREFIX$index",
-        type = StringType,
-        initializer = ExpressionBody("$TRIPLE_QUOTE$content$TRIPLE_QUOTE"),
-        modifiers = listOf(Modifier.Private, Modifier.Const)
-    )
-}
+data class ContentAndRawConstants(val body: String, val templateConstant: Property)
 
 /**
  * Builds the content of a template function. This helps with indentation and grouping raw content together.
  */
 class ContentBuilder {
-    private val rawContentItems = mutableListOf<String>()
+    private val allRawContent = StringBuilder()
     private val currentRawContent = StringBuilder()
     private var writer = CodeWriter()
 
@@ -32,7 +23,7 @@ class ContentBuilder {
 
     fun clear() {
         currentRawContent.clear()
-        rawContentItems.clear()
+        allRawContent.clear()
         writingRaw = false
         writer = CodeWriter()
     }
@@ -40,7 +31,7 @@ class ContentBuilder {
     fun raw(content: String) {
         if (!writingRaw) {
             writingRaw = true
-            writer.write("raw($RAW_PREFIX${rawContentItems.size})").newLine()
+            writer.write("raw($TEMPLATE_CONSTANT, ${allRawContent.length}, ")
         }
         currentRawContent.append(content)
     }
@@ -53,7 +44,8 @@ class ContentBuilder {
 
     private fun endRaw() {
         if (writingRaw) {
-            rawContentItems.add(currentRawContent.toString())
+            allRawContent.append(currentRawContent.toString())
+            writer.write("${currentRawContent.length})").newLine()
             currentRawContent.clear()
             writingRaw = false
         }
@@ -63,11 +55,12 @@ class ContentBuilder {
         get() {
             endRaw()
 
-            val constants = rawContentItems.mapIndexed { index, it ->
-                RawConstant(index, it)
-            }
-
-            return ContentAndRawConstants(writer.toString(), constants.map { it.toProperty() })
+            return ContentAndRawConstants(writer.toString(), Property(
+                name = TEMPLATE_CONSTANT,
+                type = StringType,
+                initializer = ExpressionBody("$TRIPLE_QUOTE$allRawContent$TRIPLE_QUOTE"),
+                modifiers = listOf(Modifier.Private, Modifier.Const)
+            ))
         }
 
     fun write(kotlin: String) {

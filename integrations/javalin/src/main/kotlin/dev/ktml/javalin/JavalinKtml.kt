@@ -19,9 +19,10 @@ object JavalinKtml {
         require(::engine.isInitialized) { "You must initialize KtmlEngine by calling JavalinKtml.init() first!" }
 
         ctx.contentType("text/html; charset=utf-8")
+        val out = OutputStreamWriter(ctx.outputStream())
 
         val ktmlContext = Context(
-            writer = OutputStreamWriter(ctx.outputStream()),
+            writer = out,
             model = model,
             queryParams = ctx.queryParamMap(),
             pathParams = ctx.pathParamMap(),
@@ -29,6 +30,7 @@ object JavalinKtml {
 
         runBlocking {
             engine.writePage(ktmlContext, path)
+            out.flush()
         }
     }
 }
@@ -37,8 +39,14 @@ fun JavalinContext.ktml(path: String, model: Map<String, Any?> = emptyMap()) = a
     JavalinKtml.write(this, path, model)
 }
 
-private class OutputStreamWriter(private val out: OutputStream) : ContentWriter {
-    override suspend fun write(content: String) {
-        out.write(content.encodeToByteArray())
+private class OutputStreamWriter(out: OutputStream) : ContentWriter {
+    private val writer = out.bufferedWriter(Charsets.UTF_8)
+
+    override suspend fun write(content: String, offset: Int, length: Int) {
+        writer.write(content, offset, length)
+    }
+
+    fun flush() {
+        writer.flush()
     }
 }
