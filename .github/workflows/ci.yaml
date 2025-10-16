@@ -28,7 +28,7 @@ jobs:
           cache-disabled: true
 
       - name: Build with Gradle
-        run: ./gradlew build --no-daemon --no-configuration-cache
+        run: ./gradlew build --no-daemon --no-configuration-cache --no-build-cache
 
       - name: Test Report
         if: (success() || failure())
