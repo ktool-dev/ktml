@@ -17,6 +17,8 @@ spring = "6.2.11"
 spring-boot = "3.4.1"
 jakarta-servlet = "6.0.0"
 mockk = "1.14.6"
+vanniktechMavenPublish = "0.34.0"
+dokka = "2.1.0"
 
 [libraries]
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
@@ -51,4 +53,5 @@ kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotest = { id = "io.kotest", version.ref = "kotest" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
-spring-dependency-management = { id = "io.spring.dependency-management", version = "1.1.4" }
+dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
+vanniktech-mavenPublish = { id = "com.vanniktech.maven.publish", version.ref = "vanniktechMavenPublish" }

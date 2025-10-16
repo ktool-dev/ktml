@@ -17,3 +17,7 @@ dependencies {
     testImplementation(libs.javalin)
     testImplementation(libs.mockk)
 }
+
+tasks.withType<Test>().configureEach {
+    useJUnitPlatform()
+}

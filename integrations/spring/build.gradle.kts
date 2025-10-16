@@ -20,3 +20,7 @@ dependencies {
     testImplementation(libs.jakarta.servlet.api)
     testImplementation(libs.mockk)
 }
+
+tasks.withType<Test>().configureEach {
+    useJUnitPlatform()
+}

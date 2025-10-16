@@ -11,7 +11,13 @@ repositories {
 kotlin {
     jvmToolchain(22)
 
-    jvm()
+    jvm {
+        testRuns.named("test") {
+            executionTask.configure {
+                useJUnitPlatform()
+            }
+        }
+    }
 
     applyDefaultHierarchyTemplate()
 

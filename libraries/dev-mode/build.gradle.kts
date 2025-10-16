@@ -24,3 +24,7 @@ dependencies {
     testImplementation(libs.kotest.assertions.core)
     testImplementation(libs.ktool.kotest.bdd)
 }
+
+tasks.withType<Test>().configureEach {
+    useJUnitPlatform()
+}
