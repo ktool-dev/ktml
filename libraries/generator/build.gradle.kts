@@ -8,10 +8,6 @@ repositories {
     mavenCentral()
 }
 
-tasks.withType<Test>().configureEach {
-    useJUnitPlatform()
-}
-
 kotlin {
     jvmToolchain(22)
 
@@ -19,10 +15,13 @@ kotlin {
 
     applyDefaultHierarchyTemplate()
 
+    iosX64()
+    iosArm64()
+    iosSimulatorArm64()
     linuxX64()
+    mingwX64()
     macosX64()
     macosArm64()
-    mingwX64()
 
     sourceSets {
         commonMain.dependencies {
