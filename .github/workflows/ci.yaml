@@ -28,12 +28,12 @@ jobs:
           cache-disabled: true
 
       - name: Build with Gradle
-        run: ./gradlew build --no-daemon --no-configuration-cache --no-build-cache
+        run: ./gradlew build --no-daemon --no-configuration-cache
 
       - name: Test Report
         if: (success() || failure())
         uses: dorny/test-reporter@v1
         with:
           name: Unit Test Results
-          path: build/test-results/**/*.xml
+          path: applications/*/build/test-results/**/*.xml,libraries/*/build/test-results/**/*.xml,integrations/*/build/test-results/**/*.xml
           reporter: java-junit
