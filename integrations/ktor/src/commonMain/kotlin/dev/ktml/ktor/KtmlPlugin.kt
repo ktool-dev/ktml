@@ -3,6 +3,7 @@ package dev.ktml.ktor
 import dev.ktml.ContentWriter
 import dev.ktml.Context
 import dev.ktml.KtmlEngine
+import dev.ktml.KtmlRegistry
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.response.*
@@ -13,6 +14,10 @@ import io.ktor.utils.io.core.*
 import kotlinx.io.Sink
 
 val ktmlEngineKey = AttributeKey<KtmlEngine>("KtmlEngine")
+
+class KtmlConfig {
+    var registry: KtmlRegistry? = null
+}
 
 suspend fun RoutingCall.respondKtml(
     path: String,
