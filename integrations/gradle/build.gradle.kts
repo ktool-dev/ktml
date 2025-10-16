@@ -3,6 +3,10 @@ plugins {
     `java-gradle-plugin`
 }
 
+kotlin {
+    jvmToolchain(22)
+}
+
 dependencies {
     implementation(project(":generator"))
     compileOnly(gradleApi())

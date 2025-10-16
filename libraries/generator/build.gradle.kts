@@ -17,12 +17,12 @@ kotlin {
 
     jvm()
 
+    applyDefaultHierarchyTemplate()
+
     linuxX64()
     macosX64()
     macosArm64()
     mingwX64()
-
-    applyDefaultHierarchyTemplate()
 
     sourceSets {
         commonMain.dependencies {
