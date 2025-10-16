@@ -3,24 +3,14 @@ package dev.ktml.ktor
 import dev.ktml.ContentWriter
 import dev.ktml.Context
 import dev.ktml.KtmlEngine
-import dev.ktml.KtmlRegistry
-import io.ktor.utils.io.core.writeText
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.util.*
 import io.ktor.utils.io.*
-import io.ktor.utils.io.charsets.Charsets
+import io.ktor.utils.io.core.*
 import kotlinx.io.Sink
-
-class KtmlConfig {
-    lateinit var registry: KtmlRegistry
-}
-
-val KtmlPlugin = createApplicationPlugin(name = "KTML", createConfiguration = ::KtmlConfig) {
-    application.attributes.put(ktmlEngineKey, KtmlEngine(pluginConfig.registry))
-}
 
 val ktmlEngineKey = AttributeKey<KtmlEngine>("KtmlEngine")
 

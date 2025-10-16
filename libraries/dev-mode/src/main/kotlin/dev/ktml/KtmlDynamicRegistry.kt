@@ -19,6 +19,8 @@ class KtmlDynamicRegistry(
     outputDirectory: String = createTempDirectory("ktml").toString(),
     compiledDirectory: String = createTempDirectory("ktml-compile").toString()
 ) : KtmlRegistry {
+    constructor(templateDir: String) : this(templateDir, {})
+
     private var _templateRegistry: KtmlRegistry? = null
     private val compileDir: File = File(compiledDirectory)
     private val outputDir: File = File(outputDirectory)

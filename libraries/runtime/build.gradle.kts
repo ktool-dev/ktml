@@ -21,27 +21,25 @@ kotlin {
     applyDefaultHierarchyTemplate()
 
     sourceSets {
-        val commonMain by getting {
-            dependencies {
-                implementation(libs.kotlinx.coroutines.core)
-            }
+        commonMain.dependencies {
+            implementation(libs.kotlinx.coroutines.core)
         }
 
-        val commonTest by getting {
-            dependencies {
-                implementation(kotlin("test"))
-                implementation(libs.kotlin.test)
-                implementation(libs.kotlinx.coroutines.test)
-                implementation(libs.kotest.framework.engine)
-                implementation(libs.kotest.assertions.core)
-                implementation(libs.ktool.kotest.bdd)
-            }
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+            implementation(libs.kotlin.test)
+            implementation(libs.kotlinx.coroutines.test)
+            implementation(libs.kotest.framework.engine)
+            implementation(libs.kotest.assertions.core)
+            implementation(libs.ktool.kotest.bdd)
         }
 
-        val jvmTest by getting {
-            dependencies {
-                implementation(libs.kotest.runner.junit5)
-            }
+        jvmMain.dependencies {
+            implementation(libs.kotlin.logging)
+        }
+
+        jvmTest.dependencies {
+            implementation(libs.kotest.runner.junit5)
         }
     }
 }

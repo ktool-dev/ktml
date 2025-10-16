@@ -1,12 +1,11 @@
 package dev.ktml.example.javalin
 
-import dev.ktml.KtmlDynamicRegistry
 import dev.ktml.javalin.JavalinKtml
 import dev.ktml.javalin.ktml
 import io.javalin.Javalin
 
 fun main() {
-    JavalinKtml.init(KtmlDynamicRegistry("applications/example-javalin/src/main/ktml"))
+    JavalinKtml.init()
 
     val app = Javalin.create().apply {
         configureRouting()

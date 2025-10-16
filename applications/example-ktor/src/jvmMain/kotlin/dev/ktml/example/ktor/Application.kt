@@ -1,6 +1,5 @@
 package dev.ktml.example.ktor
 
-import dev.ktml.KtmlDynamicRegistry
 import dev.ktml.ktor.KtmlPlugin
 import dev.ktml.ktor.respondKtml
 import io.ktor.server.application.*
@@ -10,15 +9,9 @@ import io.ktor.server.routing.*
 
 fun main() {
     embeddedServer(CIO, port = 8080, host = "0.0.0.0") {
-        configureKtml()
+        install(KtmlPlugin)
         configureRouting()
     }.start(wait = true)
-}
-
-fun Application.configureKtml() {
-    install(KtmlPlugin) {
-        registry = KtmlDynamicRegistry("src/jvmMain/ktml")
-    }
 }
 
 fun Application.configureRouting() {

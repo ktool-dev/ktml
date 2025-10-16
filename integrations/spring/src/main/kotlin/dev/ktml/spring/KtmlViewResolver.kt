@@ -3,7 +3,7 @@ package dev.ktml.spring
 import dev.ktml.ContentWriter
 import dev.ktml.Context
 import dev.ktml.KtmlEngine
-import dev.ktml.KtmlRegistry
+import dev.ktml.findKtmlRegistry
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import kotlinx.coroutines.runBlocking
@@ -13,8 +13,8 @@ import org.springframework.web.servlet.ViewResolver
 import java.io.OutputStream
 import java.util.*
 
-class KtmlViewResolver(ktmlRegistry: KtmlRegistry) : ViewResolver {
-    private val engine = KtmlEngine(ktmlRegistry)
+class KtmlViewResolver() : ViewResolver {
+    private val engine = KtmlEngine(findKtmlRegistry())
 
     override fun resolveViewName(viewName: String, locale: Locale) = KtmlView(engine, viewName)
 }

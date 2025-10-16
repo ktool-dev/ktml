@@ -3,7 +3,7 @@ package dev.ktml.javalin
 import dev.ktml.ContentWriter
 import dev.ktml.Context
 import dev.ktml.KtmlEngine
-import dev.ktml.KtmlRegistry
+import dev.ktml.findKtmlRegistry
 import kotlinx.coroutines.runBlocking
 import java.io.OutputStream
 import io.javalin.http.Context as JavalinContext
@@ -11,8 +11,8 @@ import io.javalin.http.Context as JavalinContext
 object JavalinKtml {
     private lateinit var engine: KtmlEngine
 
-    fun init(ktmlRegistry: KtmlRegistry) {
-        engine = KtmlEngine(ktmlRegistry)
+    fun init() {
+        engine = KtmlEngine(findKtmlRegistry())
     }
 
     internal fun write(ctx: JavalinContext, path: String, model: Map<String, Any?> = emptyMap()) {

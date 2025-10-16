@@ -1,6 +1,5 @@
 package dev.ktml.example.spring
 
-import dev.ktml.KtmlDynamicRegistry
 import dev.ktml.spring.KtmlViewResolver
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
@@ -20,7 +19,5 @@ fun main(args: Array<String>) {
 @EnableWebMvc
 open class WebConfig {
     @Bean
-    open fun ktmlViewResolver(): ViewResolver {
-        return KtmlViewResolver(KtmlDynamicRegistry("applications/example-spring/src/main/ktml"))
-    }
+    open fun ktmlViewResolver(): ViewResolver = KtmlViewResolver()
 }
