@@ -105,11 +105,3 @@ jobs:
           SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
           SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
         run: ./gradlew :gradle:publishPlugins --no-configuration-cache
-
-      - name: Publish Maven Plugin
-        env:
-          CENTRAL_PORTAL_USERNAME: ${{ secrets.CENTRAL_PORTAL_USERNAME }}
-          CENTRAL_PORTAL_PASSWORD: ${{ secrets.CENTRAL_PORTAL_PASSWORD }}
-          SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
-          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
-        run: ./gradlew :maven:publish --no-configuration-cache
