@@ -7,9 +7,11 @@ on:
     branches: [ main ]
 
 jobs:
-  test:
+  build:
     name: Build and Test
     runs-on: ubuntu-latest
+    outputs:
+      new_tag: ${{ steps.tag_version.outputs.new_tag }}
     permissions:
       contents: write
       checks: write
@@ -37,3 +39,61 @@ jobs:
           name: Unit Test Results
           path: applications/*/build/test-results/**/*.xml,libraries/*/build/test-results/**/*.xml,integrations/*/build/test-results/**/*.xml
           reporter: java-junit
+
+      - name: Bump version and push tag
+        if: success()
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v6.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          tag_prefix: ''
+          default_bump: false
+
+      - name: Create a GitHub release
+        if: success() && steps.tag_version.outputs.new_tag != ''
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ steps.tag_version.outputs.new_tag }}
+          name: Release ${{ steps.tag_version.outputs.new_tag }}
+          body: ${{ steps.tag_version.outputs.changelog }}
+
+  deploy:
+    name: Deploy
+    needs: build
+    if: needs.build.outputs.new_tag != ''
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      checks: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 22
+        uses: actions/setup-java@v3
+        with:
+          java-version: '22'
+          distribution: 'adopt'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Update version in gradle.properties
+        shell: bash
+        run: |
+          if [[ "${{ runner.os }}" == "macOS" ]]; then
+            sed -i '' 's/version=.*/version=${{ needs.build.outputs.new_tag }}/' gradle.properties
+          else
+            sed -i 's/version=.*/version=${{ needs.build.outputs.new_tag }}/' gradle.properties
+          fi
+
+      - name: Publish to Maven Central
+        run: ./gradlew publishToMavenCentral --no-configuration-cache
+        env:
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.CENTRAL_PORTAL_USERNAME }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.CENTRAL_PORTAL_PASSWORD }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyId: ${{ secrets.SIGNING_KEY_ID }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.SIGNING_PASSWORD }}
+          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.SIGNING_KEY }}

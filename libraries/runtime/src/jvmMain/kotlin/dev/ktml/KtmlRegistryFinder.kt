@@ -17,6 +17,10 @@ fun findKtmlRegistry(basePath: String = determineBasePath()): KtmlRegistry {
     return createDynamicRegistry(dynamicRegistryClass, ktmlDir)
 }
 
+/**
+ * This will try to determine where the ktml files are located. They should be in a directory like src/main/ktml
+ * or maybe src/commonMain/ktml
+ */
 private fun determineBasePath(): String {
     val workingDir = System.getProperty("user.dir")
     val projectPath = System.getProperty("java.class.path").split(pathSeparator).find { it.startsWith(workingDir) }

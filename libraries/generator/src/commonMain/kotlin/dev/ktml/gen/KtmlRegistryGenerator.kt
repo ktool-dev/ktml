@@ -9,23 +9,23 @@ object KtmlRegistryGenerator {
      */
     fun createKtmlRegistry(basePackageName: String, templates: Templates) =
         KotlinFile(basePackageName) {
-            addImport("dev.ktml.Content")
-            addImport("dev.ktml.TagDefinition")
-            addImport("dev.ktml.KtmlRegistry")
-            addImport("dev.ktml.TagParameter")
+            +Import("dev.ktml.Content")
+            +Import("dev.ktml.TagDefinition")
+            +Import("dev.ktml.KtmlRegistry")
+            +Import("dev.ktml.TagParameter")
 
             templates.registryTemplates.filter { it.subPath.isNotEmpty() }.forEach { template ->
-                addImport(template.qualifiedFunctionName, template.uniqueFunctionName)
+                +Import(template.qualifiedFunctionName, template.uniqueFunctionName)
             }
 
-            addObject("KtmlRegistryImpl") {
-                addSuperType("KtmlRegistry")
+            +Object("KtmlRegistryImpl") {
+                +SuperType("KtmlRegistry")
 
-                addValProperty(
+                +Property(
                     name = "templates",
-                    type = Type("Map", typeArguments = listOf(StringType, Type("Content")))
+                    type = Type("Map", typeArguments = listOf(TypeArgument("String"), TypeArgument("Content")))
                 ) {
-                    addModifiers(Modifier.Override)
+                    +Modifier.Override
                     initializer = ExpressionBody {
                         write("mapOf(")
                         withIndent {
@@ -64,8 +64,8 @@ object KtmlRegistryGenerator {
                     }
                 }
 
-                addValProperty(name = "tags", type = Type("List", typeArguments = listOf(Type("TagDefinition")))) {
-                    addModifiers(Modifier.Override)
+                +Property(name = "tags", type = Type("List", typeArguments = listOf(TypeArgument("TagDefinition")))) {
+                    +Modifier.Override
                     initializer = ExpressionBody {
                         write("listOf(")
                         withIndent {

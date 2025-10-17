@@ -1,6 +1,10 @@
+import com.vanniktech.maven.publish.JavadocJar
+import com.vanniktech.maven.publish.KotlinJvm
+
 plugins {
     kotlin("jvm")
-    `maven-publish`
+    alias(libs.plugins.dokka)
+    alias(libs.plugins.vanniktech.mavenPublish)
 }
 
 kotlin {
@@ -23,4 +27,60 @@ dependencies {
 
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
+}
+
+description = "Spring plugin for KTML"
+
+val javadocJar by tasks.registering(Jar::class) {
+    dependsOn(tasks.dokkaGeneratePublicationHtml)
+    from(tasks.dokkaGeneratePublicationHtml.flatMap { it.outputDirectory })
+    archiveClassifier.set("javadoc")
+}
+
+mavenPublishing {
+    val rootName = rootProject.name
+    val gitHubOrg = project.property("github.org") as String
+    val artifactId = "$rootName-${project.name}"
+    val repoPath = "github.com/$gitHubOrg/$rootName"
+    val projectUrl = "https://$repoPath"
+
+    configure(
+        KotlinJvm(
+            javadocJar = JavadocJar.Dokka("javadocJar"),
+            sourcesJar = true,
+        )
+    )
+
+    publishToMavenCentral()
+
+    signAllPublications()
+
+    coordinates(project.group.toString(), artifactId, project.version.toString())
+
+    pom {
+        name = artifactId
+        description = project.description
+        inceptionYear = project.property("inception.year") as String
+        url = projectUrl
+        licenses {
+            license {
+                name = project.property("license.name") as String
+                url = project.property("license.url") as String
+                distribution = project.property("license.url") as String
+            }
+        }
+        developers {
+            developer {
+                id = project.property("developer.id") as String
+                name = project.property("developer.name") as String
+                email = project.property("developer.email") as String
+                url = "https://github.com/$gitHubOrg"
+            }
+        }
+        scm {
+            url = projectUrl
+            connection = "scm:git:git://$repoPath.git"
+            developerConnection = "scm:git:ssh://git@$repoPath.git"
+        }
+    }
 }

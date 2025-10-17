@@ -2,7 +2,7 @@ package dev.ktml.parser
 
 import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlHandler
 
-class HtmlHandler(private val selfClosingTags: Collection<String> = emptySet()) : KsoupHtmlHandler {
+class HtmlHandler(private val selfClosingTags: Collection<String> = emptyList()) : KsoupHtmlHandler {
     private val elementStack = mutableListOf<HtmlElement.Tag>()
     private var _rootElements = mutableListOf<HtmlElement.Tag>()
     private var currentTextElement: HtmlElement.Text? = null
@@ -30,6 +30,7 @@ class HtmlHandler(private val selfClosingTags: Collection<String> = emptySet()) 
         }
 
         // Don't add self-closing tags to the stack since they can't have content
+        // This is a bit of a problem because, if the tag is sometimes self-closing sometimes not, this will not work
         if (!selfClosingTags.contains(name)) {
             elementStack.add(element)
         }

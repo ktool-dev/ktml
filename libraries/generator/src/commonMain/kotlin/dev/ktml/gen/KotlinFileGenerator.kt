@@ -16,19 +16,19 @@ class KotlinFileGenerator(templates: Templates) {
         generateFunction(template, content)
 
         if (template.externalScriptContent.isNotEmpty()) {
-            addLiteral(template.externalScriptContent.trim())
+            +Literal(template.externalScriptContent.trim())
         }
 
-        if(content.templateConstantIsNotEmpty) {
+        if (content.templateConstantIsNotEmpty) {
             members += content.templateConstant
         }
     }
 
     private fun KotlinFile.generateFunction(template: ParsedTemplate, content: TemplateContent) =
-        addFunction("write${template.name.toCamelCase()}", Type("Context")) {
-            addModifiers(Modifier.Suspend)
+        +Function("write${template.name.toCamelCase()}", Type("Context")) {
+            +Modifier.Suspend
             template.nonContextParameters.map { param ->
-                addParameter(name = param.name, type = Type(param.type)) {
+                +Parameter(name = param.name, type = Type(param.type)) {
                     defaultValue = param.defaultValue?.let { ExpressionBody(it) }
                 }
             }
