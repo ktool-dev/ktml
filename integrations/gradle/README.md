@@ -14,31 +14,19 @@ plugins {
 
 ## Configuration
 
-Configure the plugin using the `ktml` extension:
+The plugin doesn't require any configuration. It will find `ktml` directories in any SourceSet, for instance at:
 
-```kotlin
-ktml {
-    moduleName.set("my-templates")
-    templateDirectories.set(listOf("src/main/ktml"))
-}
+```mermaid
+src/main/ktml
+src/commonMain/ktml
+src/jvmMain/ktml
 ```
 
-### Options
-
-- **`moduleName`**: Optional module name for generated templates (default: `""`)
-- **`templateDirectories`**: List of directories containing KTML templates (default: `["src/main/ktml"]`)
-
-## How It Works
-
-The plugin automatically:
-
-1. Creates a `generateKtml` task that processes KTML templates
-2. Configures Kotlin compilation tasks to depend on `generateKtml`
-3. Generates Kotlin code from your KTML templates before compilation
-
-## Requirements
+It will then generate code for each SourceSet, and add the generated code as a srcDir on the SourceSet for the
+Kotlin compiler. So the compiled code will be included in the output with all your other code.
 
 One of the following Kotlin plugins must be applied:
+
 - `org.jetbrains.kotlin.jvm`
 - `org.jetbrains.kotlin.multiplatform`
 
@@ -50,17 +38,20 @@ This task runs automatically before Kotlin compilation.
 
 ## Example
 
+With Kotlin on the JVM
+
 ```kotlin
 plugins {
     kotlin("jvm")
     id("dev.ktml.gradle")
 }
+```
 
-ktml {
-    moduleName.set("web-templates")
-    templateDirectories.set(listOf(
-        "src/main/ktml",
-        "src/main/templates"
-    ))
+With Kotlin and KMP
+
+```kotlin
+plugins {
+    id("org.jetbrains.kotlin.multiplatform")
+    id("dev.ktml.gradle")
 }
 ```

@@ -19,6 +19,7 @@ jakarta-servlet = "6.0.0"
 mockk = "1.14.6"
 vanniktechMavenPublish = "0.34.0"
 dokka = "2.1.0"
+gradle-publish = "2.0.0"
 
 [libraries]
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
@@ -55,3 +56,4 @@ ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 vanniktech-mavenPublish = { id = "com.vanniktech.maven.publish", version.ref = "vanniktechMavenPublish" }
+gradle-publish = { id = "com.gradle.plugin-publish", version.ref = "gradle-publish" }

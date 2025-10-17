@@ -39,9 +39,9 @@ val javadocJar by tasks.registering(Jar::class) {
 
 mavenPublishing {
     val rootName = rootProject.name
-    val gitHubOrg = project.property("github.org") as String
+    val orgUrl = project.property("scm.org.url") as String
     val artifactId = "$rootName-${project.name}"
-    val repoPath = "github.com/$gitHubOrg/$rootName"
+    val repoPath = project.property("scm.repo.path") as String
     val projectUrl = "https://$repoPath"
 
     configure(
@@ -56,7 +56,7 @@ mavenPublishing {
     signAllPublications()
 
     coordinates(project.group.toString(), artifactId, project.version.toString())
-
+    
     pom {
         name = artifactId
         description = project.description
@@ -74,7 +74,7 @@ mavenPublishing {
                 id = project.property("developer.id") as String
                 name = project.property("developer.name") as String
                 email = project.property("developer.email") as String
-                url = "https://github.com/$gitHubOrg"
+                url = orgUrl
             }
         }
         scm {
