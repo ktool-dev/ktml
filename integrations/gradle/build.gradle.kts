@@ -17,6 +17,11 @@ dependencies {
     compileOnly(kotlin("gradle-plugin"))
 }
 
+signing {
+    useInMemoryPgpKeys(System.getenv("SIGNING_KEY"), System.getenv("SIGNING_PASSWORD"))
+    sign(publishing.publications)
+}
+
 gradlePlugin {
     val repoPath = project.property("scm.repo.path") as String
     val pluginPath = "https://$repoPath/integrations/gradle"

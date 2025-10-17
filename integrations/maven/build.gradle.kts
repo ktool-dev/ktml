@@ -1,6 +1,7 @@
 plugins {
     kotlin("jvm")
     `maven-publish`
+    signing
 }
 
 kotlin {
@@ -17,6 +18,11 @@ dependencies {
     compileOnly(libs.maven.core)
     compileOnly(libs.maven.plugin.annotations)
     annotationProcessor(libs.maven.plugin.annotations)
+}
+
+signing {
+    useInMemoryPgpKeys(System.getenv("SIGNING_KEY"), System.getenv("SIGNING_PASSWORD"))
+    sign(publishing.publications)
 }
 
 publishing {
