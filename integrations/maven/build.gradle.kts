@@ -1,7 +1,10 @@
+import com.vanniktech.maven.publish.JavadocJar
+import com.vanniktech.maven.publish.KotlinJvm
+
 plugins {
+    alias(libs.plugins.dokka)
+    alias(libs.plugins.vanniktech.mavenPublish)
     kotlin("jvm")
-    `maven-publish`
-    signing
 }
 
 kotlin {
@@ -20,62 +23,58 @@ dependencies {
     annotationProcessor(libs.maven.plugin.annotations)
 }
 
-signing {
-    useInMemoryPgpKeys(System.getenv("SIGNING_KEY"), System.getenv("SIGNING_PASSWORD"))
-    sign(publishing.publications)
+description = "Developer mode for KTML"
+
+val javadocJar by tasks.registering(Jar::class) {
+    dependsOn(tasks.dokkaGeneratePublicationHtml)
+    from(tasks.dokkaGeneratePublicationHtml.flatMap { it.outputDirectory })
+    archiveClassifier.set("javadoc")
 }
 
-publishing {
-    publications {
-        create<MavenPublication>("maven") {
-            val rootName = rootProject.name
-            val orgUrl = project.property("scm.org.url") as String
-            val repoPath = project.property("scm.repo.path") as String
-            val projectUrl = "https://$repoPath"
+mavenPublishing {
+    val rootName = rootProject.name
+    val orgUrl = project.property("scm.org.url") as String
+    val artifactId = "$rootName-${project.name}"
+    val repoPath = project.property("scm.repo.path") as String
+    val projectUrl = "https://$repoPath"
 
-            groupId = project.group.toString()
-            artifactId = "$rootName-${project.name}"
-            version = project.version.toString()
+    configure(
+        KotlinJvm(
+            javadocJar = JavadocJar.Dokka("javadocJar"),
+            sourcesJar = true,
+        )
+    )
 
-            from(components["java"])
+    publishToMavenCentral()
 
-            pom {
-                name = artifactId
-                description = project.description
-                inceptionYear = project.property("inception.year") as String
-                url = projectUrl
-                licenses {
-                    license {
-                        name = project.property("license.name") as String
-                        url = project.property("license.url") as String
-                        distribution = project.property("license.url") as String
-                    }
-                }
-                developers {
-                    developer {
-                        id = project.property("developer.id") as String
-                        name = project.property("developer.name") as String
-                        email = project.property("developer.email") as String
-                        url = orgUrl
-                    }
-                }
-                scm {
-                    url = projectUrl
-                    connection = "scm:git:git://$repoPath.git"
-                    developerConnection = "scm:git:ssh://git@$repoPath.git"
-                }
+    signAllPublications()
+
+    coordinates(project.group.toString(), artifactId, project.version.toString())
+
+    pom {
+        name = artifactId
+        description = project.description
+        inceptionYear = project.property("inception.year") as String
+        url = projectUrl
+        licenses {
+            license {
+                name = project.property("license.name") as String
+                url = project.property("license.url") as String
+                distribution = project.property("license.url") as String
             }
         }
-    }
-
-    repositories {
-        maven {
-            name = "mavenCentral"
-            url = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
-            credentials {
-                username = System.getenv("CENTRAL_PORTAL_USERNAME")
-                password = System.getenv("CENTRAL_PORTAL_PASSWORD")
+        developers {
+            developer {
+                id = project.property("developer.id") as String
+                name = project.property("developer.name") as String
+                email = project.property("developer.email") as String
+                url = orgUrl
             }
+        }
+        scm {
+            url = projectUrl
+            connection = "scm:git:git://$repoPath.git"
+            developerConnection = "scm:git:ssh://git@$repoPath.git"
         }
     }
 }
