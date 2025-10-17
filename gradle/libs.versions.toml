@@ -45,6 +45,7 @@ maven-core = { module = "org.apache.maven:maven-core", version.ref = "maven" }
 maven-plugin-annotations = { module = "org.apache.maven.plugin-tools:maven-plugin-annotations", version.ref = "maven-plugin-tools" }
 spring-webmvc = { module = "org.springframework:spring-webmvc", version.ref = "spring" }
 spring-boot-starter-web = { module = "org.springframework.boot:spring-boot-starter-web", version.ref = "spring-boot" }
+spring-boot-autoconfigure = { module = "org.springframework.boot:spring-boot-autoconfigure", version.ref = "spring-boot" }
 jakarta-servlet-api = { module = "jakarta.servlet:jakarta.servlet-api", version.ref = "jakarta-servlet" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 

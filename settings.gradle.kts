@@ -25,13 +25,8 @@ integration("spring")
 integration("ktor")
 integration("javalin")
 
-application("example-ktor")
-application("example-javalin")
-application("example-spring")
-
 fun library(name: String) = includeType("libraries", name)
 fun integration(name: String) = includeType("integrations", name)
-fun application(name: String) = includeType("applications", name)
 
 fun includeType(dir: String, name: String) {
     include(name)

@@ -15,6 +15,7 @@ dependencies {
     implementation(project(":runtime"))
     compileOnly(libs.spring.webmvc)
     compileOnly(libs.jakarta.servlet.api)
+    compileOnly(libs.spring.boot.autoconfigure)
     implementation(libs.kotlinx.coroutines.core)
 
     testImplementation(libs.ktool.kotest.bdd)
@@ -56,7 +57,7 @@ mavenPublishing {
     signAllPublications()
 
     coordinates(project.group.toString(), artifactId, project.version.toString())
-    
+
     pom {
         name = artifactId
         description = project.description
