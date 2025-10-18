@@ -2,31 +2,33 @@
 
 # Kotlin Multiplatform HTML Template Engine
 
-A type-safe HTML template engine for Kotlin Multiplatform that generates Kotlin functions from `.ktml` template files.
+A blazingly fast, type-safe HTML template engine for Kotlin Multiplatform that transforms `.ktml` templates into
+optimized Kotlin functions.
 
-## Overview
+## Why KTML?
 
-KTML transforms HTML templates into type-safe Kotlin functions, enabling compile-time verification of template
-parameters and seamless integration with Kotlin code. Templates support parameter binding, conditional rendering, loops,
-and composition, which allows you to break templates down into reusable components with no performance overhead since
-every template call is just a function call.
+KTML is designed to make building web applications with Kotlin simple, safe, and fast:
 
-## Features
-
-- **Type Safety** - Template parameters are validated at compile time
-- **Multiplatform** - Works on JVM and Native platforms
-- **Template Composition** - Nest templates and reuse components
-- **Kotlin Integration** - Embed Kotlin expressions directly in templates
-- **Conditional Rendering** - Use `if` attributes and `<if>` tags for dynamic content
-- **Loop Support** - Iterate over collections with `each` attributes
-- **Content Parameters** - Pass HTML content blocks as parameters
-- **Web Server** - Built-in Ktor server with hot-reloading during development
+- **🚀 Just HTML** - templates are valid HTML
+- **🧩 Component Based** - Custom tags are trivial to create, making it easy to break down content into reusable
+  components
+- **🔒 Type Safety** - Full compile-time type checking with nullable types, default parameters, and imported types from
+  your codebase
+- **📄 Flexible Template Types** - Support for full pages (with `<html>` root), custom tags (reusable components), and
+  fragments (embeddable or directly routable)
+- **⚡ Blazing Fast** - Templates compile to pure Kotlin functions with little runtime overhead, even with hundreds of
+  custom tags
+- **🎯 Simple API** - Only two special attributes (`if` and `each`) to learn—the rest is just HTML and Kotlin
+- **🌍 Kotlin Multiplatform** - Works on JVM and Native platforms
+- **🔥 Hot Reloading** - Instant template updates in dev mode without restarting your server
+- **💻 Embedded Kotlin** - Use `<script type="text/kotlin">` tags for complex processing directly in templates (use with
+  care 🙂)
 
 ## Quick Start
 
-### 1. Define a Template
+### 1. Create a Custom Tag Component
 
-Create a `.ktml` file with a custom root element defining parameters as attributes:
+Custom tags let you build reusable components with type-safe parameters that can be included in other templates:
 
 ```html
 <!-- card.ktml -->
@@ -42,262 +44,258 @@ Create a `.ktml` file with a custom root element defining parameters as attribut
 </card>
 ```
 
-### 2. Generate and Execute Templates
+### 2. Create a Full Page Template
 
-On JVM, templates are compiled automatically at runtime:
-
-```kotlin
-val processor = KtmlDynamicProcessor(
-    templateDir = "templates/",
-    outputDirectory = "build/generated/ktml",
-    compiledDirectory = "build/generated/ktml-compiled"
-)
-val engine = KtmlEngine(processor)
-
-// Render a page
-val writer = StringContentWriter()
-engine.writePage(Context(writer, mapOf("userName" to "John")), "dashboard")
-val html = writer.toString()
-```
-
-### 3. Run the Web Server
-
-Start the built-in Ktor server with hot-reloading:
-
-```kotlin
-KtmlDynamicProcessor("templates/").createWebApp().start(port = 8080)
-```
-
-Or use the CLI:
-
-```bash
-# Run with current directory as template root
-./gradlew run
-
-# Or specify a template directory
-./gradlew run --args="/path/to/templates"
-```
-
-## Template Syntax
-
-### Parameters
-
-**Basic Parameters:**
+Pages use `<html>` as the root and can be rendered from a controller. A template can import types from your code and use
+values from a context model.
 
 ```html
+<!-- dashboard.ktml -->
+<!DOCTYPE html>
 
-<my-button text="String" onClick="String">
-    <button onclick="${raw(onClick)}">${text}</button>
-</my-button>
-```
+import com.myapp.User
 
-**Parameters with Default Values:**
-
-```html
-
-<page-layout title='String = "No Title"' header="Content" content="Content">
-    <head>
-        <title>${title}</title>
-    </head>
-    <body>
-    <div class="header">${header}</div>
-    <div class="content">${content}</div>
-    </body>
-</page-layout>
-```
-
-**Context Parameters:**
-Use the `ctx-` prefix to pass data from the Context model:
-
-```html
-
-<sidebar ctx-sideBarItems="List<SideBarItem> = listOf()">
-    <div class="sidebar">
-        <a each="${item in sideBarItems}" href="${item.href}">${item.name}</a>
-    </div>
-</sidebar>
-```
-
-Then pass data via the Context:
-
-```kotlin
-val data = mapOf("sideBarItems" to listOf(SideBarItem("Home", "/")))
-engine.writePage(Context(writer, data), "sidebar")
-```
-
-### Content Parameters
-
-Content parameters allow you to pass HTML blocks as parameters:
-
-**Parameters with Default Values:**
-
-```html
-
-<page-layout title='String = "No Title"' header="Content" content="Content">
-    <head>
-        <title>${title}</title>
-    </head>
-    <body>
-    <div class="header">${header}</div>
-    <div class="content">${content}</div>
-    </body>
-</page-layout>
-```
-
-**Context Parameters:**
-Use the `ctx-` prefix to pass data from the Context model:
-
-```html
-
-<card header="Content? = null" content="Content">
-    <div class="card">
-        <div if="${header != null}" class="card-header">
-            ${header}
-        </div>
-        <div class="card-body">
-            ${content}
-        </div>
-    </div>
-</card>
-```
-
-Call templates with named content blocks:
-
-```html
-
+<html lang="en" user="User">
+<head>
+    <title>Dashboard</title>
+</head>
+<body>
 <card>
-    <header>
-        <h3>Items</h3>
-    </header>
-    <ul>
-        <li>Item 1</li>
-        <li>Item 2</li>
-    </ul>
+    <header><h2>Welcome, ${user.name}!</h2></header>
+    <p if="${user.type == UserType.ADMIN}">You have admin privileges</p>
 </card>
+</body>
+</html>
 ```
 
-### Conditional Rendering
+### 3. Use in Your Application
 
-**Using `if` attribute:**
+With integrations for Spring MVC, Ktor, and Javalin, KTML works like other template engines. The Gradle plugin will
+automatically generate and compile the code from your templates.
+
+Here's an example using Ktor:
+
+```kotlin
+fun main() {
+    embeddedServer(CIO, port = 8080, host = "0.0.0.0") {
+        install(KtmlPlugin)
+        configureRouting()
+    }.start(wait = true)
+}
+
+fun Application.configureRouting() {
+    routing {
+        get("/") {
+            call.respondKtml(path = "dashboard", model = mapOf("user" to User()))
+        }
+    }
+}
+```
+
+Check out other [example applications here](https://github.com/ktool-dev/ktml-examples)!
+
+## Template Types
+
+KTML supports three template types, each with a specific purpose:
+
+### 1. Full Pages (`<html>` root)
+
+Templates with `<html>` as the root element become pages accessible via web routes. All parameters declared on a page
+template will be pulled from the context model.
 
 ```html
-<h2 if="${user.type == UserType.ADMIN}">You are an admin!</h2>
-<h2 if="${user.type != UserType.GUEST}">You are not a guest!</h2>
+<!DOCTYPE html>
+<html lang="en" userName="String">
+<head><title>My Page</title></head>
+<body><h1>Hello, ${userName}!</h1></body>
+</html>
 ```
 
-**Using `<if>` tag with `<else>`:**
+### 2. Custom Tags (reusable components)
+
+Templates with custom root elements become reusable components:
 
 ```html
 
-<if test="${user.type == UserType.ADMIN}">
-    <h2>You are an admin!</h2>
-    <else>
-        <h2>You are not an admin!</h2>
-    </else>
-</if>
+<button-primary text="String" onClick='String = ""'>
+    <button class="btn-primary" onclick="${raw(onClick)}">
+        ${text}
+    </button>
+</button-primary>
 ```
 
-### Loops
+Use in other templates: `<button-primary text="Click me!" onClick="handleClick()" />`
 
-**Basic iteration:**
+### 3. Fragments (partial templates)
+
+Custom tags can also be labeled as fragments, which allows them to be called from other templates or call directly from
+a controller like a page. All parameter values will get populated from the context model.
 
 ```html
 
-<sidebar ctx-sideBarItems="List<SideBarItem> = listOf()">
-    <a each="${item in sideBarItems}" href="${item.href}">${item.name}</a>
-</sidebar>
+<user-info fragment userName="String" userEmail="String">
+    <h3>${userName}</h3>
+    <p>${userEmail}</p>
+</user-info>
 ```
 
-**Iteration with index:**
+## Type Safety Features
+
+### Nullable Types and Default Parameters
+
+KTML supports Kotlin's type system, including nullable types and default values:
 
 ```html
 
-<ul>
-    <li each="${(index, item) in items.withIndex()}">${item.name} - Item ${index}</li>
-</ul>
+<user-profile
+        name="String"
+        bio="String? = null"
+        role='String = "Member"'
+        isActive="Boolean = true">
+
+    <div class="profile">
+        <h2>${name}</h2>
+        <p if="${bio != null}">${bio}</p>
+        <span class="role">${role}</span>
+    </div>
+</user-profile>
 ```
 
-### Embedded Kotlin
+### Imported Types
 
-You can embed Kotlin code in your templates using the `<script type="text/kotlin">` tag:
-
-```html
-
-<timestamp>
-    <script type="text/kotlin">
-        val now = java.time.LocalDateTime.now()
-    </script>
-    <p>Generated at: ${now}</p>
-</timestamp>
-```
-
-### Importing Types
-
-Import types at the top of your template file:
+Import your own Kotlin types for full type safety:
 
 ```html
 import dev.ktml.User
 import dev.ktml.UserType
+import dev.ktml.models.Product
 
-<html lang="en" ctx-user="User">
-<h1>Hello, ${user.name}!</h1>
-<h2 if="${user.type == UserType.ADMIN}">You are an admin!</h2>
-</html>
+<product-card product="Product" user="User">
+    <div class="product">
+        <h3>${product.name}</h3>
+        <p>${product.price}</p>
+        <button if="${user.type == UserType.ADMIN}">Edit</button>
+    </div>
+</product-card>
 ```
 
-### HTML Pages
+### Context Parameters
 
-Root templates with `<html>` as the root element become pages accessible via web routes:
-
-```html
-<!DOCTYPE html>
-
-import dev.ktml.*
-
-<html lang="en" ctx-userName="String" ctx-user="User">
-<page-layout title="Dashboard - ${user.name}">
-    <header>
-        <h1>Dashboard</h1>
-    </header>
-    <content>
-        <h1>Hello, ${user.name}!</h1>
-    </content>
-</page-layout>
-</html>
-```
-
-File path `templates/dashboard.ktml` becomes accessible at `http://localhost:8080/dashboard`.
-
-### Raw Output
-
-Use `raw()` to output unescaped HTML:
+Use `ctx-` prefix for parameters passed via the Context model:
 
 ```html
 
-<my-button text="String" onClick="String">
-    <button onclick="${raw(onClick)}">${text}</button>
-</my-button>
+<sidebar ctx-items="List<MenuItem> = listOf()">
+    <nav>
+        <a each="${item in items}" href="${item.url}">${item.label}</a>
+    </nav>
+</sidebar>
 ```
+
+## Simple API: Just `if` and `each`
+
+KTML keeps it simple with only two special attributes to learn:
+
+### Conditional Rendering: `if`
+
+```html
+<h2 if="${user.isAdmin}">Admin Panel</h2>
+<p if="${user.balance > 0}">Balance: ${user.balance}</p>
+```
+
+### Loops: `each`
+
+```html
+
+<ul>
+    <li each="${item in items}">${item.name}</li>
+</ul>
+
+<!-- With index -->
+<div each="${(index, product) in products.withIndex()}">
+    ${index + 1}. ${product.name}
+</div>
+```
+
+## Embedded Kotlin for Complex Logic
+
+When you need more than simple expressions, embed Kotlin directly in templates:
+
+```html
+
+<report sales="List<Sale>">
+    <script type="text/kotlin">
+        val totalRevenue = sales.sumOf { it.amount }
+        val avgSale = totalRevenue / sales.size
+        val topSale = sales.maxByOrNull { it.amount }
+    </script>
+
+    <div class="report">
+        <h2>Sales Report</h2>
+        <p>Total Revenue: $${totalRevenue}</p>
+        <p>Average Sale: $${avgSale}</p>
+        <p if="${topSale != null}">Top Sale: $${topSale.amount}</p>
+    </div>
+</report>
+```
+
+## Content Parameters
+
+Pass HTML blocks as parameters for flexible composition:
+
+```html
+
+<modal title="String" footer="Content? = null" content="Content">
+    <div class="modal">
+        <div class="modal-header"><h3>${title}</h3></div>
+        <div class="modal-body">${content}</div>
+        <div if="${footer != null}" class="modal-footer">${footer}</div>
+    </div>
+</modal>
+```
+
+```html
+
+<modal title="Confirm Action">
+    <p>Are you sure you want to proceed?</p>
+    <footer>
+        <button>Cancel</button>
+        <button>Confirm</button>
+    </footer>
+</modal>
+```
+
+## Raw Output
+
+Use `raw()` to output unescaped HTML (use carefully!):
+
+```html
+
+<code-block code="String">
+    <pre><code>${raw(code)}</code></pre>
+</code-block>
+```
+
+## Performance
+
+KTML is designed for speed:
+
+- **Zero Runtime Overhead** - Templates compile to simple Kotlin functions
+- **No Reflection** - Everything is resolved at compile time
+- **Efficient Composition** - Custom tag calls are just function calls
+- **Optimized String Building** - Direct writer output with minimal allocations
+
+Rendering a complex page with hundreds of custom tags is as fast as manually writing the equivalent Kotlin string
+concatenation code.
 
 ## Building
 
 ```bash
 # Build all platforms
 ./gradlew build
-
-# Build JVM only
-./gradlew jvmJar
-
-# Build native binaries
-./gradlew linuxX64Binaries
-./gradlew macosX64Binaries
-./gradlew macosArm64Binaries
-./gradlew mingwX64Binaries
 ```
 
 ## Testing
-
-The project uses Kotest with a custom BDD framework:
 
 ```bash
 # Run all tests
@@ -307,6 +305,11 @@ The project uses Kotest with a custom BDD framework:
 ./gradlew jvmTest
 ```
 
+## Platform Support
+
+- **JVM** - Java 22+ required
+- **Native** - Linux x64, macOS x64/ARM64, Windows x64
+
 ## Dependencies
 
 - **Kotlin Multiplatform** - Core platform
@@ -315,10 +318,23 @@ The project uses Kotest with a custom BDD framework:
 - **Kotlinx Coroutines** - Async support
 - **Kotest** - Testing framework
 
-## Platform Support
+## Architecture
 
-- **JVM** - Java 22+ required
-- **Native** - Linux x64, macOS x64/ARM64, Windows x64
+KTML processes templates through a clean pipeline:
+
+1. **HTML Parsing** - Parse `.ktml` files using Ksoup
+2. **AST Generation** - Build abstract syntax tree
+3. **Kotlin Code Generation** - Generate type-safe Kotlin functions
+4. **Compilation** - Compile to bytecode (JVM) or native code
+5. **Execution** - Fast function calls at runtime
+
+Key components:
+
+- **KtmlEngine** - Main orchestrator for template processing
+- **TemplateParser** - Parses HTML templates
+- **KotlinFileGenerator** - Generates type-safe Kotlin functions
+- **Templates Registry** - Manages template dependencies
+- **Context System** - Handles type-safe parameter binding
 
 ## License
 
@@ -326,23 +342,10 @@ This project is licensed under the [Apache 2.0 License](LICENSE).
 
 ## Contributing
 
-Contributions are welcome! Please read our contributing guidelines and submit pull requests for any improvements.
+Contributions are welcome! Please:
 
 1. Fork the repository
 2. Create a feature branch
 3. Write tests for your changes
 4. Ensure all tests pass with `./gradlew test`
 5. Submit a pull request
-
-## Architecture
-
-KTML consists of several key components:
-
-- **KtmlEngine** - Main orchestrator for template processing
-- **TemplateParser** - Parses HTML templates using Ksoup
-- **KotlinFileGenerator** - Generates type-safe Kotlin functions
-- **Templates Registry** - Manages template dependencies and composition
-- **Context System** - Handles type-safe parameter binding
-
-Templates are processed through a pipeline: HTML → Parsed AST → Generated Kotlin Functions → Runtime Execution with type
-safety.
