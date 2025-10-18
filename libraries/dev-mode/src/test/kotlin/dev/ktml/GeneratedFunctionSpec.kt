@@ -21,13 +21,10 @@ private const val templateDir = "src/test/resources/templates"
 
 class GeneratedFunctionSpec : BddSpec({
     lateinit var engine: KtmlEngine
-    val processor = KtmlDynamicRegistry(
-        templateDir,
-        outputDirectory = "build/generated/ktml",
-        compiledDirectory = "build/generated/ktml-compiled",
-    )
+    lateinit var processor: KtmlDynamicRegistry
 
-    beforeSpec {
+    beforeEach {
+        processor = KtmlDynamicRegistry(templateDir)
         engine = KtmlEngine(processor)
     }
 
@@ -101,6 +98,17 @@ class GeneratedFunctionSpec : BddSpec({
         result.trimIndent() shouldContain "<div>Outer Context</div><div>Inner 1</div><div>Inner 2</div>"
     }
 
+    "test-fragment can be rendered" {
+        Given
+        val templateName = "test-fragment"
+
+        When
+        val result = writePage(templateName, mapOf("value" to "myTestValue"))
+
+        Then
+        result shouldContain "<span>myTestValue</span>"
+    }
+
     "reloads templates when a template is changed" {
         Given
         val templateName = "regenerated-template"
@@ -116,17 +124,6 @@ class GeneratedFunctionSpec : BddSpec({
         Then
         beforeContent shouldContain "Hello Before"
         afterContent shouldContain "Hello After"
-    }
-
-    "test-fragment can be rendered" {
-        Given
-        val templateName = "test-fragment"
-
-        When
-        val result = writePage(templateName, mapOf("value" to "myTestValue"))
-
-        Then
-        result shouldContain "<span>myTestValue</span>"
     }
 })
 
