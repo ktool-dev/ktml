@@ -12,7 +12,6 @@ private var templates = Templates()
 private const val basePackageName = "dev.ktml.templates"
 
 class KtmlRegistryGeneratorSpec : BddSpec({
-
     beforeEach {
         templates = Templates()
     }
@@ -25,7 +24,7 @@ class KtmlRegistryGeneratorSpec : BddSpec({
         )
 
         When
-        val result = KtmlRegistryGenerator.createKtmlRegistry(basePackageName, templates)
+        val result = createKtmlRegistry(basePackageName, templates)
 
         Then
         result shouldContain "object KtmlRegistryImpl : KtmlRegistry"
@@ -55,7 +54,7 @@ class KtmlRegistryGeneratorSpec : BddSpec({
         )
 
         When
-        val result = KtmlRegistryGenerator.createKtmlRegistry(basePackageName, templates)
+        val result = createKtmlRegistry(basePackageName, templates)
 
         Then
         result shouldContain """
@@ -90,7 +89,7 @@ class KtmlRegistryGeneratorSpec : BddSpec({
         )
 
         When
-        val result = KtmlRegistryGenerator.createKtmlRegistry(basePackageName, templates)
+        val result = createKtmlRegistry(basePackageName, templates)
 
         Then
         result shouldContain "TagParameter(\"text\", \"String\", true)"
@@ -107,7 +106,7 @@ class KtmlRegistryGeneratorSpec : BddSpec({
         )
 
         When
-        val result = KtmlRegistryGenerator.createKtmlRegistry(basePackageName, templates)
+        val result = createKtmlRegistry(basePackageName, templates)
 
         Then
         result shouldContain "import dev.ktml.templates.components.writeMyPage as writeComponentsMyPage"
@@ -127,7 +126,7 @@ class KtmlRegistryGeneratorSpec : BddSpec({
         )
 
         When
-        val result = KtmlRegistryGenerator.createKtmlRegistry(basePackageName, templates)
+        val result = createKtmlRegistry(basePackageName, templates)
 
         Then
         result shouldContain "\"header\" to { writeHeader() }"
@@ -141,7 +140,7 @@ class KtmlRegistryGeneratorSpec : BddSpec({
         )
 
         When
-        val result = KtmlRegistryGenerator.createKtmlRegistry(basePackageName, templates)
+        val result = createKtmlRegistry(basePackageName, templates)
 
         Then
         result shouldContain "import dev.ktml.Content"
@@ -165,7 +164,7 @@ class KtmlRegistryGeneratorSpec : BddSpec({
         )
 
         When
-        val result = KtmlRegistryGenerator.createKtmlRegistry(basePackageName, templates)
+        val result = createKtmlRegistry(basePackageName, templates)
 
         Then
         result shouldContain "\"button\" to { writeButton() }"

@@ -15,11 +15,12 @@ import kotlin.io.path.createTempDirectory
  */
 class KtmlDynamicRegistry(
     val templateDir: String,
+    watchFiles: Boolean = true,
     val onPathsChanged: () -> Unit = {},
     outputDirectory: String = createTempDirectory("ktml").toString(),
-    compiledDirectory: String = createTempDirectory("ktml-compile").toString()
+    compiledDirectory: String = createTempDirectory("ktml-compile").toString(),
 ) : KtmlRegistry {
-    constructor(templateDir: String) : this(templateDir, {})
+    constructor(templateDir: String, watchFiles: Boolean = true) : this(templateDir, watchFiles, {})
 
     private var _templateRegistry: KtmlRegistry? = null
     private val compileDir: File = File(compiledDirectory)
@@ -34,9 +35,9 @@ class KtmlDynamicRegistry(
     private val basePackageName: String get() = processor.basePackageName
 
     init {
-        KtmlFileWatcher(templateDir) { file, itemDeleted ->
-            reprocessFile(file, itemDeleted)
-        }.start()
+        if (watchFiles) {
+            KtmlFileWatcher(templateDir, ::reprocessFile).start()
+        }
     }
 
     private val ktmlRegistry: KtmlRegistry
