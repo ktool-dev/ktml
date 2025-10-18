@@ -94,6 +94,31 @@ fun Application.configureRouting() {
 
 Check out other [example applications here](https://github.com/ktool-dev/ktml-examples)!
 
+## Why build KTML when there are other template engines
+
+There are a lot of HTML template engines available for the JVM. I've used most of them. The two I like the most are
+Thymeleaf and Java Template Engine. In a lot of ways KTML is a combination of those two.
+
+### Thymeleaf
+
+From Thymeleaf I really like the concept of a template just being valid HTML, rather than having a bunch of added
+declarations in the file. The main issue I had with Thymeleaf is building custom tags was too difficult, and if you use
+them too much, it greatly affects page render speed. I also found their `replace` concept, with the idea of have demo
+content in the template, just wasn't practical and wasn't something we ever used. Plus, it makes invoking other
+templates rather cumbersome. So, it didn't have the natural composability I wanted and had major performance issues.
+
+### Java Template Engine
+
+I like the type safety that JTE has and the performance. The idea of generating code from the template and compiling it
+seemed like the best way to go from a performance perspective. I didn't care for how other templates were invoked, or
+that the template wasn't valid HTML like Thymeleaf. So, it also didn't have the natural composability I was looking for.
+
+### KTML is more like client side component frameworks
+
+Having built a lot of web apps with client side component frameworks like React, I really liked the idea of breaking a
+site down into reusable pieces of HTML that you use to build pages. I just also think SSR over SPA is often the right
+choice and leads to an easier development process.
+
 ## Template Types
 
 KTML supports three template types, each with a specific purpose:
