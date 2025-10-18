@@ -10,6 +10,11 @@ import java.io.File
 import java.net.URLClassLoader
 import kotlin.io.path.createTempDirectory
 
+object KtmlDynamicRegistryFactory : KtmlRegistryFactory {
+    override fun create(templateDir: String, outputDir: String): KtmlRegistry =
+        KtmlDynamicRegistry(templateDir, outputDir = outputDir)
+}
+
 /**
  * This implements the KtmlRegistry interface and will automatically reload templates if they change and recompile them.
  */
@@ -17,20 +22,17 @@ class KtmlDynamicRegistry(
     val templateDir: String,
     watchFiles: Boolean = true,
     val onPathsChanged: () -> Unit = {},
-    outputDirectory: String = createTempDirectory("ktml").toString(),
-    compiledDirectory: String = createTempDirectory("ktml-compile").toString(),
+    outputDir: String = createTempDirectory().toString(),
 ) : KtmlRegistry {
-    constructor(templateDir: String) : this(templateDir, true, {})
-
     private var _templateRegistry: KtmlRegistry? = null
-    private val compileDir: File = File(compiledDirectory)
-    private val outputDir: File = File(outputDirectory)
+    private val compileDir: File = File(outputDir).resolve("compiled")
+    private val generatedDir: File = File(outputDir).resolve("generated")
     private var exception: Exception? = null
 
     override val templates: Map<String, Content> get() = ktmlRegistry.templates
     override val tags: List<TagDefinition> get() = ktmlRegistry.tags
 
-    private val processor = KtmlProcessor(outputDirectory = outputDirectory)
+    private val processor = KtmlProcessor(outputDirectory = generatedDir.absolutePath)
 
     private val basePackageName: String get() = processor.basePackageName
 
@@ -66,8 +68,8 @@ class KtmlDynamicRegistry(
     }
 
     private fun loadTemplateRegistry(): KtmlRegistry {
-        outputDir.deleteRecursively()
-        outputDir.mkdirs()
+        generatedDir.deleteRecursively()
+        generatedDir.mkdirs()
         processor.processRootDirectories(listOf(templateDir))
         processor.generateTemplateCode()
         return compileTemplates()
@@ -98,7 +100,7 @@ class KtmlDynamicRegistry(
     private fun compile() {
         exception = null
         compileDir.deleteRecursively()
-        val errors = KotlinCompile.compileFilesToDir(outputDir.toPath(), compileDir.toPath())
+        val errors = KotlinCompile.compileFilesToDir(generatedDir.toPath(), compileDir.toPath())
         if (errors.isNotEmpty()) {
             val convertedErrors = errors.map {
                 val path = it.filePath.substringAfter(ROOT_PACKAGE_PATH)

@@ -4,17 +4,22 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import java.io.File
 import java.io.File.pathSeparator
 import java.io.File.separator
+import kotlin.io.path.createTempDirectory
 
 private val log = KotlinLogging.logger {}
 
+interface KtmlRegistryFactory {
+    fun create(templateDir: String, outputDir: String): KtmlRegistry
+}
+
 fun findKtmlRegistry(basePath: String = determineBasePath()): KtmlRegistry {
-    val dynamicRegistryClass = loadDynamicRegistryClass() ?: return findRegistryImpl()
+    val registryFactory = loadDynamicRegistryFactory() ?: return findRegistryImpl()
 
     val ktmlDir = breadthFirstSearchForKtmlDir(basePath)
 
     log.info { "Running with ktml directory: $ktmlDir" }
 
-    return createDynamicRegistry(dynamicRegistryClass, ktmlDir)
+    return registryFactory.create(ktmlDir, determineOutputDir(ktmlDir))
 }
 
 /**
@@ -31,6 +36,21 @@ private fun determineBasePath(): String {
     }
 
     return workingDir
+}
+
+private fun determineOutputDir(ktmlDir: String): String {
+    // Usually this is in a src/main/ktml directory. If there is a build or target directory near, use that.
+    if (ktmlDir.contains("/src/")) {
+        val dir = File(ktmlDir.substringBeforeLast("/src/"))
+
+        val buildDir = dir.resolve("build")
+        if (buildDir.exists()) return buildDir.resolve("ktml").absolutePath
+
+        val targetDir = dir.resolve("target")
+        if (targetDir.exists()) return targetDir.resolve("ktml").absolutePath
+    }
+
+    return createTempDirectory().toString()
 }
 
 private fun breadthFirstSearchForKtmlDir(basePath: String): String {
@@ -71,11 +91,9 @@ private fun findRegistryImpl(): KtmlRegistry = try {
     error("Could not find dev-mode module on the classpath or a generated KtmlRegistry.")
 }
 
-private fun loadDynamicRegistryClass(): Class<*>? = try {
-    Class.forName("dev.ktml.KtmlDynamicRegistry")
+private fun loadDynamicRegistryFactory(): KtmlRegistryFactory? = try {
+    val type = Class.forName("dev.ktml.KtmlDynamicRegistryFactory")
+    type.getField("INSTANCE").get(null) as KtmlRegistryFactory
 } catch (_: ClassNotFoundException) {
     null
 }
-
-private fun createDynamicRegistry(dynamicRegistryClass: Class<*>, templateDir: String): KtmlRegistry =
-    dynamicRegistryClass.getConstructor(String::class.java).newInstance(templateDir) as KtmlRegistry
