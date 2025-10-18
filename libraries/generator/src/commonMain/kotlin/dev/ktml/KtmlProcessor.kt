@@ -46,7 +46,7 @@ open class KtmlProcessor(private val moduleName: String = "", outputDirectory: S
         val path = file.toPath()
         if (!file.endsWith(".ktml") || path.isDirectory) return listOf()
         val (fileName, subPath) = parseFilePath(file, rootPath)
-        log.info { "Processing file: $subPath/$file.ktml" }
+        log.info { "Processing file: $subPath/$fileName.ktml" }
         return processTemplate(fileName, path.readText(), subPath)
     }
 
