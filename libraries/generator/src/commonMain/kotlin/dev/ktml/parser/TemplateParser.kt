@@ -19,10 +19,14 @@ class TemplateParser(private val moduleName: String = "") {
 
         val imports = parseImportStatements(content)
 
-        val handler = HtmlHandler(findSelfClosingTags(content))
+        val (normalizedContent, selfClosingTag) = findSelfClosingTags(content)
+
+        println(normalizedContent)
+
+        val handler = HtmlHandler(selfClosingTag)
 
         KsoupHtmlParser(handler = handler, options = parserOptions).apply {
-            write(content)
+            write(normalizedContent)
             end()
         }
 
@@ -80,15 +84,30 @@ class TemplateParser(private val moduleName: String = "") {
      * Since Ksoup only handles known HTML self-closing tags, we have to find any other tags that are self-closing and
      * add them to the list of self-closing tags, so they are parsed correctly.
      */
-    private fun findSelfClosingTags(content: String): Set<String> {
-        val selfClosingRegex = """<(\w+(?:-\w+)*)[^>]*\s*/>""".toRegex()
-        return selfClosingRegex.findAll(content)
+    private val selfClosingRegex = """<(\w+(?:-\w+)*)[^>]*\s*/>""".toRegex()
+
+    private fun findSelfClosingTags(content: String): Pair<String, List<String>> {
+        val selfClosingTags = selfClosingRegex.findAll(content)
             .map { it.groupValues[1] }
-            .toSet()
+            .toMutableSet()
+        var normalized = content
+
+        // If some tags are used as self-closing in one place and not another, we need to normalize the usage to always
+        // have a close tag.
+        selfClosingTags.toList().forEach { tagName ->
+            // Check if the tag also has closing tag usage
+            if (Regex("""<$tagName[^>]*>\s*</$tagName>""").containsMatchIn(content)) {
+                // Replace self-closing with explicit closing tags
+                normalized = normalized.replace("""<($tagName)([^>]*)\s*/>""".toRegex(), "<$1$2></$1>")
+                selfClosingTags.remove(tagName)
+            }
+        }
+
+        return Pair(normalized, selfClosingTags.toList())
     }
 
-    private fun extractParameters(tagName: String, attrs: Map<String, String>): List<ParsedTemplateParameter> {
-        val params = attrs.filter { it.key != FRAGMENT_INDICATOR }.map { (name, typeSpec) ->
+    private fun extractParameters(tagName: String, attrs: Map<String, String>): List<ParsedTemplateParameter> =
+        attrs.filter { it.key != FRAGMENT_INDICATOR }.map { (name, typeSpec) ->
             val parts = typeSpec.split("=", limit = 2)
             val defaultValue = if (parts.size > 1) parts[1].trim() else null
 
@@ -100,20 +119,4 @@ class TemplateParser(private val moduleName: String = "") {
                 { it.name } // Alphabetical within each group
             ))
 
-        /**
-         * This is because tags need to either always have content or never have it, or the parser won't work correctly.
-         * See also [dev.ktml.parser.HtmlHandler.onOpenTag].
-         */
-        val contentParams = params.filter { it.isContent }
-        if (contentParams.isNotEmpty() && contentParams.all { it.hasDefault }) {
-            error(
-                """
-                KTML has a current limitation that a custom tag has to either never have content or always have content.
-                But the tag $tagName has content parameters that all have defaults, which violates this constraint.
-            """.trimIndent()
-            )
-        }
-
-        return params
-    }
 }

@@ -219,7 +219,7 @@ class TemplateParserSpec : BddSpec({
         }
     }
 
-    "should parse self closing tag properly" {
+    "should parse self-closing tag properly" {
         Given
         val content = """
             <my-button>
@@ -234,6 +234,24 @@ class TemplateParserSpec : BddSpec({
 
         Then
         template.root.children shouldHaveSize 3
+    }
+
+    "can handle self-closing and non self-closing tag properly" {
+        Given
+        val content = """
+            <my-button>
+                <some-tag value="hello"/>
+                <some-tag value="hello"></some-tag>
+                <br>
+                <div>Hello</div>
+            </my-button>
+        """.trimIndent()
+
+        When
+        val template = parse(content)
+
+        Then
+        template.root.children shouldHaveSize 4
     }
 
     "can parse a template with some nested kotlin code" {

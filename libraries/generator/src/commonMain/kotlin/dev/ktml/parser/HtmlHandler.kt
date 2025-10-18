@@ -29,10 +29,6 @@ class HtmlHandler(private val selfClosingTags: Collection<String> = emptyList())
             elementStack.last().addChild(element)
         }
 
-        /**
-         * Don't add self-closing tags to the stack since they can't have content.
-         * See also [dev.ktml.parser.TemplateParser.extractParameters].
-         */
         if (!selfClosingTags.contains(name)) {
             elementStack.add(element)
         }
