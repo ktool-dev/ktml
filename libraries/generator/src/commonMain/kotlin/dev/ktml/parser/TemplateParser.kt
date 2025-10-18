@@ -42,7 +42,7 @@ class TemplateParser(private val moduleName: String = "") {
                 isPage = true,
                 inRegistry = true,
                 subPath = subPath,
-                parameters = extractParameters(contextParams),
+                parameters = extractParameters(fileName, contextParams),
                 imports = imports,
                 root = HtmlElement.Tag("index", mapOf(), mutableListOf(filteredElement)),
                 dockTypeDeclaration = doctype,
@@ -56,7 +56,7 @@ class TemplateParser(private val moduleName: String = "") {
                 name = it.name,
                 subPath = subPath,
                 inRegistry = it.attrs.any { (key, value) -> key == FRAGMENT_INDICATOR && value != "false" },
-                parameters = extractParameters(it.attrs),
+                parameters = extractParameters(it.name, it.attrs),
                 imports = imports,
                 root = it,
                 externalScriptContent = handler.externalScriptContent,
@@ -87,8 +87,8 @@ class TemplateParser(private val moduleName: String = "") {
             .toSet()
     }
 
-    private fun extractParameters(attrs: Map<String, String>) =
-        attrs.filter { it.key != FRAGMENT_INDICATOR }.map { (name, typeSpec) ->
+    private fun extractParameters(tagName: String, attrs: Map<String, String>): List<ParsedTemplateParameter> {
+        val params = attrs.filter { it.key != FRAGMENT_INDICATOR }.map { (name, typeSpec) ->
             val parts = typeSpec.split("=", limit = 2)
             val defaultValue = if (parts.size > 1) parts[1].trim() else null
 
@@ -99,4 +99,21 @@ class TemplateParser(private val moduleName: String = "") {
                 { it.isContent && it.name == "content" }, // Content "content" parameter goes last
                 { it.name } // Alphabetical within each group
             ))
+
+        /**
+         * This is because tags need to either always have content or never have it, or the parser won't work correctly.
+         * See also [dev.ktml.parser.HtmlHandler.onOpenTag].
+         */
+        val contentParams = params.filter { it.isContent }
+        if (contentParams.isNotEmpty() && contentParams.all { it.hasDefault }) {
+            error(
+                """
+                KTML has a current limitation that a custom tag has to either never have content or always have content.
+                But the tag $tagName has content parameters that all have defaults, which violates this constraint.
+            """.trimIndent()
+            )
+        }
+
+        return params
+    }
 }
