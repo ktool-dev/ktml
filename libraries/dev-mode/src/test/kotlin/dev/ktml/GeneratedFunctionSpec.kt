@@ -17,7 +17,7 @@ data class User(val name: String, val type: UserType)
 
 data class SideBarItem(val name: String, val href: String)
 
-private const val templateDir = "src/test/resources/templates"
+private const val templateDir = "src/test/ktml"
 
 class GeneratedFunctionSpec : BddSpec({
     lateinit var engine: KtmlEngine
