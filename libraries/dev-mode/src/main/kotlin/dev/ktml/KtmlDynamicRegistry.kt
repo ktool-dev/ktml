@@ -12,7 +12,7 @@ import kotlin.io.path.createTempDirectory
 
 object KtmlDynamicRegistryFactory : KtmlRegistryFactory {
     override fun create(templateDir: String, outputDir: String): KtmlRegistry =
-        KtmlDynamicRegistry(templateDir, outputDir = outputDir)
+        KtmlDynamicRegistry(templateDir, outputDir = outputDir).apply { initializeRegistry() }
 }
 
 /**
@@ -48,6 +48,10 @@ class KtmlDynamicRegistry(
             if (exception != null) throw exception!!
             return _templateRegistry!!
         }
+
+    fun initializeRegistry() {
+        _templateRegistry = loadTemplateRegistry()
+    }
 
     fun reprocessFile(file: String, itemDeleted: Boolean) {
         val pathsBefore = processor.pagePaths
