@@ -5,8 +5,7 @@ import dev.ktml.parser.HtmlElement
 import dev.ktml.parser.ParsedTemplate
 import dev.ktml.parser.Templates
 import dev.ktml.parser.removeEmptyText
-import dev.ktml.util.isVoidTag
-import dev.ktml.util.requiresCloseTag
+import dev.ktml.util.isNotVoidTag
 import dev.ktml.util.toImport
 import dev.ktool.gen.TRIPLE_QUOTE
 import dev.ktool.gen.safe
@@ -129,14 +128,11 @@ class ContentGenerator(private val templates: Templates) {
                 }
             }
 
-            if (tag.children.isNotEmpty() || tag.name.requiresCloseTag()) {
-                contentBuilder.raw(">")
+            contentBuilder.raw(">")
+
+            if (tag.name.isNotVoidTag()) {
                 generateChildContent(template, tag.children, currentNoInterpolation)
                 contentBuilder.raw("</${tag.name}>")
-            } else if (!tag.name.isVoidTag()) {
-                contentBuilder.raw(" />")
-            } else {
-                contentBuilder.raw(">")
             }
         }
 

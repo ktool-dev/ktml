@@ -22,9 +22,7 @@ internal data class Path(val path: String) {
 
 internal fun String.toPath() = Path(this)
 
-fun String.isVoidTag() = VOID_TAGS.find { it.equals(this, ignoreCase = true) } != null
-
-fun String.requiresCloseTag() = TAGS_REQUIRING_CLOSE.find { it.equals(this, ignoreCase = true) } != null
+fun String.isNotVoidTag() = VOID_TAGS.find { it.equals(this, ignoreCase = true) } == null
 
 fun String.toImport() = Import(
     packagePath = substringAfter("import ").substringBefore(" as "),
@@ -33,8 +31,6 @@ fun String.toImport() = Import(
 
 const val ROOT_PACKAGE = "dev.ktml.templates"
 const val ROOT_PACKAGE_PATH = "dev/ktml/templates"
-
-private val TAGS_REQUIRING_CLOSE = setOf("script")
 
 private val VOID_TAGS = setOf(
     "br", "hr", "img", "input", "meta", "link", "area", "base", "col", "embed", "param", "source", "track", "wbr",
