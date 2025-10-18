@@ -12,7 +12,5 @@ import org.springframework.context.annotation.Bean
 open class KtmlAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
-    open fun ktmlViewResolver(): KtmlViewResolver {
-        return KtmlViewResolver()
-    }
+    open fun ktmlViewResolver() = KtmlViewResolver()
 }
