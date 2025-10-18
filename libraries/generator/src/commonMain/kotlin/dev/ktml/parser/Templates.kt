@@ -19,8 +19,8 @@ class Templates(ktmlRegistries: List<KtmlRegistry> = listOf()) {
         templates.clear()
     }
 
-    val allTags: Collection<TagDefinition> get() = tags.values
-    val registryTemplates: Collection<ParsedTemplate> get() = templates.values
+    val allTags: Collection<TagDefinition> get() = tags.values.toList()
+    val registryTemplates: Collection<ParsedTemplate> get() = templates.values.toList()
 
     fun register(template: TagDefinition) {
         require(!tags.containsKey(template.name)) { "Tag '${template.path}' already registered" }

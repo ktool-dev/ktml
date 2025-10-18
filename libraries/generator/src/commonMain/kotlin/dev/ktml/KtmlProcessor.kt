@@ -1,7 +1,7 @@
 package dev.ktml
 
 import dev.ktml.gen.KotlinFileGenerator
-import dev.ktml.gen.KtmlRegistryGenerator
+import dev.ktml.gen.createKtmlRegistry
 import dev.ktml.parser.ParsedTemplate
 import dev.ktml.parser.TemplateParser
 import dev.ktml.parser.Templates
@@ -90,7 +90,7 @@ open class KtmlProcessor(private val moduleName: String = "", outputDirectory: S
     }
 
     fun generateRegistry() {
-        val content = KtmlRegistryGenerator.createKtmlRegistry(basePackageName, templates)
+        val content = createKtmlRegistry(basePackageName, templates)
         Path("$basePath/KtmlRegistryImpl.kt").mkDirs().writeText(content)
     }
 
