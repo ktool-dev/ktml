@@ -396,6 +396,58 @@ class ContentGeneratorSpec : BddSpec({
             raw($TEMPLATE_CONSTANT, 0, 38)
         """.trimIndent()
     }
+
+    "can use each on call to custom tag" {
+        Given
+        val template = $$"""
+            <tag-with-multiple-buttons>
+                <script type="text/kotlin">
+                    val textItems = listOf("One", "Two", "Three")
+                </script>
+                <my-button each="${text in textItems}" onClick="null" text="${text}" />
+            </tag-with-multiple-buttons>
+        """.parse()
+
+        When
+        val result = contentGenerator.generateTemplateContent(template)
+
+        Then
+        result.body.render() shouldBe """
+             {
+                val textItems = listOf("One", "Two", "Three")
+                for (text in textItems) {
+                    writeMyButton(
+                        onClick = "null",
+                        text = text,
+                    )
+                }
+            }
+        """.trimIndent()
+    }
+
+    "can use if on call to custom tag" {
+        Given
+        val template = $$"""
+            <tag-with-if-buttons test="Int">
+                <my-button if="${test == 4}" onClick="null" text="something" />
+            </tag-with-if-buttons>
+        """.parse()
+
+        When
+        val result = contentGenerator.generateTemplateContent(template)
+
+        Then
+        result.body.render() shouldBe """
+             {
+                if (test == 4) {
+                    writeMyButton(
+                        onClick = "null",
+                        text = "something",
+                    )
+                }
+            }
+        """.trimIndent()
+    }
 })
 
 private fun String.parse() =

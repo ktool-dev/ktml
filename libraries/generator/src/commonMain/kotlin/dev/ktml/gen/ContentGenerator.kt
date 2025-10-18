@@ -92,20 +92,6 @@ class ContentGenerator(private val templates: Templates) {
     private fun generateTagContent(template: ParsedTemplate, tag: HtmlElement.Tag, noInterpolation: Boolean = false) {
         logger.debug { "Generating tag content: ${tag.name}" }
 
-        val customTag = templates.locate(template.subPath, tag.name)
-
-        // This prevents a template from calling itself
-        if (customTag != null && !rootTemplate.sameTemplate(customTag)) {
-            return generateCustomTagCall(template, tag, customTag)
-        }
-
-        if (tag.isKotlinScript) {
-            tag.children.joinToString("") { (it as HtmlElement.Text).content.trim() }
-                .split("\n").also { contentBuilder.kotlin(it) }
-
-            return
-        }
-
         tag.attrs["if"]?.let {
             contentBuilder.startControlFlow("if", expressionParser.extractSingleExpression(it))
         }
@@ -114,34 +100,44 @@ class ContentGenerator(private val templates: Templates) {
             contentBuilder.startControlFlow("for", expressionParser.extractSingleExpression(it))
         }
 
-        val currentNoInterpolation = noInterpolation || tag.attrs.containsKey("ignore-kotlin")
+        val customTag = templates.locate(template.subPath, tag.name)
 
-        contentBuilder.raw("<${tag.name}")
-
-        tag.attrs.filterNot { it.key in filteredAttrs }.forEach { (name, value) ->
-            if (!currentNoInterpolation && expressionParser.hasKotlinExpression(value)) {
-                contentBuilder.raw(" $name=\"")
-                expressionParser.extractMultipleExpressions(value).forEach { part ->
-                    if (part.isKotlin) {
-                        contentBuilder.write(part.text)
-                    } else {
-                        contentBuilder.raw(part.text)
-                    }
-                }
-                contentBuilder.raw("\"")
-            } else {
-                contentBuilder.raw(" $name=\"$value\"")
-            }
-        }
-
-        if (tag.children.isNotEmpty() || tag.name.requiresCloseTag()) {
-            contentBuilder.raw(">")
-            generateChildContent(template, tag.children, currentNoInterpolation)
-            contentBuilder.raw("</${tag.name}>")
-        } else if (!tag.name.isVoidTag()) {
-            contentBuilder.raw(" />")
+        // This prevents a template from calling itself
+        if (customTag != null && !rootTemplate.sameTemplate(customTag)) {
+            generateCustomTagCall(template, tag, customTag)
+        } else if (tag.isKotlinScript) {
+            tag.children.joinToString("") { (it as HtmlElement.Text).content.trim() }
+                .split("\n").also { contentBuilder.kotlin(it) }
         } else {
-            contentBuilder.raw(">")
+            val currentNoInterpolation = noInterpolation || tag.attrs.containsKey("ignore-kotlin")
+
+            contentBuilder.raw("<${tag.name}")
+
+            tag.attrs.filterNot { it.key in filteredAttrs }.forEach { (name, value) ->
+                if (!currentNoInterpolation && expressionParser.hasKotlinExpression(value)) {
+                    contentBuilder.raw(" $name=\"")
+                    expressionParser.extractMultipleExpressions(value).forEach { part ->
+                        if (part.isKotlin) {
+                            contentBuilder.write(part.text)
+                        } else {
+                            contentBuilder.raw(part.text)
+                        }
+                    }
+                    contentBuilder.raw("\"")
+                } else {
+                    contentBuilder.raw(" $name=\"$value\"")
+                }
+            }
+
+            if (tag.children.isNotEmpty() || tag.name.requiresCloseTag()) {
+                contentBuilder.raw(">")
+                generateChildContent(template, tag.children, currentNoInterpolation)
+                contentBuilder.raw("</${tag.name}>")
+            } else if (!tag.name.isVoidTag()) {
+                contentBuilder.raw(" />")
+            } else {
+                contentBuilder.raw(">")
+            }
         }
 
         tag.attrs.filter { it.key in controlAttrs }.forEach { _ ->

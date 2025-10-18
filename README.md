@@ -126,11 +126,12 @@ KTML supports three template types, each with a specific purpose:
 ### 1. Full Pages
 
 Templates with `<html>` as the root element become pages accessible via web routes. All parameters declared on a page
-template will be pulled from the context model.
+template will be pulled from the context model. Since a page isn't called from another tag, all the parameters to it
+have to come from the context model, so all parameter names have to be prefixed with `ctx-`.
 
 ```html
 <!DOCTYPE html>
-<html lang="en" userName="String">
+<html lang="en" ctx-userName="String">
 <head><title>My Page</title></head>
 <body><h1>Hello, ${userName}!</h1></body>
 </html>
