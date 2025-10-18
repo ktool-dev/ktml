@@ -98,7 +98,7 @@ Check out other [example applications here](https://github.com/ktool-dev/ktml-ex
 
 KTML supports three template types, each with a specific purpose:
 
-### 1. Full Pages (`<html>` root)
+### 1. Full Pages
 
 Templates with `<html>` as the root element become pages accessible via web routes. All parameters declared on a page
 template will be pulled from the context model.
@@ -111,7 +111,7 @@ template will be pulled from the context model.
 </html>
 ```
 
-### 2. Custom Tags (reusable components)
+### 2. Custom Tags
 
 Templates with custom root elements become reusable components:
 
@@ -126,10 +126,10 @@ Templates with custom root elements become reusable components:
 
 Use in other templates: `<button-primary text="Click me!" onClick="handleClick()" />`
 
-### 3. Fragments (partial templates)
+### 3. Fragments
 
-Custom tags can also be labeled as fragments, which allows them to be called from other templates or call directly from
-a controller like a page. All parameter values will get populated from the context model.
+Custom tags can also be labeled as fragments, which allows them to be called from other templates or called directly
+from a controller like a page. All template parameter values will get populated from the context model.
 
 ```html
 
@@ -181,7 +181,9 @@ import dev.ktml.models.Product
 
 ### Context Parameters
 
-Use `ctx-` prefix for parameters passed via the Context model:
+Sometimes templates need to access data that isn't passed directly to them by the calling template but comes from the
+context of the request. To have a template define a context value it uses we use `ctx-` prefix for the parameter. The
+generated code will automatically pull the value from the context object and ensure it's of the correct type:
 
 ```html
 
