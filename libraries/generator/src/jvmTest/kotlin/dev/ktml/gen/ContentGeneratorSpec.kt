@@ -304,10 +304,10 @@ class ContentGeneratorSpec : BddSpec({
         """.trimIndent()
     }
 
-    "if a tag calls itself it just prints out the raw content" {
+    "if a tag calls itself it works fine" {
         Given
         val template = $$"""
-            <tag>
+            <tag content="Content">
                 <tag>World</tag>
             </tag>
         """.parse()
@@ -317,9 +317,10 @@ class ContentGeneratorSpec : BddSpec({
 
         Then
         result.body.statements.first().toString().trim() shouldBe """
-            raw($TEMPLATE_CONSTANT, 0, 16)
+            writeTag {
+                raw(TEMPLATE_HTML, 0, 5)
+            }
         """.trimIndent()
-        result.templateConstant.initializer?.expression?.replace(TRIPLE_QUOTE, "") shouldBe """<tag>World</tag>"""
     }
 
     "can pass multiple content parameters" {

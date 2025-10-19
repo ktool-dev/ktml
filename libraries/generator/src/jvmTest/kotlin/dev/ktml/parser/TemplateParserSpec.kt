@@ -316,4 +316,32 @@ class TemplateParserSpec : BddSpec({
         Then
         template.inRegistry shouldBe false
     }
+
+    "tag with existing HTML element name throws an exception" {
+        Given
+        val content = """
+            <button>
+                Anything
+            </button>
+        """.trimIndent()
+
+        Expect
+        shouldThrow<IllegalStateException> {
+            parse(content)
+        }
+    }
+
+    "tag with existing SVG element name throws an exception" {
+        Given
+        val content = $$"""
+            <svg>
+                Anything
+            </svg>
+        """.trimIndent()
+
+        Expect
+        shouldThrow<IllegalStateException> {
+            parse(content)
+        }
+    }
 })

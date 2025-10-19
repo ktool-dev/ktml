@@ -2,6 +2,8 @@ package dev.ktml.parser
 
 import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlOptions
 import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlParser
+import dev.ktml.util.isHtmlElement
+import dev.ktml.util.isSvgElement
 
 private const val FRAGMENT_INDICATOR = "fragment"
 
@@ -20,8 +22,6 @@ class TemplateParser(private val moduleName: String = "") {
         val imports = parseImportStatements(content)
 
         val (normalizedContent, selfClosingTag) = findSelfClosingTags(content)
-
-        println(normalizedContent)
 
         val handler = HtmlHandler(selfClosingTag)
 
@@ -52,6 +52,11 @@ class TemplateParser(private val moduleName: String = "") {
                 dockTypeDeclaration = doctype,
                 externalScriptContent = handler.externalScriptContent,
             ).let(::listOf)
+        }
+
+        rootElements.forEach {
+            if (it.name.isHtmlElement()) error { "The tag ${it.name} is an existing HTML tag, so you can't use it as a custom tag name." }
+            if (it.name.isSvgElement()) error { "The tag ${it.name} is an existing SVG tag, so you can't use it as a custom tag name." }
         }
 
         return rootElements.map {

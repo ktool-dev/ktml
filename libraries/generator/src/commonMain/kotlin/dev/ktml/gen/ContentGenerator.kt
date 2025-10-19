@@ -101,8 +101,7 @@ class ContentGenerator(private val templates: Templates) {
 
         val customTag = templates.locate(template.subPath, tag.name)
 
-        // This prevents a template from calling itself
-        if (customTag != null && !rootTemplate.sameTemplate(customTag)) {
+        if (customTag != null) {
             generateCustomTagCall(template, tag, customTag)
         } else if (tag.isKotlinScript) {
             tag.children.joinToString("") { (it as HtmlElement.Text).content.trim() }
