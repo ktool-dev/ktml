@@ -55,12 +55,14 @@ class ContentBuilder {
         get() {
             endRaw()
 
-            return ContentAndRawConstants(writer.toString(), Property(
-                name = TEMPLATE_CONSTANT,
-                type = StringType,
-                initializer = ExpressionBody("$TRIPLE_QUOTE$allRawContent$TRIPLE_QUOTE"),
-                modifiers = listOf(Modifier.Private, Modifier.Const)
-            ))
+            return ContentAndRawConstants(
+                writer.toString(), Property(
+                    name = TEMPLATE_CONSTANT,
+                    type = StringType,
+                    initializer = ExpressionBody("$TRIPLE_QUOTE$allRawContent$TRIPLE_QUOTE"),
+                    modifiers = listOf(Modifier.Private, Modifier.Const)
+                )
+            )
         }
 
     fun write(kotlin: String) {

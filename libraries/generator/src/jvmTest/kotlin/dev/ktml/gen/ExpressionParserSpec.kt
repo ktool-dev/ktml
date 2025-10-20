@@ -91,7 +91,7 @@ class ExpressionParserSpec : BddSpec({
         val content = $$"Hello ${name}, you have ${count} messages"
 
         When
-        val result = content.extractMultipleExpressions()
+        val result = content.extractExpressions()
 
         Then
         result.size shouldBe 5
@@ -112,7 +112,7 @@ class ExpressionParserSpec : BddSpec({
         val content = $$"${greeting}${name}"
 
         When
-        val result = content.extractMultipleExpressions()
+        val result = content.extractExpressions()
 
         Then
         result.size shouldBe 2
@@ -127,7 +127,7 @@ class ExpressionParserSpec : BddSpec({
         val content = "Hello World"
 
         When
-        val result = content.extractMultipleExpressions()
+        val result = content.extractExpressions()
 
         Then
         result.size shouldBe 1
@@ -140,7 +140,7 @@ class ExpressionParserSpec : BddSpec({
         val content = ""
 
         When
-        val result = content.extractMultipleExpressions()
+        val result = content.extractExpressions()
 
         Then
         result.size shouldBe 0
@@ -151,7 +151,7 @@ class ExpressionParserSpec : BddSpec({
         val content = $$"${variable}"
 
         When
-        val result = content.extractMultipleExpressions()
+        val result = content.extractExpressions()
 
         Then
         result.size shouldBe 1
@@ -164,7 +164,7 @@ class ExpressionParserSpec : BddSpec({
         val content = $$"Value: ${a &amp; b}"
 
         When
-        val result = content.extractMultipleExpressions()
+        val result = content.extractExpressions()
 
         Then
         result.size shouldBe 2
@@ -179,7 +179,7 @@ class ExpressionParserSpec : BddSpec({
         val content = $$"Start ${obj.method(param1, param2)} middle ${another.call()} end"
 
         When
-        val result = content.extractMultipleExpressions()
+        val result = content.extractExpressions()
 
         Then
         result.size shouldBe 5
@@ -200,7 +200,7 @@ class ExpressionParserSpec : BddSpec({
         val content = $$"Before ${} after"
 
         When
-        val result = content.extractMultipleExpressions()
+        val result = content.extractExpressions()
 
         Then
         result.size shouldBe 3
@@ -210,5 +210,59 @@ class ExpressionParserSpec : BddSpec({
         result[1].isKotlin shouldBe true
         result[2].text shouldBe " after"
         result[2].isKotlin shouldBe false
+    }
+
+    "extract multiple with string interpolation inside" {
+        Given
+        val content = $$"""Hello ${
+            if(a == 1) {
+                val b = "}"
+                val c = '}'
+                "something ${a}"
+            } else {
+                "another $a"
+            }
+        } anything""".trimIndent()
+
+        When
+        val result = content.extractExpressions()
+
+        Then
+        result.size shouldBe 3
+        result[0].text shouldBe "Hello "
+        result[0].isKotlin shouldBe false
+        result[1].text shouldBe $$"""
+            if(a == 1) {
+                val b = "}"
+                val c = '}'
+                "something ${a}"
+            } else {
+                "another $a"
+            }
+        """.trimIndent()
+        result[1].isKotlin shouldBe true
+        result[2].text shouldBe " anything"
+        result[2].isKotlin shouldBe false
+    }
+
+    "extract expressions of single variable with no curly braces" {
+        Given
+        val content = $$"""Hello $a ${b == 1} anything""".trimIndent()
+
+        When
+        val result = content.extractExpressions()
+
+        Then
+        result.size shouldBe 5
+        result[0].text shouldBe "Hello "
+        result[0].isKotlin shouldBe false
+        result[1].text shouldBe "a"
+        result[1].isKotlin shouldBe true
+        result[2].text shouldBe " "
+        result[2].isKotlin shouldBe false
+        result[3].text shouldBe "b == 1"
+        result[3].isKotlin shouldBe true
+        result[4].text shouldBe " anything"
+        result[4].isKotlin shouldBe false
     }
 })

@@ -1,11 +1,11 @@
 <html>
-<context values="${mapOf('value' to 'Outer Context')}">
+<context-set value="Outer Context">
     <write-context-value/>
-    <context values="${mapOf('value' to 'Inner 1')}">
+    <context-set value="Inner 1">
         <write-context-value/>
-    </context>
-    <context values="${mapOf('value' to 'Inner 2')}">
+    </context-set>
+    <context-set value="Inner 2">
         <write-context-value/>
-    </context>
-</context>
+    </context-set>
+</context-set>
 </html>

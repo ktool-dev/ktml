@@ -71,6 +71,13 @@ data class ParsedTemplateParameter(
     }
 }
 
+fun Map<String, String>.toTemplateParameters() = map { (name, typeSpec) ->
+    val parts = typeSpec.split("=", limit = 2)
+    val defaultValue = if (parts.size > 1) parts[1].trim() else null
+
+    ParsedTemplateParameter(name, parts[0].trim(), defaultValue)
+}
+
 /**
  * Represents an HTML element in the parsed template
  */

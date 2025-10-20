@@ -1,0 +1,9 @@
+<empty-state iconName="String" message="String" subMessage="String? = null">
+    <div class="text-center py-5">
+        <div class="mb-3">
+            <icon name="${iconName}" size="1" color="muted"/>
+        </div>
+        <h4 class="text-muted">${message}</h4>
+        <p class="text-muted" if="${subMessage != null}">${subMessage}</p>
+    </div>
+</empty-state>

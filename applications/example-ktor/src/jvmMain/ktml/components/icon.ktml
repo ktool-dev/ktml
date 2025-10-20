@@ -1,0 +1,3 @@
+<icon name="String" size="String? = null" color="String? = null">
+    <i class="pe-1 bi bi-$name${if (size != null) ' fs-$size' else ''}${if (color != null) ' text-$color' else ''}"></i>
+</icon>

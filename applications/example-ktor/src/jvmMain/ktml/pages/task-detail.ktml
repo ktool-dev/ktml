@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+
+import dev.ktml.example.ktor.models.User
+import dev.ktml.example.ktor.models.Task
+import dev.ktml.example.ktor.models.Status
+
+<html lang="en" ctx-task="Task">
+<base-layout title="Task Detail">
+    <div class="container py-4">
+        <div class="row mb-3">
+            <div class="col">
+                <a href="/tasks" class="btn btn-link ps-0">
+                    <icon name="arrow-left"/>
+                    Back to Tasks
+                </a>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h2 class="mb-0">${task.title}</h2>
+                        <tm-button iconName="pencil" text="Edit" variant="primary" outline="true" size="sm"/>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-4">
+                            <h6 class="text-muted">Description</h6>
+                            <p>${task.description}</p>
+                        </div>
+
+                        <div class="mb-3">
+                            <h6 class="text-muted">Tags</h6>
+                            <div if="${task.tags.isEmpty()}">
+                                <span class="text-muted small">No tags</span>
+                            </div>
+                            <div if="${!task.tags.isEmpty()}">
+                                <badge text="${tag}" color="info" extraClass="me-1" each="${tag in task.tags}"/>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-warning" if="${task.isOverdue()}">
+                            <icon name="exclamation-triangle"/>
+                            This task is overdue!
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Activity Timeline (placeholder) -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <icon name="clock-history"/>
+                            Activity
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="timeline">
+                            <div class="mb-3">
+                                <small class="text-muted">
+                                    <icon name="plus-circle"/>
+                                    Task created on ${task.formattedCreatedAt()}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h6 class="mb-0">Details</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <small class="text-muted d-block">Status</small>
+                            <badge text='${task.status.displayName}'
+                                   color='${task.status.badgeClass}'/>
+                        </div>
+
+                        <div class="mb-3">
+                            <small class="text-muted d-block">Priority</small>
+                            <badge text='${task.priority.displayName}'
+                                   color='${task.priority.badgeClass}'/>
+                        </div>
+
+                        <div class="mb-3">
+                            <small class="text-muted d-block">Assignee</small>
+                            <div if="${task.assignee != null}">
+                                <badge text='${task.assignee!!.name.substring(0, 2).uppercase()}'
+                                       color="${task.assignee!!.avatarColor}"
+                                       rounded="true"
+                                       extraClass="me-2"/>
+                                ${task.assignee!!.name}
+                            </div>
+                            <span class="text-muted" if="${task.assignee == null}">Unassigned</span>
+                        </div>
+
+                        <div class="mb-3">
+                            <small class="text-muted d-block">Due Date</small>
+                            <div if="${task.dueDate != null}">
+                                <icon name="calendar"/>
+                                ${task.formattedDueDate()}
+                            </div>
+                            <span class="text-muted" if="${task.dueDate == null}">No due date</span>
+                        </div>
+
+                        <div>
+                            <small class="text-muted d-block">Created</small>
+                            <small>${task.formattedCreatedAt()}</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0">Quick Actions</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <tm-button if="${task.status != Status.DONE}" iconName="check-circle"
+                                       text="Mark as Done" variant="success" outline="true"/>
+                            <tm-button if="${task.status == Status.TODO}" iconName="play-circle" text="Start Task"
+                                       variant="primary" outline="true"/>
+                            <tm-button iconName="trash" text="Delete Task" variant="danger" outline="true"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</base-layout>
+</html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+
+import dev.ktml.example.ktor.models.User
+import dev.ktml.example.ktor.models.Task
+import dev.ktml.example.ktor.models.TaskStats
+
+<html lang="en" ctx-user="User" ctx-stats="TaskStats" ctx-todoTasks="List<Task>" ctx-inProgressTasks="List<Task>"
+      ctx-doneTasks="List<Task>">
+<base-layout title="Dashboard">
+    <div class="container-fluid py-4">
+        <div class="row mb-4">
+            <div class="col">
+                <h1>Dashboard</h1>
+                <p class="text-muted">Welcome back, ${user.name}!</p>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="row mb-4">
+            <stats-card count="${stats.total}" label="Total Tasks" iconName="list-task" cardClass="border-primary"/>
+            <stats-card count="${stats.todo}" label="To Do" iconName="circle" cardClass="border-secondary"/>
+            <stats-card count="${stats.inProgress}" label="In Progress" iconName="arrow-repeat"
+                        cardClass="border-primary"/>
+            <stats-card count="${stats.done}" label="Completed" iconName="check-circle" cardClass="border-success"/>
+        </div>
+
+        <!-- Overdue Tasks Alert -->
+        <div class="alert alert-warning" if="${stats.overdue > 0}">
+            <icon name="exclamation-triangle"/>
+            You have <strong>${stats.overdue}</strong> overdue ${if (stats.overdue == 1) "task" else "tasks"}!
+        </div>
+
+        <!-- Task Sections -->
+        <div class="row">
+            <!-- To Do Column -->
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0">
+                            <icon name="circle"/>
+                            To Do
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div if="${todoTasks.isEmpty()}">
+                            <empty-state iconName="inbox" message="No tasks to do"/>
+                        </div>
+                        <div if="${!todoTasks.isEmpty()}">
+                            <task-card task="${task}" each="${task in todoTasks}"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- In Progress Column -->
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <icon name="arrow-repeat"/>
+                            In Progress
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div if="${inProgressTasks.isEmpty()}">
+                            <empty-state iconName="hourglass-split" message="No tasks in progress"/>
+                        </div>
+                        <div if="${!inProgressTasks.isEmpty()}">
+                            <task-card task="${task}" each="${task in inProgressTasks}"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Done Column -->
+            <div class="col-md-4 mb-4">
+                <card headerClass="bg-success text-white">
+                    <header>
+                        <h5 class="mb-0">
+                            <icon name="check-circle"/>
+                            Done
+                        </h5>
+                    </header>
+                    <div if="${doneTasks.isEmpty()}">
+                        <empty-state iconName="check2-all" message="No completed tasks"/>
+                    </div>
+                    <div if="${!doneTasks.isEmpty()}">
+                        <task-card task="${task}" each="${task in doneTasks}"/>
+                    </div>
+                </card>
+            </div>
+        </div>
+    </div>
+</base-layout>
+</html>

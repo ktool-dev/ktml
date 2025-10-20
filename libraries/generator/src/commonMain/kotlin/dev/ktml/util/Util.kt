@@ -33,7 +33,21 @@ const val ROOT_PACKAGE = "dev.ktml.templates"
 const val ROOT_PACKAGE_PATH = "dev/ktml/templates"
 
 private val VOID_TAGS = listOf(
-    "br", "hr", "img", "input", "meta", "link", "area", "base", "col", "embed", "param", "source", "track", "wbr",
+    "br",
+    "hr",
+    "img",
+    "input",
+    "meta",
+    "link",
+    "area",
+    "base",
+    "col",
+    "embed",
+    "param",
+    "source",
+    "track",
+    "wbr",
+    "context-get"
 )
 
 fun String.isHtmlElement() = knownHtmlElements.any { it.equals(this, ignoreCase = true) }

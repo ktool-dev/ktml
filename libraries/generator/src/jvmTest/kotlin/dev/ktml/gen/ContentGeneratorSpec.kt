@@ -566,12 +566,78 @@ class ContentGeneratorSpec : BddSpec({
         Then
         result.body.render() shouldBe $$"""
              {
-                raw(TEMPLATE_HTML, 0, 12)
-                write($${TRIPLE_QUOTE}something ${if(number == 10) "something" else "not${defaultString}"}$$TRIPLE_QUOTE)
-                raw(TEMPLATE_HTML, 12, 8)
+                raw(TEMPLATE_HTML, 0, 22)
+                write(if(number == 10) "something" else "not${defaultString}")
+                raw(TEMPLATE_HTML, 22, 8)
                 if (defaultUser.name == "Me") {
-                    raw(TEMPLATE_HTML, 20, 11)
+                    raw(TEMPLATE_HTML, 30, 11)
                 }
+            }
+        """.trimIndent()
+    }
+
+    "pull things form context using context-get" {
+        Given
+        val template = """
+            <my-tag>
+                <context-get something="String" another="String? = 'blah'" />
+            </my-tag>
+        """.parse()
+
+        When
+        val result = contentGenerator.generateTemplateContent(template)
+
+        Then
+        result.body.render() shouldBe $$"""
+             {
+                val something: String = required("something")
+                val another: String? = optionalNullable("another", "blah")
+            }
+        """.trimIndent()
+    }
+
+    "set things on cotext with scope with context-set" {
+        Given
+        val template = """
+            <my-tag>
+                <context-set something="value" another="value">
+                    <div></div>
+                </context-set>
+            </my-tag>
+        """.parse()
+
+        When
+        val result = contentGenerator.generateTemplateContent(template)
+
+        Then
+        result.body.render() shouldBe """
+             {
+                copy(mapOf(
+                    "something" to "value",
+                    "another" to "value",
+                )).write {
+                    raw(TEMPLATE_HTML, 0, 25)
+                }
+            }
+        """.trimIndent()
+    }
+
+    "set things on cotext with no scope with context-set" {
+        Given
+        val template = """
+            <my-tag>
+                <context-set something="value" another="value" />
+            </my-tag>
+        """.parse()
+
+        When
+        val result = contentGenerator.generateTemplateContent(template)
+
+        Then
+        result.body.render() shouldBe """
+             {
+                set("something", "value")
+                set("another", "value")
             }
         """.trimIndent()
     }

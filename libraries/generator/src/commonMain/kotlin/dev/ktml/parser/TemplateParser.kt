@@ -46,7 +46,7 @@ class TemplateParser(private val moduleName: String = "") {
                 isPage = true,
                 inRegistry = true,
                 subPath = subPath,
-                parameters = extractParameters(fileName, contextParams),
+                parameters = extractParameters(contextParams),
                 imports = imports,
                 root = HtmlElement.Tag("index", mapOf(), mutableListOf(filteredElement)),
                 dockTypeDeclaration = doctype,
@@ -65,7 +65,7 @@ class TemplateParser(private val moduleName: String = "") {
                 name = it.name,
                 subPath = subPath,
                 inRegistry = it.attrs.any { (key, value) -> key == FRAGMENT_INDICATOR && value != "false" },
-                parameters = extractParameters(it.name, it.attrs),
+                parameters = extractParameters(it.attrs),
                 imports = imports,
                 root = it,
                 externalScriptContent = handler.externalScriptContent,
@@ -111,7 +111,7 @@ class TemplateParser(private val moduleName: String = "") {
         return Pair(normalized, selfClosingTags.toList())
     }
 
-    private fun extractParameters(tagName: String, attrs: Map<String, String>): List<ParsedTemplateParameter> =
+    private fun extractParameters(attrs: Map<String, String>): List<ParsedTemplateParameter> =
         attrs.filter { it.key != FRAGMENT_INDICATOR }.map { (name, typeSpec) ->
             val parts = typeSpec.split("=", limit = 2)
             val defaultValue = if (parts.size > 1) parts[1].trim() else null

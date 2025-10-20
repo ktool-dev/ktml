@@ -1,0 +1,11 @@
+<tm-button iconName="String? = null"
+           text="String"
+           variant='String = "primary"'
+           size="String = 'sm'"
+           outline="Boolean = false"
+           extraClass="String? = null">
+    <button class="btn btn-${if (outline) 'outline-' else ''}${variant} btn-$size${if (extraClass != null) ' $extraClass' else ''}">
+        <icon name="${iconName}" if="${iconName != null}"></icon>
+        ${text}
+    </button>
+</tm-button>
