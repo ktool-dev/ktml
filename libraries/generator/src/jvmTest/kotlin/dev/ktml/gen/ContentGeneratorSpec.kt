@@ -36,6 +36,23 @@ class ContentGeneratorSpec : BddSpec({
             <div>${content}</div>
         </tag>
     """.parse()
+    $$"""
+        import dev.ktml.User
+        
+        <script type="text/kotlin">
+            val number = 10
+            val defaultString = "blah"
+            val defaultUser = User("Me")
+        </script>
+        
+        <lots-of-types anInt="Int = number" aString="String = 'a $defaultString'" aBoolean="Boolean = true"
+                             aUser="User = defaultUser">
+            <div>${anInt}</div>
+            <div>${aString}</div>
+            <div>${aBoolean}</div>
+            <div>${aUser.name}</div>
+        </lots-of-types>
+    """.parse()
 
     "basic content generation" {
         Given
@@ -306,7 +323,7 @@ class ContentGeneratorSpec : BddSpec({
 
     "if a tag calls itself it works fine" {
         Given
-        val template = $$"""
+        val template = """
             <tag content="Content">
                 <tag>World</tag>
             </tag>
@@ -445,6 +462,115 @@ class ContentGeneratorSpec : BddSpec({
                         onClick = "null",
                         text = "something",
                     )
+                }
+            }
+        """.trimIndent()
+    }
+
+    "generate lots of types with number" {
+        Given
+        val template = $$"""
+            <tag-something>
+                <lots-of-types anInt="${5 * number}"/>
+            </tag-something>
+        """.parse()
+
+        When
+        val result = contentGenerator.generateTemplateContent(template)
+
+        Then
+        result.body.render() shouldBe """
+             {
+                writeLotsOfTypes(
+                    anInt = 5 * number,
+                )
+            }
+        """.trimIndent()
+    }
+
+    "generate lots of types with string concatenation" {
+        Given
+        val template = $$"""
+            <tag-something>
+                <lots-of-types aString="something ${value}"/>
+            </tag-something>
+        """.parse()
+
+        When
+        val result = contentGenerator.generateTemplateContent(template)
+
+        Then
+        result.body.render() shouldBe $$"""
+             {
+                writeLotsOfTypes(
+                    aString = $${TRIPLE_QUOTE}something ${value}$$TRIPLE_QUOTE,
+                )
+            }
+        """.trimIndent()
+    }
+
+    "generate lots of types with string and if" {
+        Given
+        val template = $$"""
+            <tag-something>
+                <lots-of-types aString="something ${if(number == 10) 'something' else 'not${defaultString}'}"/>
+            </tag-something>
+        """.parse()
+
+        When
+        val result = contentGenerator.generateTemplateContent(template)
+
+        Then
+        result.body.render() shouldBe $$"""
+             {
+                writeLotsOfTypes(
+                    aString = $${TRIPLE_QUOTE}something ${if(number == 10) "something" else "not${defaultString}"}$$TRIPLE_QUOTE,
+                )
+            }
+        """.trimIndent()
+    }
+
+    "generate lots of types with user" {
+        Given
+        val template = $$"""
+            <tag-something>
+                <lots-of-types aUser="${User('me')}"/>
+            </tag-something>
+        """.parse()
+
+        When
+        val result = contentGenerator.generateTemplateContent(template)
+
+        Then
+        result.body.render() shouldBe $$"""
+             {
+                writeLotsOfTypes(
+                    aUser = User("me"),
+                )
+            }
+        """.trimIndent()
+    }
+
+    "generate tag with normal html tags and expression parameters" {
+        Given
+        val template = $$"""
+            <something>
+                <div class="something ${if(number == 10) 'something' else 'not${defaultString}'}"></div>
+                <div if="${defaultUser.name == 'Me'}"></div>
+            </something>
+        """.parse()
+
+        When
+        val result = contentGenerator.generateTemplateContent(template)
+
+        Then
+        result.body.render() shouldBe $$"""
+             {
+                raw(TEMPLATE_HTML, 0, 12)
+                write($${TRIPLE_QUOTE}something ${if(number == 10) "something" else "not${defaultString}"}$$TRIPLE_QUOTE)
+                raw(TEMPLATE_HTML, 12, 8)
+                if (defaultUser.name == "Me") {
+                    raw(TEMPLATE_HTML, 20, 11)
                 }
             }
         """.trimIndent()

@@ -25,7 +25,6 @@ data class TemplateContent(val imports: List<Import>, val body: Block, val templ
  */
 class ContentGenerator(private val templates: Templates) {
     private val contentBuilder = ContentBuilder()
-    private val expressionParser = ExpressionParser()
     private val imports = mutableListOf<Import>()
     private lateinit var rootTemplate: ParsedTemplate
 
@@ -92,11 +91,11 @@ class ContentGenerator(private val templates: Templates) {
         logger.debug { "Generating tag content: ${tag.name}" }
 
         tag.attrs["if"]?.let {
-            contentBuilder.startControlFlow("if", expressionParser.extractSingleExpression(it))
+            contentBuilder.startControlFlow("if", it.extractAttributeExpression())
         }
 
         tag.attrs["each"]?.let {
-            contentBuilder.startControlFlow("for", expressionParser.extractSingleExpression(it))
+            contentBuilder.startControlFlow("for", it.extractAttributeExpression())
         }
 
         val customTag = templates.locate(template.subPath, tag.name)
@@ -112,19 +111,15 @@ class ContentGenerator(private val templates: Templates) {
             contentBuilder.raw("<${tag.name}")
 
             tag.attrs.filterNot { it.key in filteredAttrs }.forEach { (name, value) ->
-                if (!currentNoInterpolation && expressionParser.hasKotlinExpression(value)) {
-                    contentBuilder.raw(" $name=\"")
-                    expressionParser.extractMultipleExpressions(value).forEach { part ->
-                        if (part.isKotlin) {
-                            contentBuilder.write(part.text)
-                        } else {
-                            contentBuilder.raw(part.text)
-                        }
-                    }
-                    contentBuilder.raw("\"")
+                contentBuilder.raw(" $name=\"")
+                if (!currentNoInterpolation && value.isSingleKotlinExpression()) {
+                    contentBuilder.write(value.extractAttributeExpression())
+                } else if (!currentNoInterpolation && value.hasKotlinInterpolation()) {
+                    contentBuilder.write("$TRIPLE_QUOTE${value.replaceTicks()}$TRIPLE_QUOTE")
                 } else {
-                    contentBuilder.raw(" $name=\"$value\"")
+                    contentBuilder.raw(value)
                 }
+                contentBuilder.raw("\"")
             }
 
             contentBuilder.raw(">")
@@ -143,8 +138,10 @@ class ContentGenerator(private val templates: Templates) {
     private fun generateTextContent(text: HtmlElement.Text, noInterpolation: Boolean = false) {
         logger.debug { "Generating text content: '${text.content}'" }
         val content = text.content
-        if (!noInterpolation && expressionParser.hasKotlinExpression(content)) {
-            expressionParser.extractMultipleExpressions(content).forEach { part ->
+        if (!noInterpolation && content.isSingleKotlinExpression()) {
+            contentBuilder.write(content.extractSingleKotlinExpression())
+        } else if (!noInterpolation && content.hasKotlinInterpolation()) {
+            content.extractMultipleExpressions().forEach { part ->
                 if (part.isKotlin) {
                     contentBuilder.write(part.text)
                 } else {
@@ -210,8 +207,13 @@ class ContentGenerator(private val templates: Templates) {
                 val value = tag.attrs[param.name]
                 when {
                     value == null -> contentBuilder.kotlin("$paramName = null,")
-                    expressionParser.isKotlinExpression(value) ->
-                        contentBuilder.kotlin("$paramName = ${expressionParser.extractSingleExpression(value)},")
+
+                    value.isSingleKotlinExpression() -> contentBuilder.kotlin(
+                        "$paramName = ${value.extractAttributeExpression()},"
+                    )
+
+                    value.hasKotlinInterpolation() ->
+                        contentBuilder.kotlin("$paramName = $TRIPLE_QUOTE${value.replaceTicks()}$TRIPLE_QUOTE,")
 
                     param.isString -> contentBuilder.kotlin("${param.name} = \"$value\",")
                     else -> contentBuilder.kotlin("$paramName = $value,")

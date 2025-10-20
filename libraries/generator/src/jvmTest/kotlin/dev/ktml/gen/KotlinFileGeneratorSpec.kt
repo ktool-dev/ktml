@@ -1,17 +1,17 @@
 package dev.ktml.gen
 
-import dev.ktml.parser.HtmlElement
+import dev.ktml.parser.*
 import dev.ktml.parser.HtmlElement.Tag
-import dev.ktml.parser.ParsedTemplate
-import dev.ktml.parser.ParsedTemplateParameter
-import dev.ktml.parser.Templates
 import dev.ktool.gen.types.Function
 import dev.ktool.gen.types.KotlinFile
 import dev.ktool.kotest.BddSpec
 import io.kotest.matchers.shouldBe
 
+private val parser = TemplateParser("")
+private val templates = Templates()
+
 class KotlinFileGeneratorSpec : BddSpec({
-    val kotlinFileGenerator = KotlinFileGenerator(Templates())
+    val kotlinFileGenerator = KotlinFileGenerator(templates)
     val basePackageName = "my.templates"
 
     "generate code with basic template" {
@@ -226,6 +226,40 @@ class KotlinFileGeneratorSpec : BddSpec({
         file.writerFunction.parameters[0].name shouldBe "value"
         file.writerFunction.parameters[0].type.name shouldBe "String"
     }
+
+    "can generate functions with default value expressions" {
+        Given
+        val template = $$"""
+            import dev.ktml.User
+
+            <script type="text/kotlin">
+                val number = 10
+                val defaultString = "blah"
+                val defaultUser = User("Me")
+            </script>
+
+            <template-with-types anInt="Int = number" aString="String = 'a $defaultString'" aBoolean="Boolean = true"
+                                 aUser="User = defaultUser">
+                <div>${anInt}</div>
+                <div>${aString}</div>
+                <div>${aBoolean}</div>
+                <div>${aUser.name}</div>
+            </template-with-types>
+        """.trimIndent().parse()
+
+        When
+        val file = kotlinFileGenerator.generateCode(template)
+
+        Then
+        file.writerFunction.parameters[0].name shouldBe "aBoolean"
+        file.writerFunction.parameters[0].defaultValue?.expression shouldBe "true"
+        file.writerFunction.parameters[1].name shouldBe "aString"
+        file.writerFunction.parameters[1].defaultValue?.expression shouldBe $$""""a $defaultString""""
+        file.writerFunction.parameters[2].name shouldBe "aUser"
+        file.writerFunction.parameters[2].defaultValue?.expression shouldBe "defaultUser"
+        file.writerFunction.parameters[3].name shouldBe "anInt"
+        file.writerFunction.parameters[3].defaultValue?.expression shouldBe "number"
+    }
 })
 
 private val KotlinFile.writerFunction: Function get() = members[0] as Function
@@ -247,3 +281,7 @@ private fun parsed(
     root = root,
     externalScriptContent = externalScriptContent,
 )
+
+private fun String.parse() =
+    parser.parseContent("file", this.trimIndent(), "mine").also { parsed -> parsed.forEach { templates.replace(it) } }
+        .first()

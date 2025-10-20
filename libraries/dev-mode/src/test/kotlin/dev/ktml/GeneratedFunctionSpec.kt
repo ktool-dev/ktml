@@ -55,12 +55,9 @@ class GeneratedFunctionSpec : BddSpec({
                     <title>Dashboard - John Doe</title>
                 </head><body>
                 <div class="header">
-                    
                     <h1>Dashboard</h1>
-                
                 </div>
                 <div class="content">
-                    
                     <h1>Hello, John Doe!</h1>
                     
                     <h2>You are a user!</h2>
@@ -68,15 +65,11 @@ class GeneratedFunctionSpec : BddSpec({
                     <h2>You are not a guest!</h2>
                     <div class="card">
                     <div class="card-header">
-                        
                             <h3>Items</h3>
-                        
-                    </div>
-                    <div class="card-body">
-                        <ul>
+                        </div>
+                    <div class="card-body"><ul>
                             <li>Item 1 - Item 0</li><li>Item 2 - Item 1</li>
-                        </ul>
-                    </div>
+                        </ul></div>
                 </div>
                     
                             <h2>You are not an admin!</h2>
@@ -85,7 +78,6 @@ class GeneratedFunctionSpec : BddSpec({
                     
                 </div><br>
                     <button onclick="alert('Hello World!')">Click me!</button>
-                
                 </div>
                 </body></html>""".trimIndent()
     }

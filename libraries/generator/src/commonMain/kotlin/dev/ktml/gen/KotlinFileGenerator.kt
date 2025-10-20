@@ -29,7 +29,7 @@ class KotlinFileGenerator(templates: Templates) {
             +Modifier.Suspend
             template.nonContextParameters.map { param ->
                 +Parameter(name = param.name, type = Type(param.type)) {
-                    defaultValue = param.defaultValue?.let { ExpressionBody(it) }
+                    defaultValue = param.defaultValue?.let { ExpressionBody(it.replaceTicks()) }
                 }
             }
             body = FunctionBlock(content.body.statements)

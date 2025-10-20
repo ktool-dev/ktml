@@ -14,7 +14,7 @@ class BuildStandardTemplatesSpec : BddSpec({
         val processor = KtmlProcessor(outputDirectory = output)
 
         When
-        File("$RUNTIME_PATH/resources/templates").listFiles().forEach { file ->
+        File("$RUNTIME_PATH/ktml").listFiles().forEach { file ->
             processor.processFile(file.path, file.parent)
         }
         processor.generateTemplateCode()

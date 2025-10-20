@@ -4,9 +4,7 @@ import dev.ktool.kotest.BddSpec
 import io.kotest.matchers.shouldBe
 
 class ExpressionParserSpec : BddSpec({
-    val parser = ExpressionParser()
-
-    "isKotlinExpression should return true for valid expressions"(
+    "isSingleKotlinExpression should return true for valid expressions"(
         row($$"${variable}"),
         row($$"${object.property}"),
         row($$"${function()}"),
@@ -18,10 +16,10 @@ class ExpressionParserSpec : BddSpec({
         row($$"${complex.nested.function(param1, param2)}"),
     ) { (expression) ->
         Expect
-        parser.isKotlinExpression(expression) shouldBe true
+        expression.isSingleKotlinExpression() shouldBe true
     }
 
-    "isKotlinExpression should return false for invalid expressions"(
+    "isSingleKotlinExpression should return false for invalid expressions"(
         row("variable"),
         row($$"$variable"),
         row($$"${unclosed"),
@@ -35,7 +33,7 @@ class ExpressionParserSpec : BddSpec({
         row($$"Hello ${name}!"),
     ) { (expression) ->
         Expect
-        parser.isKotlinExpression(expression) shouldBe false
+        expression.isSingleKotlinExpression() shouldBe false
     }
 
     "hasKotlinExpression should return true when expressions are present"(
@@ -48,7 +46,7 @@ class ExpressionParserSpec : BddSpec({
         row($$"Text with ${nested.property.call()}")
     ) { (text) ->
         Expect
-        parser.hasKotlinExpression(text) shouldBe true
+        text.hasKotlinInterpolation() shouldBe true
     }
 
     "hasKotlinExpression should return false when no expressions are present"(
@@ -62,7 +60,7 @@ class ExpressionParserSpec : BddSpec({
         row("incomplete }")
     ) { (text) ->
         Expect
-        parser.hasKotlinExpression(text) shouldBe false
+        text.hasKotlinInterpolation() shouldBe false
     }
 
     "extractSingleExpression should extract expression content correctly"(
@@ -74,7 +72,7 @@ class ExpressionParserSpec : BddSpec({
         row($$"${complex.nested.function(param1, param2)}", "complex.nested.function(param1, param2)")
     ) { (input, expected) ->
         Expect
-        parser.extractSingleExpression(input) shouldBe expected
+        input.extractAttributeExpression() shouldBe expected
     }
 
     "extractSingleExpression should decode HTML entities"(
@@ -85,7 +83,7 @@ class ExpressionParserSpec : BddSpec({
         row($$"${a &amp;&amp; b}", "a && b")
     ) { (input, expected) ->
         Expect
-        parser.extractSingleExpression(input) shouldBe expected
+        input.extractAttributeExpression() shouldBe expected
     }
 
     "extractMultipleExpressions should handle mixed content correctly" {
@@ -93,7 +91,7 @@ class ExpressionParserSpec : BddSpec({
         val content = $$"Hello ${name}, you have ${count} messages"
 
         When
-        val result = parser.extractMultipleExpressions(content)
+        val result = content.extractMultipleExpressions()
 
         Then
         result.size shouldBe 5
@@ -114,7 +112,7 @@ class ExpressionParserSpec : BddSpec({
         val content = $$"${greeting}${name}"
 
         When
-        val result = parser.extractMultipleExpressions(content)
+        val result = content.extractMultipleExpressions()
 
         Then
         result.size shouldBe 2
@@ -129,7 +127,7 @@ class ExpressionParserSpec : BddSpec({
         val content = "Hello World"
 
         When
-        val result = parser.extractMultipleExpressions(content)
+        val result = content.extractMultipleExpressions()
 
         Then
         result.size shouldBe 1
@@ -142,7 +140,7 @@ class ExpressionParserSpec : BddSpec({
         val content = ""
 
         When
-        val result = parser.extractMultipleExpressions(content)
+        val result = content.extractMultipleExpressions()
 
         Then
         result.size shouldBe 0
@@ -153,7 +151,7 @@ class ExpressionParserSpec : BddSpec({
         val content = $$"${variable}"
 
         When
-        val result = parser.extractMultipleExpressions(content)
+        val result = content.extractMultipleExpressions()
 
         Then
         result.size shouldBe 1
@@ -166,7 +164,7 @@ class ExpressionParserSpec : BddSpec({
         val content = $$"Value: ${a &amp; b}"
 
         When
-        val result = parser.extractMultipleExpressions(content)
+        val result = content.extractMultipleExpressions()
 
         Then
         result.size shouldBe 2
@@ -181,7 +179,7 @@ class ExpressionParserSpec : BddSpec({
         val content = $$"Start ${obj.method(param1, param2)} middle ${another.call()} end"
 
         When
-        val result = parser.extractMultipleExpressions(content)
+        val result = content.extractMultipleExpressions()
 
         Then
         result.size shouldBe 5
@@ -202,7 +200,7 @@ class ExpressionParserSpec : BddSpec({
         val content = $$"Before ${} after"
 
         When
-        val result = parser.extractMultipleExpressions(content)
+        val result = content.extractMultipleExpressions()
 
         Then
         result.size shouldBe 3

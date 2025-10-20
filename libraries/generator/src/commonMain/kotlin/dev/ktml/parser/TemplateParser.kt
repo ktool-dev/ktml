@@ -55,8 +55,8 @@ class TemplateParser(private val moduleName: String = "") {
         }
 
         rootElements.forEach {
-            if (it.name.isHtmlElement()) error { "The tag ${it.name} is an existing HTML tag, so you can't use it as a custom tag name." }
-            if (it.name.isSvgElement()) error { "The tag ${it.name} is an existing SVG tag, so you can't use it as a custom tag name." }
+            if (it.name.isHtmlElement()) error("The tag ${it.name} is an existing HTML tag, so you can't use it as a custom tag name.")
+            if (it.name.isSvgElement()) error("The tag ${it.name} is an existing SVG tag, so you can't use it as a custom tag name.")
         }
 
         return rootElements.map {
@@ -100,8 +100,8 @@ class TemplateParser(private val moduleName: String = "") {
         // If some tags are used as self-closing in one place and not another, we need to normalize the usage to always
         // have a close tag.
         selfClosingTags.toList().forEach { tagName ->
-            // Check if the tag also has closing tag usage
-            if (Regex("""<$tagName[^>]*>\s*</$tagName>""").containsMatchIn(content)) {
+            // Check if the tag also has closing tag usage (with any content between tags)
+            if (Regex("""<$tagName[^>]*>[\s\S]*?</$tagName>""").containsMatchIn(content)) {
                 // Replace self-closing with explicit closing tags
                 normalized = normalized.replace("""<($tagName)([^>]*)\s*/>""".toRegex(), "<$1$2></$1>")
                 selfClosingTags.remove(tagName)
