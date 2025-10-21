@@ -55,7 +55,8 @@ class Context(
         _model.remove(key)
     }
 
-    fun copy(params: Map<String, Any?> = emptyMap()) = Context(writer, _model + params)
+    fun copy(params: Map<String, Any?> = emptyMap(), clear: Boolean = false) =
+        Context(writer, if (clear) params else _model + params)
 
     fun model(): Map<String, Any?> = _model
 

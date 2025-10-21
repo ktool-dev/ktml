@@ -20,7 +20,7 @@ import dev.ktml.example.ktor.models.User
     </select>
 </select-status>
 
-<select-user type="String" ctx-users="List<User>">
+<select-user type="String" $users="List<User>">
     <label class="form-label">${type}</label>
     <select class="form-select">
         <option value="">All Assignees</option>

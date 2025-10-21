@@ -24,14 +24,6 @@ object DefaultKtmlRegistry : KtmlRegistry {
                 TagParameter("content", "Content", false),
             )
         ),
-        TagDefinition(
-            name = "context",
-            packageName = "dev.ktml.templates",
-            parameters = listOf(
-                TagParameter("values", "Map<String, Any?>", false),
-                TagParameter("content", "Content", false),
-            )
-        ),
     )
 
 }

@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-<html ctx-error="Throwable">
+<html $error="Throwable">
 <head>
     <title>Server Error</title>
 </head>

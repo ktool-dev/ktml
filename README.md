@@ -127,11 +127,11 @@ KTML supports three template types, each with a specific purpose:
 
 Templates with `<html>` as the root element become pages accessible via web routes. All parameters declared on a page
 template will be pulled from the context model. Since a page isn't called from another tag, all the parameters to it
-have to come from the context model, so all parameter names have to be prefixed with `ctx-`.
+have to come from the context model, so all parameter names have to be prefixed with `$`.
 
 ```html
 <!DOCTYPE html>
-<html lang="en" ctx-userName="String">
+<html lang="en" $userName="String">
 <head><title>My Page</title></head>
 <body><h1>Hello, ${userName}!</h1></body>
 </html>
@@ -208,12 +208,12 @@ import dev.ktml.models.Product
 ### Context Parameters
 
 Sometimes templates need to access data that isn't passed directly to them by the calling template but comes from the
-context of the request. To have a template define a context value it uses we use `ctx-` prefix for the parameter. The
+context of the request. To have a template define a context value it uses we use `$` prefix for the parameter. The
 generated code will automatically pull the value from the context object and ensure it's of the correct type:
 
 ```html
 
-<sidebar ctx-items="List<MenuItem> = listOf()">
+<sidebar $items="List<MenuItem> = listOf()">
     <nav>
         <a each="${item in items}" href="${item.url}">${item.label}</a>
     </nav>

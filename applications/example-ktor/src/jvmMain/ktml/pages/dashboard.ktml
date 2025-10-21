@@ -4,8 +4,8 @@ import dev.ktml.example.ktor.models.User
 import dev.ktml.example.ktor.models.Task
 import dev.ktml.example.ktor.models.TaskStats
 
-<html lang="en" ctx-user="User" ctx-stats="TaskStats" ctx-todoTasks="List<Task>" ctx-inProgressTasks="List<Task>"
-      ctx-doneTasks="List<Task>">
+<html lang="en" $user="User" $stats="TaskStats" $todoTasks="List<Task>" $inProgressTasks="List<Task>"
+      $doneTasks="List<Task>">
 <base-layout title="Dashboard">
     <div class="container-fluid py-4">
         <div class="row mb-4">

@@ -102,7 +102,7 @@ class KtmlRegistryGeneratorSpec : BddSpec({
             inRegistry = true,
             name = "my-page",
             subPath = "components",
-            parameters = listOf(ParsedTemplateParameter("ctx-name", "String")),
+            parameters = listOf(ParsedTemplateParameter($$"$name", "String")),
         )
 
         When

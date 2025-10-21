@@ -1,6 +1,7 @@
 package dev.ktml.parser
 
 import dev.ktml.TagDefinition
+import dev.ktml.util.CONTEXT_PARAM_PREFIX
 import dev.ktml.util.ROOT_PACKAGE
 import dev.ktml.util.toCamelCase
 import dev.ktml.util.toPascalCase
@@ -44,11 +45,11 @@ data class ParsedTemplateParameter(
     val type: String,
     val defaultValue: String? = null
 ) {
-    val isContextParam = name.startsWith("ctx-")
+    val isContextParam = name.startsWith(CONTEXT_PARAM_PREFIX)
     val isContent = type == "Content" || type == "Content?"
     val hasDefault = defaultValue != null
     val isNullable = type.endsWith("?")
-    private val paramName = name.removePrefix("ctx-")
+    private val paramName = name.removePrefix(CONTEXT_PARAM_PREFIX)
     private val paramNameSafe = paramName.safe
 
     fun contextParameterDefinition() = when {

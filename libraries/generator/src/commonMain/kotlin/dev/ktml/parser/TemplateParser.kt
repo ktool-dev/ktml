@@ -36,9 +36,9 @@ class TemplateParser(private val moduleName: String = "") {
             if (rootElements.size != 1) error("The file $fileName has two html roots in it, you can only have a single html root in a file.")
 
             val rootElement = rootElements.first()
-            val contextParams = rootElement.attrs.filter { (key, _) -> key.startsWith("ctx-") }
+            val contextParams = rootElement.attrs.filter { (key, _) -> key.startsWith("$") }
             val filteredElement =
-                rootElement.copy(attrs = rootElement.attrs.filter { (key, _) -> !key.startsWith("ctx-") })
+                rootElement.copy(attrs = rootElement.attrs.filter { (key, _) -> !key.startsWith("$") })
 
             return ParsedTemplate(
                 file = fileName,

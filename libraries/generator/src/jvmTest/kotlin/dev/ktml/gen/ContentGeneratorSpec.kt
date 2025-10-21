@@ -576,33 +576,13 @@ class ContentGeneratorSpec : BddSpec({
         """.trimIndent()
     }
 
-    "pull things form context using context-get" {
+    "set things on cotext with scope with context" {
         Given
         val template = """
             <my-tag>
-                <context-get something="String" another="String? = 'blah'" />
-            </my-tag>
-        """.parse()
-
-        When
-        val result = contentGenerator.generateTemplateContent(template)
-
-        Then
-        result.body.render() shouldBe $$"""
-             {
-                val something: String = required("something")
-                val another: String? = optionalNullable("another", "blah")
-            }
-        """.trimIndent()
-    }
-
-    "set things on cotext with scope with context-set" {
-        Given
-        val template = """
-            <my-tag>
-                <context-set something="value" another="value">
+                <context something="value" another="value">
                     <div></div>
-                </context-set>
+                </context>
             </my-tag>
         """.parse()
 
@@ -612,7 +592,7 @@ class ContentGeneratorSpec : BddSpec({
         Then
         result.body.render() shouldBe """
              {
-                copy(mapOf(
+                copy(clear = false, params = mapOf(
                     "something" to "value",
                     "another" to "value",
                 )).write {
@@ -622,11 +602,11 @@ class ContentGeneratorSpec : BddSpec({
         """.trimIndent()
     }
 
-    "set things on cotext with no scope with context-set" {
+    "set things on cotext with no scope with context" {
         Given
         val template = """
             <my-tag>
-                <context-set something="value" another="value" />
+                <context something="value" another="value" />
             </my-tag>
         """.parse()
 

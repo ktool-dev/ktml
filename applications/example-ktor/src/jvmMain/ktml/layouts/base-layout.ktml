@@ -2,7 +2,7 @@
 
 import dev.ktml.example.ktor.models.User
 
-<base-layout title="String? = null" ctx-user="User" content="Content">
+<base-layout title="String? = null" $user="User" content="Content">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">

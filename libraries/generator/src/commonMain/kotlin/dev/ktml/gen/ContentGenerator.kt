@@ -1,7 +1,12 @@
 package dev.ktml.gen
 
 import dev.ktml.TagDefinition
-import dev.ktml.parser.*
+import dev.ktml.parser.HtmlElement
+import dev.ktml.parser.ParsedTemplate
+import dev.ktml.parser.Templates
+import dev.ktml.parser.removeEmptyText
+import dev.ktml.util.CONTEXT_PARAM_PREFIX
+import dev.ktml.util.SET_CONTEXT_VALUE_TAG
 import dev.ktml.util.isNotVoidTag
 import dev.ktml.util.toImport
 import dev.ktool.gen.TRIPLE_QUOTE
@@ -31,7 +36,7 @@ class ContentGenerator(private val templates: Templates) {
         contentBuilder.clear()
 
         initializeImports(template)
-        generateContextParams(template.parameters.filter { it.isContextParam })
+        generateContextParams(template)
 
         if (template.dockTypeDeclaration.isNotBlank()) {
             contentBuilder.doctype(template.dockTypeDeclaration)
@@ -49,9 +54,9 @@ class ContentGenerator(private val templates: Templates) {
         )
     }
 
-    private fun generateContextParams(parameters: List<ParsedTemplateParameter>) {
-        parameters.forEach { param ->
-            val name = param.name.removePrefix("ctx-")
+    private fun generateContextParams(template: ParsedTemplate) {
+        template.parameters.filter { it.isContextParam }.forEach { param ->
+            val name = param.name.removePrefix(CONTEXT_PARAM_PREFIX)
             logger.debug { "Generating context param: $name" }
             contentBuilder.kotlin(param.contextParameterDefinition().replaceTicks())
         }
@@ -87,12 +92,7 @@ class ContentGenerator(private val templates: Templates) {
     private fun generateTagContent(template: ParsedTemplate, tag: HtmlElement.Tag, noInterpolation: Boolean = false) {
         logger.debug { "Generating tag content: ${tag.name}" }
 
-        if (tag.name.equals("context-get", ignoreCase = true)) {
-            generateContextParams(tag)
-            return
-        }
-
-        if (tag.name.equals("context-set", ignoreCase = true)) {
+        if (tag.name.equals(SET_CONTEXT_VALUE_TAG, ignoreCase = true)) {
             generateContextSet(template, tag)
             return
         }
@@ -233,13 +233,11 @@ class ContentGenerator(private val templates: Templates) {
         }
     }
 
-    private fun generateContextParams(tag: HtmlElement.Tag) =
-        tag.attrs.toTemplateParameters().forEach { param ->
-            logger.debug { "Generating context param: $param" }
-            contentBuilder.kotlin(param.contextParameterDefinition().replaceTicks())
-        }
-
     private fun generateContextSet(template: ParsedTemplate, tag: HtmlElement.Tag) {
+        val clear = tag.attrs.any { (key, value) -> key == "clear" && value != "false" }
+
+        require(!clear || tag.children.isNotEmpty()) { "You cannot set clear on a $SET_CONTEXT_VALUE_TAG tag unless it has children" }
+
         fun convertValue(value: String) = when {
             value == "null" -> value
             value.isSingleKotlinExpression() -> value.extractAttributeExpression()
@@ -252,8 +250,8 @@ class ContentGenerator(private val templates: Templates) {
                 contentBuilder.kotlin("set(\"${it.key}\", ${convertValue(it.value)})")
             }
         } else {
-            contentBuilder.kotlin("copy(mapOf(")
-            tag.attrs.forEach {
+            contentBuilder.kotlin("copy(clear = $clear, params = mapOf(")
+            tag.attrs.filterNot { it.key == "clear" }.forEach {
                 contentBuilder.kotlin("""    "${it.key}" to ${convertValue(it.value)}, """)
             }
             contentBuilder.startEmbeddedContent(")).write ")

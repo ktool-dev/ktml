@@ -1,11 +1,11 @@
 <html>
-<context-set value="Outer Context">
+<context value="Outer Context">
     <write-context-value/>
-    <context-set value="Inner 1">
+    <context value="Inner 1">
         <write-context-value/>
-    </context-set>
-    <context-set value="Inner 2">
+    </context>
+    <context value="Inner 2">
         <write-context-value/>
-    </context-set>
-</context-set>
+    </context>
+</context>
 </html>

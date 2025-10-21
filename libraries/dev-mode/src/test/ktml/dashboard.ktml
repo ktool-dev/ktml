@@ -1,8 +1,6 @@
-<!DOCTYPE html>
-
 import dev.ktml.*
 
-<html lang="en" ctx-userName="String" ctx-message="String" ctx-user="User" ctx-items="List<Item>">
+<html lang="en" $userName="String" $message="String" $user="User" $items="List<Item>">
 <page-layout title="Dashboard - ${user.name}">
     <header>
         <h1>Dashboard</h1>
