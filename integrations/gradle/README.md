@@ -16,7 +16,7 @@ plugins {
 
 The plugin doesn't require any configuration. It will find `ktml` directories in any SourceSet, for instance at:
 
-```mermaid
+```
 src/main/ktml
 src/commonMain/ktml
 src/jvmMain/ktml
