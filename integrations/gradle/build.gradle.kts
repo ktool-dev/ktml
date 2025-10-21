@@ -25,7 +25,7 @@ signing {
 gradlePlugin {
     val repoPath = project.property("scm.repo.path") as String
     val pluginPath = "https://$repoPath"
-    website = pluginPath
+    website = "$pluginPath/blob/main/integrations/gradle"
     vcsUrl = pluginPath
 
     plugins {
