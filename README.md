@@ -92,7 +92,11 @@ fun Application.configureRouting() {
 }
 ```
 
-Check out other [example applications here](https://github.com/ktool-dev/ktml-examples)!
+Check out other [example applications here](https://github.com/ktool-dev/ktml/tree/main/applications)!
+
+## Gradle Plugin
+
+KTML has a Gradle plugin that help integrate the code generation process into your build. You have find the [documentation for it here](https://github.com/ktool-dev/ktml/tree/main/integrations/gradle).
 
 ## Why build KTML when there are other template engines
 
