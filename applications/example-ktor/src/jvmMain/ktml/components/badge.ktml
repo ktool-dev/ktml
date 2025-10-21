@@ -1,4 +1,3 @@
 <badge text="String" color="String? = null" rounded="Boolean = false" extraClass="String? = null">
-    <span class="badge ${if (rounded) ' rounded-pill' else ''} bg-${color ?: 'primary'}${if (extraClass != null) ' ' + extraClass
-    else ''}">${text}</span>
+    <span class="${buildClass('badge', rounded to 'rounded-pill', 'bg-${color ?: 'primary'}', extraClass)}">${text}</span>
 </badge>

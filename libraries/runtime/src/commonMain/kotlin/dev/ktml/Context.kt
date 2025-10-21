@@ -62,6 +62,16 @@ class Context(
 
     fun pathParam(key: String) = pathParams[key]
     fun queryParam(key: String) = queryParams[key]?.firstOrNull()
+
+    fun buildClass(vararg values: Any?) = values.filter {
+        it != null && (it !is Pair<*, *> || it.first == true)
+    }.map {
+        when (it) {
+            is Pair<*, *> -> it.second
+            is Triple<*, *, *> -> if (it.first == true) it.second else it.third
+            else -> it
+        }
+    }.joinToString(separator = " ")
 }
 
 class StringContentWriter : ContentWriter {

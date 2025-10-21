@@ -24,6 +24,6 @@ import dev.ktml.example.ktor.models.User
     <label class="form-label">${type}</label>
     <select class="form-select">
         <option value="">All Assignees</option>
-        <option each="${user in users}" value="${user.id}">${user.name}</option>
+        <option each="user in users" value="${user.id}">${user.name}</option>
     </select>
 </select-user>

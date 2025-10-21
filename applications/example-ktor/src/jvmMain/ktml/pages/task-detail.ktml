@@ -1,5 +1,3 @@
-<!DOCTYPE html>
-
 import dev.ktml.example.ktor.models.User
 import dev.ktml.example.ktor.models.Task
 import dev.ktml.example.ktor.models.Status

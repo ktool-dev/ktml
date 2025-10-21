@@ -4,8 +4,8 @@
            size="String = 'sm'"
            outline="Boolean = false"
            extraClass="String? = null">
-    <button class="btn btn-${if (outline) 'outline-' else ''}${variant} btn-$size${if (extraClass != null) ' $extraClass' else ''}">
-        <icon name="${iconName}" if="${iconName != null}"></icon>
+    <button class="${buildClass('btn', Triple(outline, 'btn-outline-$variant', 'btn-$variant'), 'btn-$size', extraClass)}">
+        <icon name="${iconName}" if="iconName != null"></icon>
         ${text}
     </button>
 </tm-button>
