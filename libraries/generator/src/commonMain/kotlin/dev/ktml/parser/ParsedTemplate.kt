@@ -21,7 +21,7 @@ class ParsedTemplate(
     val imports: List<String>,
     val parameters: List<ParsedTemplateParameter>,
     val expressions: List<KotlinExpression>,
-    val root: HtmlElement.Tag,
+    val root: HtmlTag,
     val dockTypeDeclaration: String = "",
     val externalScriptContent: String = "",
 ) {

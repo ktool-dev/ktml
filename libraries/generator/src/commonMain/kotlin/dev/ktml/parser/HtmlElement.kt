@@ -3,18 +3,18 @@ package dev.ktml.parser
 /**
  * Represents an HTML element in the parsed template
  */
-sealed class HtmlElement {
-    data class Tag(
-        val name: String,
-        val attrs: Map<String, String>,
-        private val _children: MutableList<HtmlElement> = mutableListOf()
-    ) : HtmlElement() {
-        val children: List<HtmlElement> get() = _children.toList()
+sealed class HtmlElement
 
-        fun addChild(element: HtmlElement) = _children.add(element)
-    }
+data class HtmlTag(
+    val name: String,
+    val attrs: Map<String, String>,
+    private val _children: MutableList<HtmlElement> = mutableListOf()
+) : HtmlElement() {
+    val children: List<HtmlElement> get() = _children.toList()
 
-    data class Text(var content: String) : HtmlElement()
+    fun addChild(element: HtmlElement) = _children.add(element)
 }
 
-fun List<HtmlElement>.removeEmptyText() = filterNot { it is HtmlElement.Text && it.content.isBlank() }
+data class HtmlText(var content: String) : HtmlElement()
+
+fun List<HtmlElement>.removeEmptyText() = filterNot { it is HtmlText && it.content.isBlank() }

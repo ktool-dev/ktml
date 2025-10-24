@@ -2,7 +2,6 @@ package dev.ktml.gen
 
 import dev.ktml.parsedTemplateParameter
 import dev.ktml.parser.*
-import dev.ktml.parser.HtmlElement.Tag
 import dev.ktool.gen.types.Function
 import dev.ktool.gen.types.KotlinFile
 import dev.ktool.kotest.BddSpec
@@ -23,7 +22,7 @@ class KotlinFileGeneratorSpec : BddSpec({
                 parsedTemplateParameter("text", "String"),
                 parsedTemplateParameter("onClick", "String")
             ),
-            root = Tag("my-button", emptyMap())
+            root = HtmlTag("my-button", emptyMap())
         )
 
         When
@@ -49,7 +48,7 @@ class KotlinFileGeneratorSpec : BddSpec({
             name = "custom-component",
             imports = listOf("import kotlinx.datetime.LocalDate", "import kotlin.collections.List"),
             parameters = emptyList(),
-            root = Tag("custom-component", emptyMap())
+            root = HtmlTag("custom-component", emptyMap())
         )
 
         When
@@ -70,7 +69,7 @@ class KotlinFileGeneratorSpec : BddSpec({
                 parsedTemplateParameter("title", "String"),
                 parsedTemplateParameter("content", "Content")
             ),
-            root = Tag("card", emptyMap())
+            root = HtmlTag("card", emptyMap())
         )
 
         When
@@ -98,7 +97,7 @@ class KotlinFileGeneratorSpec : BddSpec({
                 parsedTemplateParameter("disabled", "Boolean", "false"),
                 parsedTemplateParameter("count", "Int", "0")
             ),
-            root = Tag("button", emptyMap())
+            root = HtmlTag("button", emptyMap())
         )
 
         When
@@ -127,7 +126,7 @@ class KotlinFileGeneratorSpec : BddSpec({
                 parsedTemplateParameter("required", "Boolean", "true"),
                 parsedTemplateParameter("content", "Content")
             ),
-            root = Tag("form-input", emptyMap())
+            root = HtmlTag("form-input", emptyMap())
         )
 
         When
@@ -154,7 +153,7 @@ class KotlinFileGeneratorSpec : BddSpec({
             name = "my-custom-button",
             imports = emptyList(),
             parameters = emptyList(),
-            root = Tag("my-custom-button", emptyMap())
+            root = HtmlTag("my-custom-button", emptyMap())
         )
 
         When
@@ -170,7 +169,7 @@ class KotlinFileGeneratorSpec : BddSpec({
             name = "button",
             imports = emptyList(),
             parameters = emptyList(),
-            root = Tag("button", emptyMap())
+            root = HtmlTag("button", emptyMap())
         )
 
         When
@@ -186,7 +185,7 @@ class KotlinFileGeneratorSpec : BddSpec({
             name = "header",
             imports = emptyList(),
             parameters = emptyList(),
-            root = Tag("header", emptyMap())
+            root = HtmlTag("header", emptyMap())
         )
 
         When
@@ -204,9 +203,9 @@ class KotlinFileGeneratorSpec : BddSpec({
             name = "test-component",
             imports = listOf("import kotlin.String"),
             parameters = listOf(parsedTemplateParameter("value", "String")),
-            root = Tag(
+            root = HtmlTag(
                 "test-component", emptyMap(), mutableListOf(
-                    HtmlElement.Text("Hello, World!")
+                    HtmlText("Hello, World!")
                 )
             ),
             externalScriptContent = "val a = 1",
@@ -268,7 +267,7 @@ private fun parsed(
     children: MutableList<HtmlElement> = mutableListOf(),
     imports: List<String> = listOf(),
     parameters: List<ParsedTemplateParameter> = listOf(),
-    root: Tag = Tag("root", emptyMap(), children),
+    root: HtmlTag = HtmlTag("root", emptyMap(), children),
     externalScriptContent: String = "",
 ) = ParsedTemplate(
     file = "testFile",

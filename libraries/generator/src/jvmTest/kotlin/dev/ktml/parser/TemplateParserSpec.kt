@@ -263,7 +263,7 @@ class TemplateParserSpec : BddSpec({
         Then
         template.inRegistry shouldBe false
         template.root.children shouldHaveSize 1
-        (template.root.children[0] as HtmlElement.Tag).children shouldHaveSize 1
+        (template.root.children[0] as HtmlTag).children shouldHaveSize 1
         template.expressions[3].content shouldBe """if(text.size > a && b < c) "less" else "more""""
     }
 

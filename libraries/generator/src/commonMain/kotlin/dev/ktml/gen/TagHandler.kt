@@ -1,20 +1,18 @@
 package dev.ktml.gen
 
-import dev.ktml.parser.HtmlElement
-import dev.ktml.parser.ParsedTemplate
-import dev.ktml.parser.buildString
+import dev.ktml.parser.*
 import dev.ktml.util.replaceTicks
 
 private val HANDLERS = listOf(ContextTagHandler, ScriptTagHandler)
 
-fun findTagHandler(tag: HtmlElement.Tag) = HANDLERS.find { it.handles(tag) }
+fun findTagHandler(tag: HtmlTag) = HANDLERS.find { it.handles(tag) }
 
 interface TagHandler {
-    fun handles(tag: HtmlElement.Tag): Boolean
+    fun handles(tag: HtmlTag): Boolean
 
     fun process(
         template: ParsedTemplate,
-        tag: HtmlElement.Tag,
+        tag: HtmlTag,
         content: ContentBuilder,
         childrenHandler: (List<HtmlElement>) -> Unit,
     )
@@ -22,11 +20,11 @@ interface TagHandler {
 
 object ContextTagHandler : TagHandler {
     private const val NAME = "context"
-    override fun handles(tag: HtmlElement.Tag) = tag.name == NAME
+    override fun handles(tag: HtmlTag) = tag.name == NAME
 
     override fun process(
         template: ParsedTemplate,
-        tag: HtmlElement.Tag,
+        tag: HtmlTag,
         content: ContentBuilder,
         childrenHandler: (List<HtmlElement>) -> Unit,
     ) {
@@ -62,15 +60,15 @@ object ContextTagHandler : TagHandler {
 }
 
 object ScriptTagHandler : TagHandler {
-    override fun handles(tag: HtmlElement.Tag) = tag.name == "script" && tag.attrs["type"] == "text/kotlin"
+    override fun handles(tag: HtmlTag) = tag.name == "script" && tag.attrs["type"] == "text/kotlin"
 
     override fun process(
         template: ParsedTemplate,
-        tag: HtmlElement.Tag,
+        tag: HtmlTag,
         content: ContentBuilder,
         childrenHandler: (List<HtmlElement>) -> Unit
     ) {
-        val textNode = tag.children[0] as HtmlElement.Text
+        val textNode = tag.children[0] as HtmlText
         content.kotlin(textNode.content.trim())
     }
 }

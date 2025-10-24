@@ -24,6 +24,7 @@ open class KtmlProcessor(private val moduleName: String = "", outputDirectory: S
     }
 
     val pagePaths: List<String> get() = templates.registryTemplates.map { it.path }.sorted()
+    
 
     fun processRootDirectories(dirs: List<String>) = dirs.forEach { processRootDirectory(it) }
 

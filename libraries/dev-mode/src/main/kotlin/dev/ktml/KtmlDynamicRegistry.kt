@@ -80,6 +80,10 @@ class KtmlDynamicRegistry(
     private fun compileTemplates(): KtmlRegistry {
         compile()
 
+        if (exception != null) {
+            throw exception!!
+        }
+
         val className = "$basePackageName.KtmlRegistryImpl"
         try {
             val classLoader = createReloadableClassLoader(listOf(compileDir))
@@ -105,7 +109,9 @@ class KtmlDynamicRegistry(
         val errors = KotlinCompile.compileFilesToDir(generatedDir.toPath(), compileDir.toPath())
         if (errors.isNotEmpty()) {
             val convertedErrors = errors.map {
-                val path = it.filePath.substringAfter(ROOT_PACKAGE_PATH)
+                println(it)
+                val path = it.filePath.substringAfter(ROOT_PACKAGE_PATH).substringBeforeLast('.')
+                val template = processor
                 val folder = path.substringBeforeLast("/")
                 val fileName = path.substringAfterLast("/").substringBeforeLast(".").toKebabCase()
                 it.copy(filePath = "$folder/$fileName.ktml".removePrefix("/"))

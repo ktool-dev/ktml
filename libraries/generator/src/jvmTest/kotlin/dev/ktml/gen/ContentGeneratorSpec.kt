@@ -1,8 +1,6 @@
 package dev.ktml.gen
 
 import dev.ktml.parser.*
-import dev.ktml.parser.HtmlElement.Tag
-import dev.ktml.parser.HtmlElement.Text
 import dev.ktml.parser.kotlin.KotlinExpression
 import dev.ktml.parser.kotlin.removeContentComments
 import dev.ktool.gen.TRIPLE_QUOTE
@@ -57,9 +55,9 @@ class ContentGeneratorSpec : BddSpec({
     "basic content generation" {
         Given
         val children = mutableListOf(
-            Text("Hello, "),
-            Tag("b", emptyMap(), mutableListOf(Text("World"))),
-            Text("!"),
+            HtmlText("Hello, "),
+            HtmlTag("b", emptyMap(), mutableListOf(HtmlText("World"))),
+            HtmlText("!"),
         )
         val template = parsedTemplate(children = children)
 
@@ -619,5 +617,5 @@ private fun parsedTemplate(
     imports = imports,
     parameters = parameters,
     expressions = expressions,
-    root = Tag("root", emptyMap(), children),
+    root = HtmlTag("root", emptyMap(), children),
 )

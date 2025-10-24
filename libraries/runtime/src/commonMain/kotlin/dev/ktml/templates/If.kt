@@ -5,7 +5,7 @@ import dev.ktml.Context
 
 suspend fun Context.writeIf(test: Boolean, `else`: Content? = null, content: Content) {
     raw(TEMPLATE_HTML, 0, 5)
-    write(/* start */ if (test) write(content) else write(`else`) /* end: 5000e2a9-88a6-4660-8199-6f0b111daa1a */)
+    write(/* start */ if (test) write(content) else write(`else`) /* end: 874ac1ff-1842-4410-9bf0-da2249971aa7 */)
     raw(TEMPLATE_HTML, 5, 1)
 }
 

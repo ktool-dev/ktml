@@ -5,7 +5,7 @@ import dev.ktml.Context
 suspend fun Context.writeCompileException() {
     val exception: Throwable = required("exception")
     raw(TEMPLATE_HTML, 0, 192)
-    write(/* start */ exception.message /* end: d5f1b9bf-8291-42cf-b442-0367fb47e339 */)
+    write(/* start */ exception.message /* end: aae42d89-8f2d-41f2-afc5-aa480e7e0b8c */)
     raw(TEMPLATE_HTML, 192, 28)
 }
 

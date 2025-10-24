@@ -5,9 +5,9 @@ import dev.ktml.Context
 suspend fun Context.writeDefaultError() {
     val error: Throwable = required("error")
     raw(TEMPLATE_HTML, 0, 118)
-    write(/* start */ error.message /* end: 9d3e3f63-0711-4efd-b8c3-4739e81b7b1e */)
+    write(/* start */ error.message /* end: da6630aa-07b0-4538-b98c-d5814523335a */)
     raw(TEMPLATE_HTML, 118, 15)
-    write(/* start */ error.stackTraceToString() /* end: 077bc4ae-9dbe-42f0-96f8-5ad71e19b864 */)
+    write(/* start */ error.stackTraceToString() /* end: 7acd2490-88d0-4991-8e0a-19c4d9e2e005 */)
     raw(TEMPLATE_HTML, 133, 28)
 }
 

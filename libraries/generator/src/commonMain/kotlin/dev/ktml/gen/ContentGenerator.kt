@@ -74,13 +74,13 @@ class ContentGenerator(private val templates: Templates) {
     private fun generateChildContent(children: List<HtmlElement>) {
         children.forEach {
             when (it) {
-                is HtmlElement.Tag -> generateTagContent(it)
-                is HtmlElement.Text -> generateTextContent(it)
+                is HtmlTag -> generateTagContent(it)
+                is HtmlText -> generateTextContent(it)
             }
         }
     }
 
-    private fun generateTagContent(tag: HtmlElement.Tag) {
+    private fun generateTagContent(tag: HtmlTag) {
         logger.debug { "Generating tag content: ${tag.name}" }
 
         findTagHandler(tag)?.let {
@@ -103,7 +103,7 @@ class ContentGenerator(private val templates: Templates) {
         specialAttributes.forEach { if (it.isBlock) contentBuilder.endBlock() }
     }
 
-    private fun generateBasicTagContent(tag: HtmlElement.Tag) {
+    private fun generateBasicTagContent(tag: HtmlTag) {
         contentBuilder.raw("<${tag.name}")
 
         tag.attrs.filterAttributesWithHandlers().forEach { (name, value) ->
@@ -133,12 +133,12 @@ class ContentGenerator(private val templates: Templates) {
 
     private fun String.extractExpressions() = template.extractExpressions(this)
 
-    private fun generateTextContent(text: HtmlElement.Text) {
+    private fun generateTextContent(text: HtmlText) {
         logger.debug { "Generating text content: '${text.content}'" }
         text.content.writeExpressions()
     }
 
-    private fun generateCustomTagCall(tag: HtmlElement.Tag, customTag: TagDefinition) {
+    private fun generateCustomTagCall(tag: HtmlTag, customTag: TagDefinition) {
         logger.debug { "Generating custom tag call: ${customTag.name}" }
 
         logger.debug { "Custom tag: ${customTag.path}, Template: ${template.path}" }
@@ -164,7 +164,7 @@ class ContentGenerator(private val templates: Templates) {
             val paramName = param.name.safe
 
             if (param.isContent) {
-                val child = tag.children.filterIsInstance<HtmlElement.Tag>().find { it.name == param.name }
+                val child = tag.children.filterIsInstance<HtmlTag>().find { it.name == param.name }
 
                 val content = when {
                     child != null -> {

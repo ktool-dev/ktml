@@ -1,11 +1,7 @@
 package dev.ktml.gen
 
 import dev.ktml.parsedTemplateParameter
-import dev.ktml.parser.HtmlElement
-import dev.ktml.parser.HtmlElement.Tag
-import dev.ktml.parser.ParsedTemplate
-import dev.ktml.parser.ParsedTemplateParameter
-import dev.ktml.parser.Templates
+import dev.ktml.parser.*
 import dev.ktool.kotest.BddSpec
 import io.kotest.matchers.string.shouldContain
 
@@ -189,5 +185,5 @@ private fun template(
     imports = imports,
     parameters = parameters,
     expressions = listOf(),
-    root = Tag("root", emptyMap(), children),
+    root = HtmlTag("root", emptyMap(), children),
 ).also { templates.register(it) }
