@@ -1,4 +1,4 @@
-<card class="String = ''" header="Content? = null" headerClass="String = ''" content="Content">
+<card class="${String = ''}" header="${Content? = null}" headerClass="${String = ''}" content="$Content">
     <div class="card $`class`">
         <div if="${header != null}" class="card-header $headerClass">
             ${header}

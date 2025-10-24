@@ -2,7 +2,7 @@ import dev.ktml.example.ktor.models.User
 import dev.ktml.example.ktor.models.Task
 import dev.ktml.example.ktor.models.Status
 
-<html lang="en" $task="Task">
+<html lang="en" @task="$Task">
 <base-layout title="Task Detail">
     <div class="container py-4">
         <div class="row mb-3">

@@ -1,3 +1,3 @@
-<test-fragment fragment value="String">
+<test-fragment fragment value="$String">
     <span>${value}</span>
 </test-fragment>

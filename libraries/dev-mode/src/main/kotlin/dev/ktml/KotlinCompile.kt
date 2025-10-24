@@ -1,4 +1,4 @@
-package dev.ktml.compile
+package dev.ktml
 
 import dev.ktml.util.CompilerError
 import org.jetbrains.kotlin.cli.common.arguments.K2JVMCompilerArguments

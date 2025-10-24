@@ -1,7 +1,5 @@
 package dev.ktml
 
-import dev.ktml.compile.KotlinCompile
-import dev.ktml.compile.defaultClasspath
 import dev.ktml.templates.DefaultKtmlRegistry
 import dev.ktml.util.CompileException
 import dev.ktml.util.ROOT_PACKAGE_PATH

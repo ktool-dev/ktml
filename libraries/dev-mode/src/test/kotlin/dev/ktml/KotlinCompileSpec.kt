@@ -1,6 +1,5 @@
 package dev.ktml
 
-import dev.ktml.compile.KotlinCompile
 import dev.ktool.kotest.BddSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain

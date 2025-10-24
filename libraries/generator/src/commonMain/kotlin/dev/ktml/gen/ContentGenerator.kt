@@ -1,13 +1,9 @@
 package dev.ktml.gen
 
 import dev.ktml.TagDefinition
-import dev.ktml.parser.HtmlElement
-import dev.ktml.parser.ParsedTemplate
-import dev.ktml.parser.Templates
-import dev.ktml.parser.removeEmptyText
-import dev.ktml.util.CONTEXT_PARAM_PREFIX
-import dev.ktml.util.SET_CONTEXT_VALUE_TAG
+import dev.ktml.parser.*
 import dev.ktml.util.isNotVoidTag
+import dev.ktml.util.replaceTicks
 import dev.ktml.util.toImport
 import dev.ktool.gen.TRIPLE_QUOTE
 import dev.ktool.gen.safe
@@ -23,26 +19,24 @@ data class TemplateContent(val imports: List<Import>, val body: Block, val templ
 }
 
 /**
- * Generates HtmlWriter method calls from parsed HTML elements
+ * Generates HtmlWriter method calls from parsed HTML elements. This class is not thread save.
  */
 class ContentGenerator(private val templates: Templates) {
     private val contentBuilder = ContentBuilder()
     private val imports = mutableListOf<Import>()
-    private lateinit var rootTemplate: ParsedTemplate
+    private lateinit var template: ParsedTemplate
 
     fun generateTemplateContent(template: ParsedTemplate): TemplateContent {
         logger.debug { "Generating content for template: ${template.name}" }
-        rootTemplate = template
-        contentBuilder.clear()
-
-        initializeImports(template)
-        generateContextParams(template)
+        reset(template)
+        initializeImports()
+        generateContextParams()
 
         if (template.dockTypeDeclaration.isNotBlank()) {
             contentBuilder.doctype(template.dockTypeDeclaration)
         }
 
-        generateChildContent(template, template.root.children)
+        generateChildContent(template.root.children)
 
         val contentAndConstants = contentBuilder.templateContent
         logger.debug { "Finished generating content for template: ${template.name}" }
@@ -54,113 +48,97 @@ class ContentGenerator(private val templates: Templates) {
         )
     }
 
-    private fun generateContextParams(template: ParsedTemplate) {
-        template.parameters.filter { it.isContextParam }.forEach { param ->
-            val name = param.name.removePrefix(CONTEXT_PARAM_PREFIX)
-            logger.debug { "Generating context param: $name" }
-            contentBuilder.kotlin(param.contextParameterDefinition().replaceTicks())
-        }
+    private fun reset(template: ParsedTemplate) {
+        this.template = template
+        contentBuilder.clear()
+        imports.clear()
     }
 
-    private fun initializeImports(template: ParsedTemplate) {
-        imports.clear()
+    private fun initializeImports() {
         imports.addAll(template.imports.map { it.toImport() })
 
-        if (template.parameters.any { it.type == "Content" }) {
+        if (template.parameters.any { it.isContent }) {
             imports.add(Import("dev.ktml.Content"))
         }
 
         imports.add(Import("dev.ktml.Context"))
     }
 
-    private fun generateChildContent(
-        template: ParsedTemplate,
-        children: List<HtmlElement>,
-        noInterpolation: Boolean = false
-    ) {
+    private fun generateContextParams() {
+        template.parameters.filter { it.isContextParam }.forEach { param ->
+            logger.debug { "Generating context param: ${param.name}" }
+            contentBuilder.kotlin(param.contextParameterDefinition().replaceTicks())
+        }
+    }
+
+    private fun generateChildContent(children: List<HtmlElement>) {
         children.forEach {
             when (it) {
-                is HtmlElement.Tag -> generateTagContent(template, it, noInterpolation)
-                is HtmlElement.Text -> generateTextContent(it, noInterpolation)
+                is HtmlElement.Tag -> generateTagContent(it)
+                is HtmlElement.Text -> generateTextContent(it)
             }
         }
     }
 
-    private val controlAttrs = setOf("if", "each")
-    private val filteredAttrs = controlAttrs + "ignore-kotlin"
-
-    private fun generateTagContent(template: ParsedTemplate, tag: HtmlElement.Tag, noInterpolation: Boolean = false) {
+    private fun generateTagContent(tag: HtmlElement.Tag) {
         logger.debug { "Generating tag content: ${tag.name}" }
 
-        if (tag.name.equals(SET_CONTEXT_VALUE_TAG, ignoreCase = true)) {
-            generateContextSet(template, tag)
-            return
+        findTagHandler(tag)?.let {
+            it.process(template, tag, contentBuilder, ::generateChildContent)
+            return@generateTagContent
         }
 
-        tag.attrs["if"]?.let {
-            contentBuilder.startControlFlow("if", it.extractAttributeExpression())
-        }
-
-        tag.attrs["each"]?.let {
-            contentBuilder.startControlFlow("for", it.extractAttributeExpression())
-        }
+        val specialAttributes = matchingSpecialAttribute(tag.attrs).also {
+            it.forEach { (attribute, value) -> attribute.process(template, contentBuilder, value) }
+        }.map { it.first }
 
         val customTag = templates.locate(template.subPath, tag.name)
 
         if (customTag != null) {
-            generateCustomTagCall(template, tag, customTag)
-        } else if (tag.isKotlinScript) {
-            tag.children.joinToString("") { (it as HtmlElement.Text).content.trim() }
-                .split("\n").also { contentBuilder.kotlin(it) }
+            generateCustomTagCall(tag, customTag)
         } else {
-            val currentNoInterpolation = noInterpolation || tag.attrs.containsKey("ignore-kotlin")
-
-            contentBuilder.raw("<${tag.name}")
-
-            tag.attrs.filterNot { it.key in filteredAttrs }.forEach { (name, value) ->
-                contentBuilder.raw(" $name=\"")
-                if (!currentNoInterpolation && value.hasKotlinInterpolation()) {
-                    value.extractExpressions().write(true)
-                } else {
-                    contentBuilder.raw(value)
-                }
-                contentBuilder.raw("\"")
-            }
-
-            contentBuilder.raw(">")
-
-            if (tag.name.isNotVoidTag()) {
-                generateChildContent(template, tag.children, currentNoInterpolation)
-                contentBuilder.raw("</${tag.name}>")
-            }
+            generateBasicTagContent(tag)
         }
 
-        tag.attrs.filter { it.key in controlAttrs }.forEach { _ ->
-            contentBuilder.endControlFlow()
+        specialAttributes.forEach { if (it.isBlock) contentBuilder.endBlock() }
+    }
+
+    private fun generateBasicTagContent(tag: HtmlElement.Tag) {
+        contentBuilder.raw("<${tag.name}")
+
+        tag.attrs.filterAttributesWithHandlers().forEach { (name, value) ->
+            contentBuilder.raw(" $name=\"")
+            value.writeExpressions(true)
+            contentBuilder.raw("\"")
+        }
+
+        contentBuilder.raw(">")
+
+        if (tag.name.isNotVoidTag()) {
+            generateChildContent(tag.children)
+            contentBuilder.raw("</${tag.name}>")
         }
     }
 
-    private fun generateTextContent(text: HtmlElement.Text, noInterpolation: Boolean = false) {
+    private fun String.writeExpressions(replaceTicks: Boolean = false) {
+        extractExpressions().forEach {
+            if (it.text != null) {
+                contentBuilder.raw(it.text)
+            } else if (it.expression != null) {
+                val value = it.expression.kotlinFileContent
+                contentBuilder.write(if (replaceTicks) value.replaceTicks() else value)
+            }
+        }
+    }
+
+    private fun String.extractExpressions() = template.extractExpressions(this)
+
+    private fun generateTextContent(text: HtmlElement.Text) {
         logger.debug { "Generating text content: '${text.content}'" }
-        val content = text.content
-        if (!noInterpolation && content.hasKotlinInterpolation()) {
-            content.extractExpressions().write()
-        } else {
-            contentBuilder.raw(content)
-        }
+        text.content.writeExpressions()
     }
 
-    private fun List<Part>.write(attribute: Boolean = false) {
-        forEach { part ->
-            if (part.isKotlin) {
-                contentBuilder.write(if (attribute) part.text.replaceTicks() else part.text)
-            } else {
-                contentBuilder.raw(part.text)
-            }
-        }
-    }
-
-    private fun generateCustomTagCall(template: ParsedTemplate, tag: HtmlElement.Tag, customTag: TagDefinition) {
+    private fun generateCustomTagCall(tag: HtmlElement.Tag, customTag: TagDefinition) {
         logger.debug { "Generating custom tag call: ${customTag.name}" }
 
         logger.debug { "Custom tag: ${customTag.path}, Template: ${template.path}" }
@@ -202,61 +180,36 @@ class ContentGenerator(private val templates: Templates) {
                     if (param == lastParam) {
                         contentBuilder.endTemplateCallWithContent()
                         contentBuilder.startEmbeddedContent()
-                        generateChildContent(template, content)
+                        generateChildContent(content)
                         contentBuilder.endEmbeddedContent()
                     } else {
                         contentBuilder.startEmbeddedContent("$paramName = ")
-                        generateChildContent(template, content)
+                        generateChildContent(content)
                         contentBuilder.endEmbeddedContent(",")
                     }
                 }
             } else if (tag.attrs.containsKey(param.name)) {
-                val value = tag.attrs[param.name]
+                val expressions = tag.attrs[param.name]?.trim()?.extractExpressions()
                 when {
-                    value == null -> contentBuilder.kotlin("$paramName = null,")
+                    expressions == null || expressions.isEmpty() -> contentBuilder.kotlin("$paramName = null,")
 
-                    value.isSingleKotlinExpression() -> contentBuilder.kotlin(
-                        "$paramName = ${value.extractAttributeExpression()},"
+                    expressions.size == 1 && expressions[0].expression != null -> contentBuilder.kotlin(
+                        "$paramName = ${expressions[0].expression?.kotlinFileContent?.replaceTicks()},"
                     )
 
-                    value.hasKotlinInterpolation() ->
-                        contentBuilder.kotlin("$paramName = $TRIPLE_QUOTE${value.replaceTicks()}$TRIPLE_QUOTE,")
+                    expressions.size > 1 -> contentBuilder.kotlin(buildString {
+                        append("$paramName = ")
+                        appendExpressions(expressions)
+                    })
 
-                    param.isString -> contentBuilder.kotlin("$paramName = \"$value\",")
-                    else -> contentBuilder.kotlin("$paramName = $value,")
+                    param.isString -> contentBuilder.kotlin("$paramName = \"${expressions[0].text}\",")
+                    else -> contentBuilder.kotlin("$paramName = ${expressions[0].text},")
                 }
             }
         }
 
         if (lastParam?.isContent != true) {
             contentBuilder.endTemplateCall()
-        }
-    }
-
-    private fun generateContextSet(template: ParsedTemplate, tag: HtmlElement.Tag) {
-        val clear = tag.attrs.any { (key, value) -> key == "clear" && value != "false" }
-
-        require(!clear || tag.children.isNotEmpty()) { "You cannot set clear on a $SET_CONTEXT_VALUE_TAG tag unless it has children" }
-
-        fun convertValue(value: String) = when {
-            value == "null" -> value
-            value.isSingleKotlinExpression() -> value.extractAttributeExpression()
-            value.hasKotlinInterpolation() -> "$TRIPLE_QUOTE${value.replaceTicks()}$TRIPLE_QUOTE"
-            else -> "\"$value\""
-        }
-
-        if (tag.children.isEmpty()) {
-            tag.attrs.forEach {
-                contentBuilder.kotlin("set(\"${it.key}\", ${convertValue(it.value)})")
-            }
-        } else {
-            contentBuilder.kotlin("copy(clear = $clear, params = mapOf(")
-            tag.attrs.filterNot { it.key == "clear" }.forEach {
-                contentBuilder.kotlin("""    "${it.key}" to ${convertValue(it.value)}, """)
-            }
-            contentBuilder.startEmbeddedContent(")).write ")
-            generateChildContent(template, tag.children)
-            contentBuilder.endEmbeddedContent()
         }
     }
 }

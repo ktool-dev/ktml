@@ -1,5 +1,6 @@
 package dev.ktml.gen
 
+import dev.ktml.parsedTemplateParameter
 import dev.ktml.parser.HtmlElement
 import dev.ktml.parser.HtmlElement.Tag
 import dev.ktml.parser.ParsedTemplate
@@ -20,7 +21,7 @@ class KtmlRegistryGeneratorSpec : BddSpec({
         Given
         template(
             name = "button",
-            parameters = listOf(ParsedTemplateParameter("text", "String")),
+            parameters = listOf(parsedTemplateParameter("text", "String")),
         )
 
         When
@@ -43,13 +44,13 @@ class KtmlRegistryGeneratorSpec : BddSpec({
         Given
         template(
             name = "button",
-            parameters = listOf(ParsedTemplateParameter("text", "String")),
+            parameters = listOf(parsedTemplateParameter("text", "String")),
         )
         template(
             name = "card",
             parameters = listOf(
-                ParsedTemplateParameter("title", "String"),
-                ParsedTemplateParameter("content", "Content"),
+                parsedTemplateParameter("title", "String"),
+                parsedTemplateParameter("content", "Content"),
             ),
         )
 
@@ -83,8 +84,8 @@ class KtmlRegistryGeneratorSpec : BddSpec({
         template(
             name = "button",
             parameters = listOf(
-                ParsedTemplateParameter("text", "String", "\"blah\""),
-                ParsedTemplateParameter("disabled", "Boolean", "true")
+                parsedTemplateParameter("text", "String", "\"blah\""),
+                parsedTemplateParameter("disabled", "Boolean", "true")
             ),
         )
 
@@ -102,7 +103,7 @@ class KtmlRegistryGeneratorSpec : BddSpec({
             inRegistry = true,
             name = "my-page",
             subPath = "components",
-            parameters = listOf(ParsedTemplateParameter($$"$name", "String")),
+            parameters = listOf(parsedTemplateParameter($$"@name", "String")),
         )
 
         When
@@ -187,5 +188,6 @@ private fun template(
     subPath = subPath,
     imports = imports,
     parameters = parameters,
+    expressions = listOf(),
     root = Tag("root", emptyMap(), children),
 ).also { templates.register(it) }

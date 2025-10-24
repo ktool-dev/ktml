@@ -1,5 +1,3 @@
-<if test="Boolean" content="Content" else="Content? = null">
-    <script type="text/kotlin">
-        if (test) write(content) else write(`else`)
-    </script>
+<if test="$Boolean" content="$Content" else="${Content? = null}">
+    ${if (test) write(content) else write(`else`)}
 </if>

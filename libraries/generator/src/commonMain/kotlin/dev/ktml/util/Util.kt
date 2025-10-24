@@ -20,6 +20,8 @@ internal data class Path(val path: String) {
     override fun toString() = path
 }
 
+internal fun String.replaceTicks() = replace("\\'", "\u0000").replace("'", "\"").replace("\u0000", "'")
+
 internal fun String.toPath() = Path(this)
 
 fun String.isNotVoidTag() = !VOID_TAGS.any { it.equals(this, ignoreCase = true) }
@@ -32,8 +34,7 @@ fun String.toImport() = Import(
 const val ROOT_PACKAGE = "dev.ktml.templates"
 const val ROOT_PACKAGE_PATH = "dev/ktml/templates"
 
-const val SET_CONTEXT_VALUE_TAG = "context"
-const val CONTEXT_PARAM_PREFIX = "$"
+const val CONTEXT_PARAM_PREFIX = "@"
 
 private val VOID_TAGS = listOf(
     "br",

@@ -16,6 +16,7 @@ class Context(
     private val _model = model.toMutableMap()
 
     suspend fun write(content: Content?) = also { content?.invoke(it) }
+    suspend fun write(context: Context) = also { writer.write("") }
     suspend fun write(content: Any?) = raw(encodeHtml(content?.toString()))
     suspend fun raw(content: Any?) = apply { content?.toString()?.also { writer.write(it) } }
     suspend fun raw(content: String, offset: Int, length: Int) = apply { writer.write(content, offset, length) }

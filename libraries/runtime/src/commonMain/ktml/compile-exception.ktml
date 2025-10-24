@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-<html class="something" $exception="Throwable">
+<html lang="en" @exception="$Throwable">
 <head>
     <title>KTML Compiler Error</title>
 </head>

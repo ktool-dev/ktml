@@ -1,7 +1,7 @@
 import dev.ktml.example.ktor.models.User
 import dev.ktml.example.ktor.models.Task
 
-<html lang="en" $tasks="List<Task>">
+<html lang="en" @tasks="${List<Task>}">
 <base-layout title="All Tasks">
     <div class="container-fluid py-4">
         <div class="row mb-4">
@@ -36,11 +36,11 @@ import dev.ktml.example.ktor.models.Task
         </div>
 
         <!-- Task List -->
-        <div if="tasks.isEmpty()">
+        <div if="${tasks.isEmpty()}">
             <empty-state iconName="inbox" message="No tasks found" subMessage="Try adjusting your filters"/>
         </div>
 
-        <div if="!tasks.isEmpty()">
+        <div if="${!tasks.isEmpty()}">
             <task-card task="${task}" each="${task in tasks}"/>
         </div>
     </div>

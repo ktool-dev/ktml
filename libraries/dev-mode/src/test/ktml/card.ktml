@@ -1,4 +1,6 @@
-<card header="Content? = null" content="Content">
+private val a = ""
+
+<card header="${Content? = null}" content="${Content}">
     <div class="card">
         <div if="${header != null}" class="card-header">
             ${header}

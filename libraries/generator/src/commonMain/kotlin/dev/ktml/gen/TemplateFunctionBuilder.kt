@@ -18,8 +18,22 @@ class ContentBuilder {
     private val allRawContent = StringBuilder()
     private val currentRawContent = StringBuilder()
     private var writer = CodeWriter()
-
     private var writingRaw = false
+
+    val templateContent: ContentAndRawConstants
+        get() {
+            endRaw()
+
+            return ContentAndRawConstants(
+                writer.toString(),
+                Property(
+                    name = TEMPLATE_CONSTANT,
+                    type = StringType,
+                    initializer = ExpressionBody("$TRIPLE_QUOTE$allRawContent$TRIPLE_QUOTE"),
+                    modifiers = listOf(Modifier.Private, Modifier.Const),
+                ),
+            )
+        }
 
     fun clear() {
         currentRawContent.clear()
@@ -51,20 +65,6 @@ class ContentBuilder {
         }
     }
 
-    val templateContent: ContentAndRawConstants
-        get() {
-            endRaw()
-
-            return ContentAndRawConstants(
-                writer.toString(), Property(
-                    name = TEMPLATE_CONSTANT,
-                    type = StringType,
-                    initializer = ExpressionBody("$TRIPLE_QUOTE$allRawContent$TRIPLE_QUOTE"),
-                    modifiers = listOf(Modifier.Private, Modifier.Const)
-                )
-            )
-        }
-
     fun write(kotlin: String) {
         endRaw()
         if (kotlin.trim().startsWith("raw(")) {
@@ -81,7 +81,7 @@ class ContentBuilder {
         writer.newLine()
     }
 
-    fun endControlFlow() {
+    fun endBlock() {
         endRaw()
         writer.unindent()
         writer.removeLastIndentation()

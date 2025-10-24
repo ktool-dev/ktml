@@ -8,20 +8,12 @@ class HtmlHandler(private val selfClosingTags: Collection<String> = emptyList())
     private var currentTextElement: HtmlElement.Text? = null
 
     val rootElements: List<HtmlElement.Tag>
-        get() = _rootElements.filterNot { it.isKotlinScript }
-
-    val externalScriptContent: String by lazy {
-        _rootElements.filter { it.isKotlinScript }.extractScriptContent()
-    }
-
-    private fun List<HtmlElement.Tag>.extractScriptContent() =
-        joinToString("\n") { tag ->
-            tag.children.filterIsInstance<HtmlElement.Text>().joinToString("\n") { it.content.trim() }.trim()
-        }.trimIndent()
+        get() = _rootElements.toList()
 
     override fun onOpenTag(name: String, attributes: Map<String, String>, isImplied: Boolean) {
         currentTextElement = null
-        val element = HtmlElement.Tag(name, attributes)
+
+        val element = HtmlElement.Tag(name.lowercase(), attributes)
 
         if (elementStack.isEmpty()) {
             _rootElements.add(element)

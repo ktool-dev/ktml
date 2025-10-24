@@ -24,7 +24,7 @@ class GeneratedFunctionSpec : BddSpec({
     lateinit var processor: KtmlDynamicRegistry
 
     beforeEach {
-        processor = KtmlDynamicRegistry(templateDir, watchFiles = false)
+        processor = KtmlDynamicRegistry(templateDir, watchFiles = false, outputDir = "build/generated")
         engine = KtmlEngine(processor)
     }
 
@@ -79,8 +79,10 @@ class GeneratedFunctionSpec : BddSpec({
                     </div>
                 </div>
                     
+                
                             <h2>You are not an admin!</h2>
                         
+            
                     <div class="sidebar">
                     
                 </div><br>

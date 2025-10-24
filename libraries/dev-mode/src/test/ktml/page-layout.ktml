@@ -1,4 +1,4 @@
-<page-layout title="String = 'No Title'" header="Content" content="Content">
+<page-layout title="${String = 'No Title'}" header="$Content" content="$Content">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">

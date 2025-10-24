@@ -1,6 +1,6 @@
 import dev.ktml.SideBarItem
 
-<sidebar $sideBarItems="List<SideBarItem> = listOf()">
+<sidebar @sideBarItems="${List<SideBarItem> = listOf()}">
     <div class="sidebar">
         <a each="${item in sideBarItems}" href="${item.href}">${item.name}</a>
     </div>

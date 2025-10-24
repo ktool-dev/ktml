@@ -3,11 +3,11 @@ package dev.ktml.templates
 import dev.ktml.Context
 
 suspend fun Context.writeDefaultNotFound() {
-    raw(TEMPLATE_HTML, 0, 131)
+    raw(TEMPLATE_HTML, 0, 141)
 }
 
 private const val TEMPLATE_HTML: String = """<!DOCTYPE html>
-<html><head>
+<html lang="en"><head>
     <title>Not Found</title>
 </head><body>
 <div>

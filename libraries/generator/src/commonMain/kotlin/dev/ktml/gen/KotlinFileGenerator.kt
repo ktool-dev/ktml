@@ -2,6 +2,7 @@ package dev.ktml.gen
 
 import dev.ktml.parser.ParsedTemplate
 import dev.ktml.parser.Templates
+import dev.ktml.util.replaceTicks
 import dev.ktml.util.toCamelCase
 import dev.ktool.gen.types.*
 

@@ -1,4 +1,4 @@
-<stats-card count="Int" label="String" iconName="String" cardClass="String">
+<stats-card count="$Int" label="$String" iconName="$String" cardClass="$String">
     <div class="col-md-3 col-sm-6 mb-3">
         <div class="card ${cardClass}">
             <div class="card-body text-center">

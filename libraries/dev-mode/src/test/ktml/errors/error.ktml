@@ -1,4 +1,4 @@
-<html $error="Throwable">
+<html @error="$Throwable">
 <div>
     <h1>Error</h1>
     <h3>${error.message}</h3>

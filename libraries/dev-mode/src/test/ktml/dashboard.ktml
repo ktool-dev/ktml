@@ -1,13 +1,13 @@
 import dev.ktml.*
 
-<html lang="en" $userName="String" $message="String" $user="User" $items="List<Item>">
+<html lang="en" @userName="$String" @message="$String" @user="$User" @items="${List<Item>}">
 <page-layout title="Dashboard - ${user.name}">
     <header>
         <h1>Dashboard</h1>
     </header>
     <content>
         <h1>Hello, ${user.name}!</h1>
-        <h2 if="user.type == UserType.ADMIN">You are an admin!</h2>
+        <h2 if="${user.type == UserType.ADMIN}">You are an admin!</h2>
         <h2 if="${user.type == UserType.USER}">You are a user!</h2>
         <h2 if="${user.type == UserType.GUEST}">You are a guest!</h2>
         <h2 if="${user.type != UserType.GUEST}">You are not a guest!</h2>
@@ -19,7 +19,7 @@ import dev.ktml.*
                 <li each="${(index, item) in items.withIndex()}">${item.name} - Item ${index}</li>
             </ul>
         </card>
-        <if test="user.type == UserType.ADMIN">
+        <if test="${user.type == UserType.ADMIN}">
             <h2>You are an admin!</h2>
             <else>
                 <h2>You are not an admin!</h2>

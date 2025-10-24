@@ -1,5 +1,6 @@
 package dev.ktml.gen
 
+import dev.ktml.parsedTemplateParameter
 import dev.ktml.parser.*
 import dev.ktml.parser.HtmlElement.Tag
 import dev.ktool.gen.types.Function
@@ -12,7 +13,6 @@ private val templates = Templates()
 
 class KotlinFileGeneratorSpec : BddSpec({
     val kotlinFileGenerator = KotlinFileGenerator(templates)
-    val basePackageName = "my.templates"
 
     "generate code with basic template" {
         Given
@@ -20,8 +20,8 @@ class KotlinFileGeneratorSpec : BddSpec({
             name = "my-button",
             imports = emptyList(),
             parameters = listOf(
-                ParsedTemplateParameter("text", "String"),
-                ParsedTemplateParameter("onClick", "String")
+                parsedTemplateParameter("text", "String"),
+                parsedTemplateParameter("onClick", "String")
             ),
             root = Tag("my-button", emptyMap())
         )
@@ -67,8 +67,8 @@ class KotlinFileGeneratorSpec : BddSpec({
             name = "card",
             imports = emptyList(),
             parameters = listOf(
-                ParsedTemplateParameter("title", "String"),
-                ParsedTemplateParameter("content", "Content")
+                parsedTemplateParameter("title", "String"),
+                parsedTemplateParameter("content", "Content")
             ),
             root = Tag("card", emptyMap())
         )
@@ -94,9 +94,9 @@ class KotlinFileGeneratorSpec : BddSpec({
             name = "button",
             imports = emptyList(),
             parameters = listOf(
-                ParsedTemplateParameter("text", "String", "\"Click me\""),
-                ParsedTemplateParameter("disabled", "Boolean", "false"),
-                ParsedTemplateParameter("count", "Int", "0")
+                parsedTemplateParameter("text", "String", "\"Click me\""),
+                parsedTemplateParameter("disabled", "Boolean", "false"),
+                parsedTemplateParameter("count", "Int", "0")
             ),
             root = Tag("button", emptyMap())
         )
@@ -122,10 +122,10 @@ class KotlinFileGeneratorSpec : BddSpec({
             name = "form-input",
             imports = listOf("import kotlinx.serialization.Serializable"),
             parameters = listOf(
-                ParsedTemplateParameter("label", "String"),
-                ParsedTemplateParameter("placeholder", "String", "\"Enter text\""),
-                ParsedTemplateParameter("required", "Boolean", "true"),
-                ParsedTemplateParameter("content", "Content")
+                parsedTemplateParameter("label", "String"),
+                parsedTemplateParameter("placeholder", "String", "\"Enter text\""),
+                parsedTemplateParameter("required", "Boolean", "true"),
+                parsedTemplateParameter("content", "Content")
             ),
             root = Tag("form-input", emptyMap())
         )
@@ -203,7 +203,7 @@ class KotlinFileGeneratorSpec : BddSpec({
         val template = parsed(
             name = "test-component",
             imports = listOf("import kotlin.String"),
-            parameters = listOf(ParsedTemplateParameter("value", "String")),
+            parameters = listOf(parsedTemplateParameter("value", "String")),
             root = Tag(
                 "test-component", emptyMap(), mutableListOf(
                     HtmlElement.Text("Hello, World!")
@@ -232,14 +232,12 @@ class KotlinFileGeneratorSpec : BddSpec({
         val template = $$"""
             import dev.ktml.User
 
-            <script type="text/kotlin">
-                val number = 10
-                val defaultString = "blah"
-                val defaultUser = User("Me")
-            </script>
+            val number = 10
+            val defaultString = "blah"
+            val defaultUser = User("Me")
 
-            <template-with-types anInt="Int = number" aString="String = 'a $defaultString'" aBoolean="Boolean = true"
-                                 aUser="User = defaultUser">
+            <template-with-types anInt="${Int = number}" aString="${String = 'a $defaultString'}" aBoolean="${Boolean = true}"
+                                 aUser="${User = defaultUser}">
                 <div>${anInt}</div>
                 <div>${aString}</div>
                 <div>${aBoolean}</div>
@@ -279,6 +277,7 @@ private fun parsed(
     imports = imports,
     parameters = parameters,
     root = root,
+    expressions = listOf(),
     externalScriptContent = externalScriptContent,
 )
 

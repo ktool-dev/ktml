@@ -17,7 +17,7 @@ class TemplateParserSpec : BddSpec({
     "get template name from tag" {
         Given
         val content = $$"""
-            <my-button text="String" onClick="String">
+            <my-button text="$String" onClick="$String">
                 <button onclick="${onClick}">${text}</button>
             </my-button>
         """.trimIndent()
@@ -33,10 +33,10 @@ class TemplateParserSpec : BddSpec({
     "can have multiple roots in a file" {
         Given
         val content = $$"""
-            <my-button-one text="String" onClick="String">
+            <my-button-one text="$String" onClick="$String">
                 <button onclick="${onClick}">${text}</button>
             </my-button-one>
-            <my-button-two text="String" onClick="String">
+            <my-button-two text="$String" onClick="$String">
                 <button onclick="${onClick}">${text}</button>
             </my-button-two>
         """.trimIndent()
@@ -53,7 +53,7 @@ class TemplateParserSpec : BddSpec({
     "path is set correctly" {
         Given
         val content = $$"""
-            <my-button text="String" onClick="String">
+            <my-button text="$String" onClick="$String">
                 <button onclick="${onClick}">${text}</button>
             </my-button>
         """.trimIndent()
@@ -68,7 +68,7 @@ class TemplateParserSpec : BddSpec({
     "get parameters from attributes" {
         Given
         val content = $$"""
-            <my-button text="String" onClick="String">
+            <my-button text="$String" onClick="$String">
                 <button onclick="${onClick}">${text}</button>
             </my-button>
         """.trimIndent()
@@ -87,7 +87,7 @@ class TemplateParserSpec : BddSpec({
     "get parameters with default values" {
         Given
         val content = $$"""
-            <my-button text='String = "Default Text"'>
+            <my-button text='${String = "Default Text"}'>
                 <button onclick="${onClick}">${text}</button>
             </my-button>
         """.trimIndent()
@@ -106,7 +106,7 @@ class TemplateParserSpec : BddSpec({
         val content = $$"""
             import my.app.UserType
 
-            <my-button text="String">
+            <my-button text="$String">
                 <button onclick="${onClick}">${text}</button>
             </my-button>
         """.trimIndent()
@@ -123,7 +123,7 @@ class TemplateParserSpec : BddSpec({
     "should assign root element correctly" {
         Given
         val content = $$"""
-            <my-button text="String">
+            <my-button text="$String">
                 <button onclick="${onClick}">${text}</button>
             </my-button>
         """.trimIndent()
@@ -139,7 +139,7 @@ class TemplateParserSpec : BddSpec({
     "allows special characters in expressions" {
         Given
         val content = $$"""
-            <my-button text="String" onClick="String">
+            <my-button text="$String" onClick="$String">
                 <button class="${if(a < b && b < c) {'a'} else {'b'}}">A</button>
             </my-button>
         """.trimIndent()
@@ -148,22 +148,17 @@ class TemplateParserSpec : BddSpec({
         val result = parse(content)
 
         Then
-        val tag = result.root.children.find { it is HtmlElement.Tag && it.name == "button" } as HtmlElement.Tag
-        tag.attrs["class"] shouldBe $$"${if(a < b && b < c) {'a'} else {'b'}}"
+        result.expressions[2].content shouldBe "if(a < b && b < c) {'a'} else {'b'}"
     }
 
     "includes external script content" {
         Given
         val content = $$"""
-            <script type="text/kotlin">
-                val a = 1
-            </script>
-            <my-button text="String" onClick="String">
+            val a = 1
+            val b = 1
+            <my-button text="$String" onClick="$String">
                 <button onclick="${onClick}">${text}</button>
             </my-button>
-            <script type="text/kotlin">
-                val b = 1
-            </script>
         """.trimIndent()
 
         When
@@ -214,7 +209,7 @@ class TemplateParserSpec : BddSpec({
         """.trimIndent()
 
         Expect
-        shouldThrow<IllegalStateException> {
+        shouldThrow<IllegalArgumentException> {
             parse(content)
         }
     }
@@ -257,7 +252,7 @@ class TemplateParserSpec : BddSpec({
     "can parse a template with some nested kotlin code" {
         Given
         val content = $$"""
-            <my-button text="String" onClick="String">
+            <my-button text="$String" onClick="$String">
                 <button onclick="${onClick}">${if(text.size > a && b < c) "less" else "more"}</button>
             </my-button>
         """.trimIndent()
@@ -269,7 +264,7 @@ class TemplateParserSpec : BddSpec({
         template.inRegistry shouldBe false
         template.root.children shouldHaveSize 1
         (template.root.children[0] as HtmlElement.Tag).children shouldHaveSize 1
-        (template.root.children[0] as HtmlElement.Tag).children[0] shouldBe HtmlElement.Text($$"""${if(text.size > a && b < c) "less" else "more"}""")
+        template.expressions[3].content shouldBe """if(text.size > a && b < c) "less" else "more""""
     }
 
     "can put tag in the registry " {
@@ -326,7 +321,7 @@ class TemplateParserSpec : BddSpec({
         """.trimIndent()
 
         Expect
-        shouldThrow<IllegalStateException> {
+        shouldThrow<IllegalArgumentException> {
             parse(content)
         }
     }
@@ -340,7 +335,7 @@ class TemplateParserSpec : BddSpec({
         """.trimIndent()
 
         Expect
-        shouldThrow<IllegalStateException> {
+        shouldThrow<IllegalArgumentException> {
             parse(content)
         }
     }

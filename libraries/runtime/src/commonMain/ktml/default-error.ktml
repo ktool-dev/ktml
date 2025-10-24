@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-<html $error="Throwable">
+<html lang="en" @error="$Throwable">
 <head>
     <title>Server Error</title>
 </head>

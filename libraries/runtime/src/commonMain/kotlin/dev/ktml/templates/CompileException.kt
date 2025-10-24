@@ -4,13 +4,13 @@ import dev.ktml.Context
 
 suspend fun Context.writeCompileException() {
     val exception: Throwable = required("exception")
-    raw(TEMPLATE_HTML, 0, 200)
-    write(exception.message)
-    raw(TEMPLATE_HTML, 200, 28)
+    raw(TEMPLATE_HTML, 0, 192)
+    write(/* start */ exception.message /* end: d5f1b9bf-8291-42cf-b442-0367fb47e339 */)
+    raw(TEMPLATE_HTML, 192, 28)
 }
 
 private const val TEMPLATE_HTML: String = """<!DOCTYPE html>
-<html class="something"><head>
+<html lang="en"><head>
     <title>KTML Compiler Error</title>
 </head><body>
 <h1>Compiler Error</h1>

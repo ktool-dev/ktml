@@ -3,6 +3,8 @@ package dev.ktml.gen
 import dev.ktml.parser.*
 import dev.ktml.parser.HtmlElement.Tag
 import dev.ktml.parser.HtmlElement.Text
+import dev.ktml.parser.kotlin.KotlinExpression
+import dev.ktml.parser.kotlin.removeContentComments
 import dev.ktool.gen.TRIPLE_QUOTE
 import dev.ktool.kotest.BddSpec
 import io.kotest.matchers.shouldBe
@@ -14,24 +16,24 @@ class ContentGeneratorSpec : BddSpec({
     val contentGenerator = ContentGenerator(templates)
 
     $$"""
-        <my-button text="String" onClick="String">
+        <my-button text="$String" onClick="$String">
             <button onclick="${onClick}">${text}</button>
         </my-button>
     """.parse()
     $$"""
-        <tag-with-content content="Content">
+        <tag-with-content content="$Content">
             <div>${content}</div>
         </tag>
     """.parse()
-    """
-        <if inline test="Boolean" content="Content" else="Content? = null">
+    $$"""
+        <if test="$Boolean" content="$Content" else="${Content? = null}">
             <script type="text/kotlin">
                 if (test) write(content) else write(_else)
             </script>
         </if>
     """.parse()
     $$"""
-        <tag-with-multiple-content first="Content" content="Content">
+        <tag-with-multiple-content first="$Content" content="$Content">
             <div>${first}</div>
             <div>${content}</div>
         </tag>
@@ -39,14 +41,12 @@ class ContentGeneratorSpec : BddSpec({
     $$"""
         import dev.ktml.User
         
-        <script type="text/kotlin">
-            val number = 10
-            val defaultString = "blah"
-            val defaultUser = User("Me")
-        </script>
+        val number = 10
+        val defaultString = "blah"
+        val defaultUser = User("Me")
         
-        <lots-of-types anInt="Int = number" aString="String = 'a $defaultString'" aBoolean="Boolean = true"
-                             aUser="User = defaultUser">
+        <lots-of-types anInt="${Int = number}" aString="${String = 'a $defaultString'}" aBoolean="${Boolean = true}"
+                             aUser="${User = defaultUser}">
             <div>${anInt}</div>
             <div>${aString}</div>
             <div>${aBoolean}</div>
@@ -73,7 +73,7 @@ class ContentGeneratorSpec : BddSpec({
     "tag with kotlin attribute" {
         Given
         val template = $$"""
-            <tag text="String" onClick="String">
+            <tag text="$String" onClick="$String">
                 <button onclick="${onClick}">Hello</button>
             </tag>
         """.trim().parse()
@@ -82,7 +82,7 @@ class ContentGeneratorSpec : BddSpec({
         val result = contentGenerator.generateTemplateContent(template)
 
         Then
-        result.body.statements.first().toString().trim() shouldBe """
+        result.body.statements.first().toString().trim().removeContentComments() shouldBe """
             raw($TEMPLATE_CONSTANT, 0, 17)
             write(onClick)
             raw($TEMPLATE_CONSTANT, 17, 16)
@@ -92,7 +92,7 @@ class ContentGeneratorSpec : BddSpec({
     "tag with kotlin text" {
         Given
         val template = $$"""
-            <tag text="String" onClick="String">
+            <tag text="$String" onClick="$String">
                 <h1>Hello ${text} </h1>
             </tag>
         """.parse()
@@ -101,7 +101,7 @@ class ContentGeneratorSpec : BddSpec({
         val result = contentGenerator.generateTemplateContent(template)
 
         Then
-        result.body.statements.first().toString().trim() shouldBe """
+        result.body.statements.first().toString().trim().removeContentComments() shouldBe """
             raw($TEMPLATE_CONSTANT, 0, 10)
             write(text)
             raw($TEMPLATE_CONSTANT, 10, 6)
@@ -111,7 +111,7 @@ class ContentGeneratorSpec : BddSpec({
     "tag with multiple kotlin text" {
         Given
         val template = $$"""
-            <tag text="String" onClick="String">
+            <tag text="$String" onClick="$String">
                 <h1>Hello ${text} a ${text} </h1>
             </tag>
         """.parse()
@@ -120,7 +120,7 @@ class ContentGeneratorSpec : BddSpec({
         val result = contentGenerator.generateTemplateContent(template)
 
         Then
-        result.body.statements.first().toString().trim() shouldBe """
+        result.body.statements.first().toString().trim().removeContentComments() shouldBe """
             raw($TEMPLATE_CONSTANT, 0, 10)
             write(text)
             raw($TEMPLATE_CONSTANT, 10, 3)
@@ -132,7 +132,7 @@ class ContentGeneratorSpec : BddSpec({
     "tag with template call" {
         Given
         val template = $$"""
-            <tag text="String" onClick="String">
+            <tag text="$String" onClick="$String">
                 <my-button text="Hello" onClick="${onClick}"/>
                 <h1>Hello</h1>
             </tag>
@@ -142,7 +142,7 @@ class ContentGeneratorSpec : BddSpec({
         val result = contentGenerator.generateTemplateContent(template)
 
         Then
-        result.body.statements.first().toString().trim() shouldBe """
+        result.body.statements.first().toString().trim().removeContentComments() shouldBe """
             writeMyButton(
                 onClick = onClick,
                 text = "Hello",
@@ -154,7 +154,7 @@ class ContentGeneratorSpec : BddSpec({
     "tag with content parameter" {
         Given
         val template = $$"""
-            <tag text="String" onClick="String">
+            <tag text="$String" onClick="$String">
                 <tag-with-content>
                     <h1>Hello ${text} </h1>
                 </tag-with-content>
@@ -165,7 +165,7 @@ class ContentGeneratorSpec : BddSpec({
         val result = contentGenerator.generateTemplateContent(template)
 
         Then
-        result.body.statements.first().toString().trim() shouldBe """
+        result.body.statements.first().toString().trim().removeContentComments() shouldBe """
             writeTagWithContent {
                 raw($TEMPLATE_CONSTANT, 0, 10)
                 write(text)
@@ -177,7 +177,7 @@ class ContentGeneratorSpec : BddSpec({
     "content in nested tag" {
         Given
         val template = $$"""
-            <tag text="String" onClick="String">
+            <tag text="$String" onClick="$String">
                 <div><div>
                     <tag-with-content>
                         <div>
@@ -192,7 +192,7 @@ class ContentGeneratorSpec : BddSpec({
         val result = contentGenerator.generateTemplateContent(template)
 
         Then
-        result.body.statements.first().toString().trim() shouldBe """
+        result.body.statements.first().toString().trim().removeContentComments() shouldBe """
             raw($TEMPLATE_CONSTANT, 0, 19)
             writeTagWithContent {
                 raw($TEMPLATE_CONSTANT, 19, 32)
@@ -206,7 +206,7 @@ class ContentGeneratorSpec : BddSpec({
     "kotlin script generation" {
         Given
         val template = $$"""
-            <tag text="String" onClick="String">
+            <tag text="$String" onClick="$String">
                 <script type="text/kotlin">
                     val a = 1
                 </script>
@@ -221,7 +221,7 @@ class ContentGeneratorSpec : BddSpec({
         val result = contentGenerator.generateTemplateContent(template)
 
         Then
-        result.body.statements.first().toString().trim() shouldBe """
+        result.body.statements.first().toString().trim().removeContentComments() shouldBe """
             val a = 1
             raw($TEMPLATE_CONSTANT, 0, 10)
             write(text)
@@ -233,7 +233,7 @@ class ContentGeneratorSpec : BddSpec({
     "generate if for if attribute" {
         Given
         val template = $$"""
-            <tag text="String" onClick="String">
+            <tag text="$String" onClick="$String">
                 <h1 if='${text == "Hello"}'>Hello ${text} </h1>
             </tag>
         """.parse()
@@ -242,7 +242,7 @@ class ContentGeneratorSpec : BddSpec({
         val result = contentGenerator.generateTemplateContent(template)
 
         Then
-        result.body.statements.first().toString().trim() shouldBe """
+        result.body.statements.first().toString().trim().removeContentComments() shouldBe """
             if (text == "Hello") {
                 raw($TEMPLATE_CONSTANT, 0, 10)
                 write(text)
@@ -254,7 +254,7 @@ class ContentGeneratorSpec : BddSpec({
     "generate each for each attribute" {
         Given
         val template = $$"""
-            <tag items="List<String>">
+            <tag items="${List<String>}">
                 <h1 each="${item in items}">Hello ${item} </h1>
             </tag>
         """.parse()
@@ -263,7 +263,7 @@ class ContentGeneratorSpec : BddSpec({
         val result = contentGenerator.generateTemplateContent(template)
 
         Then
-        result.body.statements.first().toString().trim() shouldBe """
+        result.body.statements.first().toString().trim().removeContentComments() shouldBe """
             for (item in items) {
                 raw($TEMPLATE_CONSTANT, 0, 10)
                 write(item)
@@ -275,7 +275,7 @@ class ContentGeneratorSpec : BddSpec({
     "if and each on same tag" {
         Given
         val template = $$"""
-            <tag items="List<String>">
+            <tag items="${List<String>}">
                 <h1 if="${items.size > 1}" each="${item in items}">Hello ${item} </h1>
             </tag>
         """.parse()
@@ -284,7 +284,7 @@ class ContentGeneratorSpec : BddSpec({
         val result = contentGenerator.generateTemplateContent(template)
 
         Then
-        result.body.statements.first().toString().trim() shouldBe """
+        result.body.statements.first().toString().trim().removeContentComments() shouldBe """
             if (items.size > 1) {
                 for (item in items) {
                     raw($TEMPLATE_CONSTANT, 0, 10)
@@ -298,7 +298,7 @@ class ContentGeneratorSpec : BddSpec({
     "template with content passed as child node" {
         Given
         $$"""
-            <tag something="Content">
+            <tag something="$Content">
                 ${something}
             </tag>
         """.parse()
@@ -323,8 +323,8 @@ class ContentGeneratorSpec : BddSpec({
 
     "if a tag calls itself it works fine" {
         Given
-        val template = """
-            <tag content="Content">
+        val template = $$"""
+            <tag content="$Content">
                 <tag>World</tag>
             </tag>
         """.parse()
@@ -367,7 +367,7 @@ class ContentGeneratorSpec : BddSpec({
         result.templateConstant.initializer?.expression?.replace(TRIPLE_QUOTE, "") shouldBe """FirstSecond"""
     }
 
-    "can pass multiple content parameters without nameing second one" {
+    "can pass multiple content parameters without naming second one" {
         Given
         val template = """
             <something>
@@ -394,27 +394,6 @@ class ContentGeneratorSpec : BddSpec({
         result.templateConstant.initializer?.expression?.replace(TRIPLE_QUOTE, "") shouldBe """First<div>Second</div>"""
     }
 
-    "can flag tag as no interpolation" {
-        Given
-        val template = $$"""
-            <tag text="String">
-                <h1 ignore-kotlin class="${text}">Hello ${text}</h1>
-            </tag>
-        """.parse()
-
-        When
-        val result = contentGenerator.generateTemplateContent(template)
-
-        Then
-        result.templateConstant.initializer?.expression?.replace(
-            TRIPLE_QUOTE,
-            ""
-        ) shouldBe $$"""<h1 class="${text}">Hello ${text}</h1>"""
-        result.body.statements.first().toString().trim() shouldBe """
-            raw($TEMPLATE_CONSTANT, 0, 38)
-        """.trimIndent()
-    }
-
     "can use each on call to custom tag" {
         Given
         val template = $$"""
@@ -430,7 +409,7 @@ class ContentGeneratorSpec : BddSpec({
         val result = contentGenerator.generateTemplateContent(template)
 
         Then
-        result.body.render() shouldBe """
+        result.body.render().removeContentComments() shouldBe """
              {
                 val textItems = listOf("One", "Two", "Three")
                 for (text in textItems) {
@@ -446,7 +425,7 @@ class ContentGeneratorSpec : BddSpec({
     "can use if on call to custom tag" {
         Given
         val template = $$"""
-            <tag-with-if-buttons test="Int">
+            <tag-with-if-buttons test="$Int">
                 <my-button if="${test == 4}" onClick="null" text="something" />
             </tag-with-if-buttons>
         """.parse()
@@ -455,7 +434,7 @@ class ContentGeneratorSpec : BddSpec({
         val result = contentGenerator.generateTemplateContent(template)
 
         Then
-        result.body.render() shouldBe """
+        result.body.render().removeContentComments() shouldBe """
              {
                 if (test == 4) {
                     writeMyButton(
@@ -479,7 +458,7 @@ class ContentGeneratorSpec : BddSpec({
         val result = contentGenerator.generateTemplateContent(template)
 
         Then
-        result.body.render() shouldBe """
+        result.body.render().removeContentComments() shouldBe """
              {
                 writeLotsOfTypes(
                     anInt = 5 * number,
@@ -500,7 +479,7 @@ class ContentGeneratorSpec : BddSpec({
         val result = contentGenerator.generateTemplateContent(template)
 
         Then
-        result.body.render() shouldBe $$"""
+        result.body.render().removeContentComments() shouldBe $$"""
              {
                 writeLotsOfTypes(
                     aString = $${TRIPLE_QUOTE}something ${value}$$TRIPLE_QUOTE,
@@ -521,7 +500,7 @@ class ContentGeneratorSpec : BddSpec({
         val result = contentGenerator.generateTemplateContent(template)
 
         Then
-        result.body.render() shouldBe $$"""
+        result.body.render().removeContentComments() shouldBe $$"""
              {
                 writeLotsOfTypes(
                     aString = $${TRIPLE_QUOTE}something ${if(number == 10) "something" else "not${defaultString}"}$$TRIPLE_QUOTE,
@@ -542,7 +521,7 @@ class ContentGeneratorSpec : BddSpec({
         val result = contentGenerator.generateTemplateContent(template)
 
         Then
-        result.body.render() shouldBe $$"""
+        result.body.render().removeContentComments() shouldBe """
              {
                 writeLotsOfTypes(
                     aUser = User("me"),
@@ -564,7 +543,7 @@ class ContentGeneratorSpec : BddSpec({
         val result = contentGenerator.generateTemplateContent(template)
 
         Then
-        result.body.render() shouldBe $$"""
+        result.body.render().removeContentComments() shouldBe $$"""
              {
                 raw(TEMPLATE_HTML, 0, 22)
                 write(if(number == 10) "something" else "not${defaultString}")
@@ -632,11 +611,13 @@ private fun parsedTemplate(
     children: MutableList<HtmlElement> = mutableListOf(),
     imports: List<String> = listOf(),
     parameters: List<ParsedTemplateParameter> = listOf(),
+    expressions: List<KotlinExpression> = listOf(),
 ) = ParsedTemplate(
     file = "testFile",
     name = name,
     subPath = "",
     imports = imports,
     parameters = parameters,
+    expressions = expressions,
     root = Tag("root", emptyMap(), children),
 )
