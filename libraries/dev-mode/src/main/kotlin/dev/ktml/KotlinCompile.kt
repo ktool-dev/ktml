@@ -19,6 +19,7 @@ object KotlinCompile {
      *
      * @param rootDir Root directory to search for .kt files
      * @param outputDir Where .class files go
+     * @param cacheDir Optional cache directory for incremental compilation (enables incremental if provided)
      */
     fun compileFilesToDir(
         rootDir: Path,
@@ -36,6 +37,8 @@ object KotlinCompile {
             noReflect = true
             this.jvmTarget = jvmTarget
             this.noStdlib = true
+            moduleName = "ktml-module"
+            incrementalCompilation = true
         }
 
         val messages = mutableListOf<CompilerError>()

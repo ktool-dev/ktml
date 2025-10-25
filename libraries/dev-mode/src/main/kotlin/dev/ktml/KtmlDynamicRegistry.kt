@@ -52,12 +52,13 @@ class KtmlDynamicRegistry(
 
     fun reprocessFile(file: String, itemDeleted: Boolean) {
         val pathsBefore = processor.pagePaths
+        val removed = processor.removeFile(file, templateDir)
         if (itemDeleted) {
+            removed.forEach { File(generatedDir, it.codeFile).delete() }
             // We have to rebuild everything to make sure the removal didn't break anything
             processor.clear()
             _templateRegistry = loadTemplateRegistry()
         } else {
-            processor.removeFile(file, templateDir)
             val templates = processor.processFile(file, templateDir)
             templates.forEach { processor.generateTemplateCodeFile(it) }
             processor.generateRegistry()
@@ -69,7 +70,6 @@ class KtmlDynamicRegistry(
     }
 
     private fun loadTemplateRegistry(): KtmlRegistry {
-        generatedDir.deleteRecursively()
         generatedDir.mkdirs()
         processor.processRootDirectories(listOf(templateDir))
         processor.generateTemplateCode()
@@ -105,7 +105,6 @@ class KtmlDynamicRegistry(
 
     private fun compile() {
         exception = null
-        compileDir.deleteRecursively()
         val errors = KotlinCompile.compileFilesToDir(generatedDir.toPath(), compileDir.toPath())
         val errorResolver =
             CompilerErrorResolver(processor.getParsedTemplates(), generatedDir.absolutePath, templateDir)

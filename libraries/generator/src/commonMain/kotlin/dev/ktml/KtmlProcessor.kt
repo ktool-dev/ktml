@@ -74,16 +74,15 @@ open class KtmlProcessor(private val moduleName: String = "", outputDirectory: S
             }
         }
 
-    fun removeFile(file: String, rootPath: String): Boolean {
-        var pathFound = false
+    fun removeFile(file: String, rootPath: String): List<ParsedTemplate> {
         val (fileName, subPath) = parseFilePath(file, rootPath)
-        parsedTemplates.values.filter { it.file == fileName && it.subPath == subPath }.forEach {
-            pathFound = true
+        val removed = parsedTemplates.values.filter { it.file == fileName && it.subPath == subPath }
+        removed.forEach {
             parsedTemplates.remove(it.path)
             templates.remove(it)
             templateCodeFile(it).remove()
         }
-        return pathFound
+        return removed
     }
 
     fun generateTemplateCode() {
