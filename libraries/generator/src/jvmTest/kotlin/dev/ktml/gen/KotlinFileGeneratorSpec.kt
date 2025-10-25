@@ -2,6 +2,7 @@ package dev.ktml.gen
 
 import dev.ktml.parsedTemplateParameter
 import dev.ktml.parser.*
+import dev.ktml.parser.kotlin.removeContentComments
 import dev.ktool.gen.types.Function
 import dev.ktool.gen.types.KotlinFile
 import dev.ktool.kotest.BddSpec
@@ -106,13 +107,13 @@ class KotlinFileGeneratorSpec : BddSpec({
         Then
         file.writerFunction.parameters[0].name shouldBe "text"
         file.writerFunction.parameters[0].type.name shouldBe "String"
-        file.writerFunction.parameters[0].defaultValue?.expression shouldBe "\"Click me\""
+        file.writerFunction.parameters[0].defaultValue?.expression?.removeContentComments() shouldBe "\"Click me\""
         file.writerFunction.parameters[1].name shouldBe "disabled"
         file.writerFunction.parameters[1].type.name shouldBe "Boolean"
-        file.writerFunction.parameters[1].defaultValue?.expression shouldBe "false"
+        file.writerFunction.parameters[1].defaultValue?.expression?.removeContentComments() shouldBe "false"
         file.writerFunction.parameters[2].name shouldBe "count"
         file.writerFunction.parameters[2].type.name shouldBe "Int"
-        file.writerFunction.parameters[2].defaultValue?.expression shouldBe "0"
+        file.writerFunction.parameters[2].defaultValue?.expression?.removeContentComments() shouldBe "0"
     }
 
     "generate code with mixed parameters" {
@@ -140,9 +141,9 @@ class KotlinFileGeneratorSpec : BddSpec({
         file.writerFunction.parameters[0].name shouldBe "label"
         file.writerFunction.parameters[0].defaultValue shouldBe null
         file.writerFunction.parameters[1].name shouldBe "placeholder"
-        file.writerFunction.parameters[1].defaultValue?.expression shouldBe "\"Enter text\""
+        file.writerFunction.parameters[1].defaultValue?.expression?.removeContentComments() shouldBe "\"Enter text\""
         file.writerFunction.parameters[2].name shouldBe "required"
-        file.writerFunction.parameters[2].defaultValue?.expression shouldBe "true"
+        file.writerFunction.parameters[2].defaultValue?.expression?.removeContentComments() shouldBe "true"
         file.writerFunction.parameters[3].name shouldBe "content"
         file.writerFunction.parameters[3].defaultValue shouldBe null
     }
@@ -249,13 +250,13 @@ class KotlinFileGeneratorSpec : BddSpec({
 
         Then
         file.writerFunction.parameters[0].name shouldBe "aBoolean"
-        file.writerFunction.parameters[0].defaultValue?.expression shouldBe "true"
+        file.writerFunction.parameters[0].defaultValue?.expression?.removeContentComments() shouldBe "true"
         file.writerFunction.parameters[1].name shouldBe "aString"
-        file.writerFunction.parameters[1].defaultValue?.expression shouldBe $$""""a $defaultString""""
+        file.writerFunction.parameters[1].defaultValue?.expression?.removeContentComments() shouldBe $$""""a $defaultString""""
         file.writerFunction.parameters[2].name shouldBe "aUser"
-        file.writerFunction.parameters[2].defaultValue?.expression shouldBe "defaultUser"
+        file.writerFunction.parameters[2].defaultValue?.expression?.removeContentComments() shouldBe "defaultUser"
         file.writerFunction.parameters[3].name shouldBe "anInt"
-        file.writerFunction.parameters[3].defaultValue?.expression shouldBe "number"
+        file.writerFunction.parameters[3].defaultValue?.expression?.removeContentComments() shouldBe "number"
     }
 })
 

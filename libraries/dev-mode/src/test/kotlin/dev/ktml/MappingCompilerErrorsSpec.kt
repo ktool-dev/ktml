@@ -21,7 +21,7 @@ class MappingCompilerErrorsSpec : BddSpec({
 
         When
         val ex = shouldThrow<CompileException> {
-            KtmlDynamicRegistry(dir.absolutePath, false).initializeRegistry()
+            KtmlDynamicRegistry(dir.absolutePath, false).templates
         }
 
         Then
@@ -51,7 +51,7 @@ class MappingCompilerErrorsSpec : BddSpec({
 
         When
         val ex = shouldThrow<CompileException> {
-            KtmlDynamicRegistry(dir.absolutePath, false).initializeRegistry()
+            KtmlDynamicRegistry(dir.absolutePath, false).templates
         }
 
         Then
@@ -75,13 +75,13 @@ class MappingCompilerErrorsSpec : BddSpec({
 
         When
         val ex = shouldThrow<CompileException> {
-            KtmlDynamicRegistry(dir.absolutePath, false).initializeRegistry()
+            KtmlDynamicRegistry(dir.absolutePath, false).templates
         }
 
         Then
         ex.printStackTrace()
         ex.errors.size shouldBe 1
-        ex.errors[0].message shouldContain "Found above template content"
+        ex.errors[0].message shouldContain "Code above the template tags"
         ex.errors[0].message shouldContain "a + b"
     }
 
@@ -97,13 +97,13 @@ class MappingCompilerErrorsSpec : BddSpec({
 
         When
         val ex = shouldThrow<CompileException> {
-            KtmlDynamicRegistry(dir.absolutePath, false).initializeRegistry()
+            KtmlDynamicRegistry(dir.absolutePath, false).templates
         }
 
         Then
         ex.printStackTrace()
         ex.errors.size shouldBe 1
-        ex.errors[0].message shouldContain "Found in expression on line 0"
+        ex.errors[0].message shouldContain "The expression on line 0 starting at column"
         ex.errors[0].message shouldContain $$"""<something value="${String = null}">"""
     }
 })

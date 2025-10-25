@@ -6,21 +6,21 @@ import dev.ktml.util.CompileException
 suspend fun Context.writeCompileException() {
     val exception: CompileException = required("exception")
     raw(TEMPLATE_HTML, 0, 3116)
-    write(exception.errors.size /*id:39e1178f-7bb8-44ee-93e7-81018d533c95*/)
+    write(exception.errors.size /*id:a479b8d1-f723-4e81-af92-3994d6cd766f*/)
     raw(TEMPLATE_HTML, 3116, 1)
-    write(if (exception.errors.size == 1) "error" else "errors" /*id:40ede948-20e9-48ed-9789-0b6ab28fe0eb*/)
+    write(if (exception.errors.size == 1) "error" else "errors" /*id:e9d077ec-84e4-4dc4-be45-f1c24320fe94*/)
     raw(TEMPLATE_HTML, 3117, 404)
-    for ((filePath, fileErrors) in exception.errors.groupBy { it.filePath } /*id:a39714f6-1c20-4314-ba7d-cb0ae4d0cc50*/) {
+    for ((filePath, fileErrors) in exception.errors.groupBy { it.filePath } /*id:441862b7-8ac3-4b3d-8934-fe752a5ed80f*/) {
         raw(TEMPLATE_HTML, 3521, 179)
-        write(filePath /*id:f3a6ba96-8cc1-48fc-b762-658c05bc38fd*/)
+        write(filePath /*id:282c40f9-6cbf-47ea-8e6b-b3c88a609615*/)
         raw(TEMPLATE_HTML, 3700, 52)
-        write(fileErrors.size /*id:d0ce1ac8-a6b3-45af-bb19-cb2ebe1565f8*/)
+        write(fileErrors.size /*id:07a054c3-eb8e-45f9-acbc-d0f08c14f1b2*/)
         raw(TEMPLATE_HTML, 3752, 1)
-        write(if (fileErrors.size == 1) "error" else "errors" /*id:c4afba49-4af1-4b36-9a1c-cb1aa624cc61*/)
+        write(if (fileErrors.size == 1) "error" else "errors" /*id:712c817a-7768-45ba-8f4d-0f7b61f1c631*/)
         raw(TEMPLATE_HTML, 3753, 50)
-        for (error in fileErrors /*id:d3535b55-1797-460f-a7c6-96cb8044eed9*/) {
+        for (error in fileErrors /*id:4d582c51-0b4a-4966-8d7f-155f953d5630*/) {
             raw(TEMPLATE_HTML, 3803, 64)
-            write(error.message /*id:4564b65d-faef-4f39-b41c-0efd306671c3*/)
+            write(error.message /*id:fe831124-e1b0-4835-b170-55d98188d278*/)
             raw(TEMPLATE_HTML, 3867, 21)
         }
         raw(TEMPLATE_HTML, 3888, 11)
