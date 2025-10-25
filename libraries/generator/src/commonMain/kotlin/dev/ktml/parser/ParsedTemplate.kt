@@ -21,13 +21,15 @@ class ParsedTemplate(
     val imports: List<String>,
     val parameters: List<ParsedTemplateParameter>,
     val expressions: List<KotlinExpression>,
+    val headerLines: Int = 0,
     val root: HtmlTag,
     val dockTypeDeclaration: String = "",
     val externalScriptContent: String = "",
 ) {
     val path = if (subPath.isNotEmpty()) "$subPath/$name" else name
+    val templateFile = "$path.ktml"
     val camelCaseName = name.toCamelCase()
-    val pathCamelCaseName = if (path.isNotEmpty()) "$subPath/$camelCaseName" else camelCaseName
+    val codeFile = "${if (subPath.isNotEmpty()) "$subPath/$camelCaseName" else camelCaseName}.kt"
     val nonContextParameters = parameters.filterNot { it.isContextParam }
     val functionName = "write${name.toCamelCase()}"
     val packageName = if (subPath.isEmpty()) ROOT_PACKAGE else ROOT_PACKAGE + "." +
@@ -41,26 +43,23 @@ class ParsedTemplate(
 
     fun findExpression(value: String) = value.trim().let { v -> expressions.find { it.key == v || it.uuid == v } }
 
-    fun extractExpressions(value: String): List<ExpressionPart> {
-        val parts = mutableListOf<ExpressionPart>()
+    fun extractExpressions(value: String): List<ExpressionPart> = buildList {
         var lastIndex = 0
 
         EXPRESSION_REPLACE_REGEX.findAll(value).forEach { match ->
             // Add text before the match (if any)
             if (match.range.first > lastIndex) {
-                parts.add(ExpressionPart(text = value.substring(lastIndex, match.range.first)))
+                add(ExpressionPart(text = value.substring(lastIndex, match.range.first)))
             }
 
-            // Add the matched expression
-            parts.add(ExpressionPart(expression = findExpression(match.value)))
+            add(ExpressionPart(expression = findExpression(match.value)))
 
             lastIndex = match.range.last + 1
         }
 
         if (lastIndex < value.length) {
-            parts.add(ExpressionPart(text = value.substring(lastIndex)))
+            add(ExpressionPart(text = value.substring(lastIndex)))
         }
-        return parts.toList()
     }
 }
 

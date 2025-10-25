@@ -16,7 +16,9 @@ class KotlinExpression(rawContent: String, val start: Location, noCurly: Boolean
     val key = EXPRESSION_REPLACE_FORMAT.replace("X", uuid)
     val end = determineEnd(start, rawContent, noCurly)
     val content = rawContent.trimIndent().trim()
-    val kotlinFileContent = "/* start */ $content /* end: $uuid */"
+    val isMultiLine = content.contains(LINE_SEPARATOR)
+    val idComment = " /*id:$uuid*/"
+    val kotlinFileContent = "$content$idComment"
 
     override fun toString() = "[uuid=$uuid start=$start, end=$end, content=$content]"
 }
@@ -31,5 +33,6 @@ private fun determineEnd(start: Location, content: String, noCurly: Boolean) = c
 
 fun List<KotlinExpression>.findByKey(key: String) = this.find { it.key == key } ?: error("Unknown expression: $key")
 
-private val END_COMMENT_REGEX = """\s/\*\s*end:\s*[0-9a-f-]+\s*\*/""".toRegex()
-fun String.removeContentComments() = replace("/* start */ ", "").replace(END_COMMENT_REGEX, "")
+val ID_COMMENT_REGEX = """\s/\*id:\s*([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\*/""".toRegex()
+
+fun String.removeContentComments() = replace(ID_COMMENT_REGEX, "")

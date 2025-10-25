@@ -7,11 +7,7 @@ import dev.ktml.TagParameter
 
 object DefaultKtmlRegistry : KtmlRegistry {
     override val templates: Map<String, Content> = mapOf(
-        "default-not-found" to { writeDefaultNotFound() },
-
         "compile-exception" to { writeCompileException() },
-
-        "default-error" to { writeDefaultError() },
     )
 
     override val tags: List<TagDefinition> = listOf(

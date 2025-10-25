@@ -12,6 +12,7 @@ internal actual fun Path.list(): List<Path> = toFile().listFiles().map { Path(it
 internal actual val Path.isDirectory: Boolean get() = toFile().isDirectory
 internal actual val Path.exists: Boolean get() = toFile().exists()
 internal actual fun Path.remove(): Boolean = toFile().delete()
+internal actual fun Path.resolve(path: String): Path = toFile().resolve(path).absolutePath.toPath()
 
 internal actual fun Path.mkDirs(): Path {
     if (exists) return this

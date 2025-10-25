@@ -1,20 +1,171 @@
 package dev.ktml.templates
 
 import dev.ktml.Context
+import dev.ktml.util.CompileException
 
 suspend fun Context.writeCompileException() {
-    val exception: Throwable = required("exception")
-    raw(TEMPLATE_HTML, 0, 192)
-    write(/* start */ exception.message /* end: aae42d89-8f2d-41f2-afc5-aa480e7e0b8c */)
-    raw(TEMPLATE_HTML, 192, 28)
+    val exception: CompileException = required("exception")
+    raw(TEMPLATE_HTML, 0, 3116)
+    write(exception.errors.size /*id:39e1178f-7bb8-44ee-93e7-81018d533c95*/)
+    raw(TEMPLATE_HTML, 3116, 1)
+    write(if (exception.errors.size == 1) "error" else "errors" /*id:40ede948-20e9-48ed-9789-0b6ab28fe0eb*/)
+    raw(TEMPLATE_HTML, 3117, 404)
+    for ((filePath, fileErrors) in exception.errors.groupBy { it.filePath } /*id:a39714f6-1c20-4314-ba7d-cb0ae4d0cc50*/) {
+        raw(TEMPLATE_HTML, 3521, 179)
+        write(filePath /*id:f3a6ba96-8cc1-48fc-b762-658c05bc38fd*/)
+        raw(TEMPLATE_HTML, 3700, 52)
+        write(fileErrors.size /*id:d0ce1ac8-a6b3-45af-bb19-cb2ebe1565f8*/)
+        raw(TEMPLATE_HTML, 3752, 1)
+        write(if (fileErrors.size == 1) "error" else "errors" /*id:c4afba49-4af1-4b36-9a1c-cb1aa624cc61*/)
+        raw(TEMPLATE_HTML, 3753, 50)
+        for (error in fileErrors /*id:d3535b55-1797-460f-a7c6-96cb8044eed9*/) {
+            raw(TEMPLATE_HTML, 3803, 64)
+            write(error.message /*id:4564b65d-faef-4f39-b41c-0efd306671c3*/)
+            raw(TEMPLATE_HTML, 3867, 21)
+        }
+        raw(TEMPLATE_HTML, 3888, 11)
+    }
+    raw(TEMPLATE_HTML, 3899, 22)
 }
 
 private const val TEMPLATE_HTML: String = """<!DOCTYPE html>
 <html lang="en"><head>
     <title>KTML Compiler Error</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        body {
+            background-color: #2a3035;
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        .error-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .error-header {
+            background: #091017;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 2rem;
+        }
+
+        .logo-container {
+            flex-shrink: 0;
+        }
+
+        .logo {
+            height: 120px;
+            object-fit: contain;
+        }
+
+        .error-card {
+            background: white;
+            border-radius: 12px;
+            padding: 0;
+            margin-bottom: 1rem;
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .file-header {
+            background: #f8f9fa;
+            padding: 1rem 1.5rem;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .file-path {
+            font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .error-item {
+            padding: 1.5rem;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .error-item:last-child {
+            border-bottom: none;
+        }
+
+        .error-message {
+            background: #fff5f5;
+            border: 1px solid #fed7d7;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 0;
+            font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+            font-size: 0.875rem;
+            color: #c53030;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            line-height: 1.6;
+        }
+
+        .error-header .badge {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+            vertical-align: middle;
+        }
+
+        h1 {
+            color: #FFFFFF;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .subtitle {
+            color: #718096;
+            margin-top: 0.5rem;
+            font-size: 1rem;
+        }
+    </style>
 </head><body>
-<h1>Compiler Error</h1>
-<div style="color: darkred; font-weight: bold; line-height: 20px">
-    <pre></pre>
+<div class="error-container">
+    <div class="error-header">
+        <div>
+            <h1>
+                Compiler Error
+                <span class="badge text-bg-danger"> </span>
+            </h1>
+            <p class="subtitle mb-0">
+                <i class="bi bi-info-circle me-1"></i>
+                Fix the errors below to continue development
+            </p>
+        </div>
+        <div class="logo-container">
+            <img src="https://github.com/ktool-dev/.github/raw/main/KTML%20Logo.png?raw=true" alt="KTML Logo" class="logo">
+        </div>
+    </div>
+
+    <div class="error-card">
+        <div class="file-header">
+            <div class="file-path">
+                <i class="bi bi-file-earmark-code text-danger"></i>
+                
+                <span class="badge text-bg-danger"> </span>
+            </div>
+        </div>
+        <div class="error-item">
+            <pre class="error-message"></pre>
+        </div>
+    </div>
 </div>
 </body></html>"""

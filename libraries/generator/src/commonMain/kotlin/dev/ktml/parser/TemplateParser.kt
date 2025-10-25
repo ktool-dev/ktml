@@ -9,6 +9,7 @@ import dev.ktml.parser.kotlin.replaceKotlinExpressions
 import dev.ktml.util.CONTEXT_PARAM_PREFIX
 import dev.ktml.util.isHtmlElement
 import dev.ktml.util.isSvgElement
+import dev.ktool.gen.LINE_SEPARATOR
 
 private const val FRAGMENT_INDICATOR = "fragment"
 private val FIRST_TAG_REGEX = """(?m)^\s*<""".toRegex()
@@ -23,20 +24,22 @@ class TemplateParser(private val moduleName: String = "") {
      * Parse template content
      */
     fun parseContent(fileName: String, rawContent: String, subPath: String = moduleName): List<ParsedTemplate> {
-        val (doctype, content) = rawContent.checkForDoctype()
+        val (replacedContent, expressions) = rawContent.replaceKotlinExpressions()
+
+        val (doctype, content) = replacedContent.checkForDoctype()
 
         val contentStart = FIRST_TAG_REGEX.find(content)?.range?.start ?: 0
+
+        val headerLines = rawContent.take(contentStart).split(LINE_SEPARATOR).size
 
         val (imports, externalScriptContent) = parseHeader(fileName, content.substring(0, contentStart))
 
         val (normalizedContent, selfClosingTag) = content.substring(contentStart).findSelfClosingTags()
 
-        val (replacedContent, expressions) = normalizedContent.replaceKotlinExpressions()
-
         val handler = HtmlHandler(selfClosingTag)
 
         KsoupHtmlParser(handler = handler, options = parserOptions).apply {
-            write(replacedContent)
+            write(normalizedContent)
             end()
         }
 
@@ -60,6 +63,7 @@ class TemplateParser(private val moduleName: String = "") {
                 root = HtmlTag("index", mapOf(), mutableListOf(filteredElement)),
                 dockTypeDeclaration = doctype,
                 expressions = expressions,
+                headerLines = headerLines,
                 externalScriptContent = externalScriptContent,
             ).let(::listOf)
         }
@@ -79,6 +83,7 @@ class TemplateParser(private val moduleName: String = "") {
                 imports = imports,
                 root = it,
                 expressions = expressions,
+                headerLines = headerLines,
                 externalScriptContent = externalScriptContent,
             )
         }

@@ -8,3 +8,4 @@ internal expect fun Path.mkDirs(): Path
 internal expect val Path.isDirectory: Boolean
 internal expect val Path.exists: Boolean
 internal expect fun Path.remove(): Boolean
+internal expect fun Path.resolve(path: String): Path

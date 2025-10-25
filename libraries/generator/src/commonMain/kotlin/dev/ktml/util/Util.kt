@@ -1,5 +1,6 @@
 package dev.ktml.util
 
+import dev.ktool.gen.LINE_SEPARATOR
 import dev.ktool.gen.types.Import
 
 fun String.toCamelCase(): String {
@@ -23,6 +24,8 @@ internal data class Path(val path: String) {
 internal fun String.replaceTicks() = replace("\\'", "\u0000").replace("'", "\"").replace("\u0000", "'")
 
 internal fun String.toPath() = Path(this)
+
+internal fun Path.readLines() = readText().split(LINE_SEPARATOR)
 
 fun String.isNotVoidTag() = !VOID_TAGS.any { it.equals(this, ignoreCase = true) }
 

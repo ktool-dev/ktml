@@ -11,8 +11,6 @@ private val parser = TemplateParser("")
 private val templates = Templates()
 
 class ContentGeneratorSpec : BddSpec({
-    val contentGenerator = ContentGenerator(templates)
-
     $$"""
         <my-button text="$String" onClick="$String">
             <button onclick="${onClick}">${text}</button>
@@ -62,7 +60,7 @@ class ContentGeneratorSpec : BddSpec({
         val template = parsedTemplate(children = children)
 
         When
-        val result = contentGenerator.generateTemplateContent(template)
+        val result = ContentGenerator(templates, template).generate()
 
         Then
         result.body.statements.first().toString().trim().trim() shouldBe "raw($TEMPLATE_CONSTANT, 0, 20)"
@@ -77,7 +75,7 @@ class ContentGeneratorSpec : BddSpec({
         """.trim().parse()
 
         When
-        val result = contentGenerator.generateTemplateContent(template)
+        val result = ContentGenerator(templates, template).generate()
 
         Then
         result.body.statements.first().toString().trim().removeContentComments() shouldBe """
@@ -96,7 +94,7 @@ class ContentGeneratorSpec : BddSpec({
         """.parse()
 
         When
-        val result = contentGenerator.generateTemplateContent(template)
+        val result = ContentGenerator(templates, template).generate()
 
         Then
         result.body.statements.first().toString().trim().removeContentComments() shouldBe """
@@ -115,7 +113,7 @@ class ContentGeneratorSpec : BddSpec({
         """.parse()
 
         When
-        val result = contentGenerator.generateTemplateContent(template)
+        val result = ContentGenerator(templates, template).generate()
 
         Then
         result.body.statements.first().toString().trim().removeContentComments() shouldBe """
@@ -137,7 +135,7 @@ class ContentGeneratorSpec : BddSpec({
         """.parse()
 
         When
-        val result = contentGenerator.generateTemplateContent(template)
+        val result = ContentGenerator(templates, template).generate()
 
         Then
         result.body.statements.first().toString().trim().removeContentComments() shouldBe """
@@ -160,7 +158,7 @@ class ContentGeneratorSpec : BddSpec({
         """.parse()
 
         When
-        val result = contentGenerator.generateTemplateContent(template)
+        val result = ContentGenerator(templates, template).generate()
 
         Then
         result.body.statements.first().toString().trim().removeContentComments() shouldBe """
@@ -187,7 +185,7 @@ class ContentGeneratorSpec : BddSpec({
         """.parse()
 
         When
-        val result = contentGenerator.generateTemplateContent(template)
+        val result = ContentGenerator(templates, template).generate()
 
         Then
         result.body.statements.first().toString().trim().removeContentComments() shouldBe """
@@ -216,7 +214,7 @@ class ContentGeneratorSpec : BddSpec({
         """.parse()
 
         When
-        val result = contentGenerator.generateTemplateContent(template)
+        val result = ContentGenerator(templates, template).generate()
 
         Then
         result.body.statements.first().toString().trim().removeContentComments() shouldBe """
@@ -237,7 +235,7 @@ class ContentGeneratorSpec : BddSpec({
         """.parse()
 
         When
-        val result = contentGenerator.generateTemplateContent(template)
+        val result = ContentGenerator(templates, template).generate()
 
         Then
         result.body.statements.first().toString().trim().removeContentComments() shouldBe """
@@ -258,7 +256,7 @@ class ContentGeneratorSpec : BddSpec({
         """.parse()
 
         When
-        val result = contentGenerator.generateTemplateContent(template)
+        val result = ContentGenerator(templates, template).generate()
 
         Then
         result.body.statements.first().toString().trim().removeContentComments() shouldBe """
@@ -279,7 +277,7 @@ class ContentGeneratorSpec : BddSpec({
         """.parse()
 
         When
-        val result = contentGenerator.generateTemplateContent(template)
+        val result = ContentGenerator(templates, template).generate()
 
         Then
         result.body.statements.first().toString().trim().removeContentComments() shouldBe """
@@ -309,7 +307,7 @@ class ContentGeneratorSpec : BddSpec({
         """.trimMargin().parse()
 
         When
-        val result = contentGenerator.generateTemplateContent(template)
+        val result = ContentGenerator(templates, template).generate()
 
         Then
         result.body.statements.first().toString().trim() shouldBe """
@@ -328,7 +326,7 @@ class ContentGeneratorSpec : BddSpec({
         """.parse()
 
         When
-        val result = contentGenerator.generateTemplateContent(template)
+        val result = ContentGenerator(templates, template).generate()
 
         Then
         result.body.statements.first().toString().trim() shouldBe """
@@ -350,7 +348,7 @@ class ContentGeneratorSpec : BddSpec({
         """.parse()
 
         When
-        val result = contentGenerator.generateTemplateContent(template)
+        val result = ContentGenerator(templates, template).generate()
 
         Then
         result.body.statements.first().toString().trim() shouldBe """
@@ -377,7 +375,7 @@ class ContentGeneratorSpec : BddSpec({
         """.parse()
 
         When
-        val result = contentGenerator.generateTemplateContent(template)
+        val result = ContentGenerator(templates, template).generate()
 
         Then
         result.body.statements.first().toString().trim() shouldBe """
@@ -404,7 +402,7 @@ class ContentGeneratorSpec : BddSpec({
         """.parse()
 
         When
-        val result = contentGenerator.generateTemplateContent(template)
+        val result = ContentGenerator(templates, template).generate()
 
         Then
         result.body.render().removeContentComments() shouldBe """
@@ -429,7 +427,7 @@ class ContentGeneratorSpec : BddSpec({
         """.parse()
 
         When
-        val result = contentGenerator.generateTemplateContent(template)
+        val result = ContentGenerator(templates, template).generate()
 
         Then
         result.body.render().removeContentComments() shouldBe """
@@ -453,7 +451,7 @@ class ContentGeneratorSpec : BddSpec({
         """.parse()
 
         When
-        val result = contentGenerator.generateTemplateContent(template)
+        val result = ContentGenerator(templates, template).generate()
 
         Then
         result.body.render().removeContentComments() shouldBe """
@@ -474,7 +472,7 @@ class ContentGeneratorSpec : BddSpec({
         """.parse()
 
         When
-        val result = contentGenerator.generateTemplateContent(template)
+        val result = ContentGenerator(templates, template).generate()
 
         Then
         result.body.render().removeContentComments() shouldBe $$"""
@@ -495,7 +493,7 @@ class ContentGeneratorSpec : BddSpec({
         """.parse()
 
         When
-        val result = contentGenerator.generateTemplateContent(template)
+        val result = ContentGenerator(templates, template).generate()
 
         Then
         result.body.render().removeContentComments() shouldBe $$"""
@@ -516,7 +514,7 @@ class ContentGeneratorSpec : BddSpec({
         """.parse()
 
         When
-        val result = contentGenerator.generateTemplateContent(template)
+        val result = ContentGenerator(templates, template).generate()
 
         Then
         result.body.render().removeContentComments() shouldBe """
@@ -538,7 +536,7 @@ class ContentGeneratorSpec : BddSpec({
         """.parse()
 
         When
-        val result = contentGenerator.generateTemplateContent(template)
+        val result = ContentGenerator(templates, template).generate()
 
         Then
         result.body.render().removeContentComments() shouldBe $$"""
@@ -564,7 +562,7 @@ class ContentGeneratorSpec : BddSpec({
         """.parse()
 
         When
-        val result = contentGenerator.generateTemplateContent(template)
+        val result = ContentGenerator(templates, template).generate()
 
         Then
         result.body.render() shouldBe """
@@ -588,7 +586,7 @@ class ContentGeneratorSpec : BddSpec({
         """.parse()
 
         When
-        val result = contentGenerator.generateTemplateContent(template)
+        val result = ContentGenerator(templates, template).generate()
 
         Then
         result.body.render() shouldBe """

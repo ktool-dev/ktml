@@ -4,6 +4,8 @@ import dev.ktml.ContentWriter
 import dev.ktml.Context
 import dev.ktml.KtmlEngine
 import dev.ktml.KtmlRegistry
+import dev.ktml.templates.DefaultKtmlRegistry
+import dev.ktml.util.CompileException
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.response.*
@@ -41,11 +43,15 @@ suspend fun ApplicationCall.respondKtml(
     queryParameters: Map<String, List<String>> = mapOf(),
     pathParameters: Map<String, String> = mapOf(),
 ) {
-    val engine = application.attributes[ktmlEngineKey]
-
     respondBytesWriter(contentType = ContentType.Text.Html, status = status) {
-        val context = Context(KtmlWriter(writeBuffer), model, queryParameters, pathParameters)
-        engine.writePage(context, path)
+        try {
+            val engine = application.attributes[ktmlEngineKey]
+            val context = Context(KtmlWriter(writeBuffer), model, queryParameters, pathParameters)
+            engine.writePage(context, path)
+        } catch (e: CompileException) {
+            val context = Context(KtmlWriter(writeBuffer), mapOf("exception" to e))
+            DefaultKtmlRegistry.templates["compile-exception"]?.invoke(context)
+        }
     }
 }
 

@@ -44,18 +44,5 @@ import dev.ktml.example.ktor.models.Task
             <task-card task="${task}" each="${task in tasks}"/>
         </div>
     </div>
-    <pre>
-        Just Writing ${
-        if("a" == "b") "b" else "c"
-        } just to see what ${
-            if("a" == "c") {
-                "b"
-            } else if("a" == "J") {
-                "c"
-            } else {
-                "d"
-            }
-        }
-    </pre>
 </base-layout>
 </html>

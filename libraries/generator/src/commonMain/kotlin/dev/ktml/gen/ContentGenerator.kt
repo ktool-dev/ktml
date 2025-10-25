@@ -21,14 +21,13 @@ data class TemplateContent(val imports: List<Import>, val body: Block, val templ
 /**
  * Generates HtmlWriter method calls from parsed HTML elements. This class is not thread save.
  */
-class ContentGenerator(private val templates: Templates) {
+class ContentGenerator(private val templates: Templates, private val template: ParsedTemplate) {
     private val contentBuilder = ContentBuilder()
     private val imports = mutableListOf<Import>()
-    private lateinit var template: ParsedTemplate
 
-    fun generateTemplateContent(template: ParsedTemplate): TemplateContent {
+    fun generate(): TemplateContent {
         logger.debug { "Generating content for template: ${template.name}" }
-        reset(template)
+        reset()
         initializeImports()
         generateContextParams()
 
@@ -48,8 +47,7 @@ class ContentGenerator(private val templates: Templates) {
         )
     }
 
-    private fun reset(template: ParsedTemplate) {
-        this.template = template
+    private fun reset() {
         contentBuilder.clear()
         imports.clear()
     }

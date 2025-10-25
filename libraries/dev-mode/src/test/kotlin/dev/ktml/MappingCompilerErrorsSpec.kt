@@ -25,8 +25,85 @@ class MappingCompilerErrorsSpec : BddSpec({
         }
 
         Then
+        ex.printStackTrace()
         ex.errors.size shouldBe 1
         ex.errors[0].filePath shouldBe "something.ktml"
         ex.errors[0].message shouldContain $$"""<div class="$missing"></div>"""
+    }
+
+    "displays multiline expression" {
+        Given
+        val dir = createTempDirectory().toFile()
+        val template = $$"""
+            <something>
+                <div>
+                    ${
+                       if(1 > 4) {
+                          b + 2
+                       } else if(a == 4) {
+                          6
+                       }
+                    }
+                </div>
+            </something>
+        """.trimIndent()
+        File(dir, "something.ktml").writeText(template)
+
+        When
+        val ex = shouldThrow<CompileException> {
+            KtmlDynamicRegistry(dir.absolutePath, false).initializeRegistry()
+        }
+
+        Then
+        ex.printStackTrace()
+        ex.errors.size shouldBe 1
+        ex.errors[0].message shouldContain """} else if(a == 4) {"""
+    }
+
+    "handles compiler errors in content above the starting tag" {
+        Given
+        val dir = createTempDirectory().toFile()
+        val template = $$"""
+            val a = ""
+            a + b
+            
+            <something>
+                <div>$a</div>
+            </something>
+        """.trimIndent()
+        File(dir, "something.ktml").writeText(template)
+
+        When
+        val ex = shouldThrow<CompileException> {
+            KtmlDynamicRegistry(dir.absolutePath, false).initializeRegistry()
+        }
+
+        Then
+        ex.printStackTrace()
+        ex.errors.size shouldBe 1
+        ex.errors[0].message shouldContain "Found above template content"
+        ex.errors[0].message shouldContain "a + b"
+    }
+
+    "handles errors in template parameters" {
+        Given
+        val dir = createTempDirectory().toFile()
+        val template = $$"""
+            <something value="${String = null}">
+                <div>a</div>
+            </something>
+        """.trimIndent()
+        File(dir, "something.ktml").writeText(template)
+
+        When
+        val ex = shouldThrow<CompileException> {
+            KtmlDynamicRegistry(dir.absolutePath, false).initializeRegistry()
+        }
+
+        Then
+        ex.printStackTrace()
+        ex.errors.size shouldBe 1
+        ex.errors[0].message shouldContain "Found in expression on line 0"
+        ex.errors[0].message shouldContain $$"""<something value="${String = null}">"""
     }
 })

@@ -26,6 +26,6 @@ class BuildStandardTemplatesSpec : BddSpec({
         registryFile.delete()
 
         Then
-        File("$outputPackage/DefaultError.kt").exists() shouldBe true
+        File("$outputPackage/If.kt").exists() shouldBe true
     }
 })

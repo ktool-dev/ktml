@@ -2,8 +2,7 @@ package dev.ktml
 
 import dev.ktml.templates.DefaultKtmlRegistry
 import dev.ktml.util.CompileException
-import dev.ktml.util.ROOT_PACKAGE_PATH
-import dev.ktml.util.toKebabCase
+import dev.ktml.util.CompilerErrorResolver
 import java.io.File
 import java.net.URLClassLoader
 import kotlin.io.path.createTempDirectory
@@ -81,7 +80,8 @@ class KtmlDynamicRegistry(
         compile()
 
         if (exception != null) {
-            throw exception!!
+            exception?.printStackTrace()
+            return DefaultKtmlRegistry
         }
 
         val className = "$basePackageName.KtmlRegistryImpl"
@@ -107,17 +107,10 @@ class KtmlDynamicRegistry(
         exception = null
         compileDir.deleteRecursively()
         val errors = KotlinCompile.compileFilesToDir(generatedDir.toPath(), compileDir.toPath())
+        val errorResolver =
+            CompilerErrorResolver(processor.getParsedTemplates(), generatedDir.absolutePath, templateDir)
         if (errors.isNotEmpty()) {
-            val convertedErrors = errors.map {
-                println(it)
-                val path = it.filePath.substringAfter(ROOT_PACKAGE_PATH).substringBeforeLast('.')
-                val template = processor
-                val folder = path.substringBeforeLast("/")
-                val fileName = path.substringAfterLast("/").substringBeforeLast(".").toKebabCase()
-                it.copy(filePath = "$folder/$fileName.ktml".removePrefix("/"))
-            }
-            exception = CompileException(convertedErrors)
-            exception?.printStackTrace()
+            exception = CompileException(errorResolver.resolve(errors))
         }
     }
 }

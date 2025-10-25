@@ -6,11 +6,9 @@ import dev.ktml.util.replaceTicks
 import dev.ktml.util.toCamelCase
 import dev.ktool.gen.types.*
 
-class KotlinFileGenerator(templates: Templates) {
-    private val contentGenerator = ContentGenerator(templates)
-
+class KotlinFileGenerator(private val templates: Templates) {
     fun generateCode(template: ParsedTemplate) = KotlinFile(template.packageName) {
-        val content = contentGenerator.generateTemplateContent(template)
+        val content = ContentGenerator(templates, template).generate()
 
         imports.addAll(content.imports)
 
@@ -30,7 +28,8 @@ class KotlinFileGenerator(templates: Templates) {
             +Modifier.Suspend
             template.nonContextParameters.map { param ->
                 +Parameter(name = param.name, type = Type(param.type)) {
-                    defaultValue = param.defaultValue?.let { ExpressionBody(it.replaceTicks()) }
+                    defaultValue =
+                        param.defaultValue?.let { ExpressionBody(it.replaceTicks() + param.expression.idComment) }
                 }
             }
             body = FunctionBlock(content.body.statements)

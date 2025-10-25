@@ -24,7 +24,8 @@ open class KtmlProcessor(private val moduleName: String = "", outputDirectory: S
     }
 
     val pagePaths: List<String> get() = templates.registryTemplates.map { it.path }.sorted()
-    
+
+    fun getParsedTemplates() = parsedTemplates.values.toList()
 
     fun processRootDirectories(dirs: List<String>) = dirs.forEach { processRootDirectory(it) }
 
@@ -100,5 +101,5 @@ open class KtmlProcessor(private val moduleName: String = "", outputDirectory: S
         templateCodeFile(template).mkDirs().writeText(fileGenerator.generateCode(template).render())
     }
 
-    private fun templateCodeFile(template: ParsedTemplate) = Path("$basePath/${template.pathCamelCaseName}.kt")
+    private fun templateCodeFile(template: ParsedTemplate) = Path("$basePath/${template.codeFile}")
 }
