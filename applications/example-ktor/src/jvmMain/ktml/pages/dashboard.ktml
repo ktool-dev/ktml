@@ -15,7 +15,7 @@ import dev.ktml.example.ktor.models.TaskStats
 
         <!-- Stats Cards -->
         <div class="row mb-4">
-            <stats-card count="${stat.total}" label="Total Tasks" iconName="list-task" cardClass="border-primary"/>
+            <stats-card count="${stats.total}" label="Total Tasks" iconName="list-task" cardClass="border-primary"/>
             <stats-card count="${stats.todo}" label="To Do" iconName="circle" cardClass="border-secondary"/>
             <stats-card count="${stats.inProgress}" label="In Progress" iconName="arrow-repeat"
                         cardClass="border-primary"/>

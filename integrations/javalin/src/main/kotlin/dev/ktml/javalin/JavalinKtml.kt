@@ -1,6 +1,8 @@
 package dev.ktml.javalin
 
 import dev.ktml.*
+import dev.ktml.templates.DefaultKtmlRegistry
+import dev.ktml.util.CompileException
 import kotlinx.coroutines.runBlocking
 import java.io.OutputStream
 import io.javalin.http.Context as JavalinContext
@@ -26,7 +28,13 @@ object JavalinKtml {
         )
 
         runBlocking {
-            engine.writePage(ktmlContext, path)
+            try {
+                engine.writePage(ktmlContext, path)
+            } catch (e: CompileException) {
+                e.printStackTrace()
+                val context = Context(out, mapOf("exception" to e))
+                DefaultKtmlRegistry.templates["compile-exception"]?.invoke(context)
+            }
             out.flush()
         }
     }

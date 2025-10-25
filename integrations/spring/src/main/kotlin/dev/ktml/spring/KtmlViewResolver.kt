@@ -1,6 +1,8 @@
 package dev.ktml.spring
 
 import dev.ktml.*
+import dev.ktml.templates.DefaultKtmlRegistry
+import dev.ktml.util.CompileException
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import kotlinx.coroutines.runBlocking
@@ -23,7 +25,7 @@ class KtmlView(private val engine: KtmlEngine, private val path: String) : View 
         response.contentType = contentType
         val out = OutputStreamWriter(response.outputStream)
 
-        val context = Context(
+        val ktmlContext = Context(
             writer = out,
             model = model ?: emptyMap(),
             queryParams = request.parameterMap.mapValues { it.value.toList() },
@@ -31,7 +33,13 @@ class KtmlView(private val engine: KtmlEngine, private val path: String) : View 
         )
 
         runBlocking {
-            engine.writePage(context, path)
+            try {
+                engine.writePage(ktmlContext, path)
+            } catch (e: CompileException) {
+                e.printStackTrace()
+                val context = Context(out, mapOf("exception" to e))
+                DefaultKtmlRegistry.templates["compile-exception"]?.invoke(context)
+            }
             out.flush()
         }
     }
