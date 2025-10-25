@@ -5,27 +5,27 @@ import dev.ktml.util.CompileException
 
 suspend fun Context.writeCompileException() {
     val exception: CompileException = required("exception")
-    raw(TEMPLATE_HTML, 0, 3116)
-    write(exception.errors.size /*id:a479b8d1-f723-4e81-af92-3994d6cd766f*/)
-    raw(TEMPLATE_HTML, 3116, 1)
-    write(if (exception.errors.size == 1) "error" else "errors" /*id:e9d077ec-84e4-4dc4-be45-f1c24320fe94*/)
-    raw(TEMPLATE_HTML, 3117, 404)
-    for ((filePath, fileErrors) in exception.errors.groupBy { it.filePath } /*id:441862b7-8ac3-4b3d-8934-fe752a5ed80f*/) {
-        raw(TEMPLATE_HTML, 3521, 179)
-        write(filePath /*id:282c40f9-6cbf-47ea-8e6b-b3c88a609615*/)
-        raw(TEMPLATE_HTML, 3700, 52)
-        write(fileErrors.size /*id:07a054c3-eb8e-45f9-acbc-d0f08c14f1b2*/)
-        raw(TEMPLATE_HTML, 3752, 1)
-        write(if (fileErrors.size == 1) "error" else "errors" /*id:712c817a-7768-45ba-8f4d-0f7b61f1c631*/)
-        raw(TEMPLATE_HTML, 3753, 50)
-        for (error in fileErrors /*id:4d582c51-0b4a-4966-8d7f-155f953d5630*/) {
-            raw(TEMPLATE_HTML, 3803, 64)
-            write(error.message /*id:fe831124-e1b0-4835-b170-55d98188d278*/)
-            raw(TEMPLATE_HTML, 3867, 21)
+    raw(TEMPLATE_HTML, 0, 3103)
+    write(exception.errors.size /*id:633dfa17-c7c1-4c07-b1d7-e415061fb548*/)
+    raw(TEMPLATE_HTML, 3103, 1)
+    write(if (exception.errors.size == 1) "error" else "errors" /*id:658801b9-9cab-45db-996b-6c637d1d0589*/)
+    raw(TEMPLATE_HTML, 3104, 348)
+    for ((filePath, fileErrors) in exception.errors.groupBy { it.filePath } /*id:f5a18df0-f007-42c2-94e1-41b4880e1dda*/) {
+        raw(TEMPLATE_HTML, 3452, 179)
+        write(filePath /*id:e8271556-5f8e-488c-915c-ac2b9bffc56c*/)
+        raw(TEMPLATE_HTML, 3631, 52)
+        write(fileErrors.size /*id:183ba26b-d88a-41be-ade6-79dcafe52329*/)
+        raw(TEMPLATE_HTML, 3683, 1)
+        write(if (fileErrors.size == 1) "error" else "errors" /*id:d9831abf-e3c1-4b61-8541-d9a0f49f8c4d*/)
+        raw(TEMPLATE_HTML, 3684, 50)
+        for (error in fileErrors /*id:289ebb66-284b-46af-aaba-acbcf1106eee*/) {
+            raw(TEMPLATE_HTML, 3734, 64)
+            write(error.message /*id:f3e39dbf-6e13-4693-951f-8ac82dc9155c*/)
+            raw(TEMPLATE_HTML, 3798, 21)
         }
-        raw(TEMPLATE_HTML, 3888, 11)
+        raw(TEMPLATE_HTML, 3819, 11)
     }
-    raw(TEMPLATE_HTML, 3899, 22)
+    raw(TEMPLATE_HTML, 3830, 22)
 }
 
 private const val TEMPLATE_HTML: String = """<!DOCTYPE html>
@@ -33,6 +33,7 @@ private const val TEMPLATE_HTML: String = """<!DOCTYPE html>
     <title>KTML Compiler Error</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="https://iili.io/Kr8ZhSs.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
@@ -62,11 +63,6 @@ private const val TEMPLATE_HTML: String = """<!DOCTYPE html>
 
         .logo-container {
             flex-shrink: 0;
-        }
-
-        .logo {
-            height: 120px;
-            object-fit: contain;
         }
 
         .error-card {
@@ -151,7 +147,7 @@ private const val TEMPLATE_HTML: String = """<!DOCTYPE html>
             </p>
         </div>
         <div class="logo-container">
-            <img src="https://github.com/ktool-dev/.github/raw/main/KTML%20Logo.png?raw=true" alt="KTML Logo" class="logo">
+            <img src="https://iili.io/Kr86Zx9.png" alt="KTML Logo">
         </div>
     </div>
 

@@ -7,6 +7,7 @@ import dev.ktml.util.CompileException
     <title>KTML Compiler Error</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="https://iili.io/Kr8ZhSs.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
@@ -36,11 +37,6 @@ import dev.ktml.util.CompileException
 
         .logo-container {
             flex-shrink: 0;
-        }
-
-        .logo {
-            height: 120px;
-            object-fit: contain;
         }
 
         .error-card {
@@ -126,8 +122,7 @@ import dev.ktml.util.CompileException
             </p>
         </div>
         <div class="logo-container">
-            <img src="https://github.com/ktool-dev/.github/raw/main/KTML%20Logo.png?raw=true" alt="KTML Logo"
-                 class="logo">
+            <img src="https://iili.io/Kr86Zx9.png" alt="KTML Logo">
         </div>
     </div>
 
