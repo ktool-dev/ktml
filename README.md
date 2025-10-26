@@ -47,7 +47,8 @@ Custom tags let you build reusable components with type-safe parameters that can
 ### 2. Create a Full Page Template
 
 Pages use `<html>` as the root and can be rendered from a controller. A template can import types from your code and use
-values from a context model.
+values from a context model. To pull a value from the context model into the template you prefix the attribute name on
+the root template tag with a `@`.
 
 ```html
 <!-- dashboard.ktml -->
@@ -55,7 +56,7 @@ values from a context model.
 
 import com.myapp.User
 
-<html lang="en" user="User">
+<html lang="en" @user="User">
 <head>
     <title>Dashboard</title>
 </head>
@@ -96,7 +97,8 @@ Check out other [example applications here](https://github.com/ktool-dev/ktml/tr
 
 ## Gradle Plugin
 
-KTML has a Gradle plugin that help integrate the code generation process into your build. You have find the [documentation for it here](https://github.com/ktool-dev/ktml/tree/main/integrations/gradle).
+KTML has a Gradle plugin that helps integrate the code generation process into your build. You can find
+the [documentation for it here](https://github.com/ktool-dev/ktml/tree/main/integrations/gradle).
 
 ## Why build KTML when there are other template engines
 
@@ -135,7 +137,7 @@ have to come from the context model, so all parameter names have to be prefixed 
 
 ```html
 <!DOCTYPE html>
-<html lang="en" $userName="String">
+<html lang="en" @userName="String">
 <head><title>My Page</title></head>
 <body><h1>Hello, ${userName}!</h1></body>
 </html>
@@ -143,11 +145,13 @@ have to come from the context model, so all parameter names have to be prefixed 
 
 ### 2. Custom Tags
 
-Templates with custom root elements become reusable components:
+Templates with custom root elements become reusable components. Since strings are often used in attribute values, and
+attributes often use `"` around the value, KTML lets you use a `'` inside the value. It will be changed to a `"` in
+the actual Kotlin code. If you actually need a `'` in the value, you can escape it with `\'`.
 
 ```html
 
-<button-primary text="String" onClick='String = ""'>
+<button-primary text="$String" onClick="${String = ''}">
     <button class="btn-primary" onclick="${raw(onClick)}">
         ${text}
     </button>
@@ -163,9 +167,9 @@ from a controller like a page. All template parameter values will get populated 
 
 ```html
 
-<user-info fragment userName="String" userEmail="String">
-    <h3>${userName}</h3>
-    <p>${userEmail}</p>
+<user-info fragment userName="$String" userEmail="$String">
+    <h3>$userName</h3>
+    <p>$userEmail</p>
 </user-info>
 ```
 
@@ -178,15 +182,15 @@ KTML supports Kotlin's type system, including nullable types and default values:
 ```html
 
 <user-profile
-        name="String"
-        bio="String? = null"
-        role='String = "Member"'
-        isActive="Boolean = true">
+        name="$String"
+        bio="${String? = null}"
+        role="${String = 'Member'}"
+        isActive="${Boolean = true}">
 
     <div class="profile">
-        <h2>${name}</h2>
-        <p if="${bio != null}">${bio}</p>
-        <span class="role">${role}</span>
+        <h2>$name</h2>
+        <p if="${bio != null}">$bio</p>
+        <span class="role">$role</span>
     </div>
 </user-profile>
 ```
@@ -217,7 +221,7 @@ generated code will automatically pull the value from the context object and ens
 
 ```html
 
-<sidebar $items="List<MenuItem> = listOf()">
+<sidebar @items="${List<MenuItem> = listOf()}">
     <nav>
         <a each="${item in items}" href="${item.url}">${item.label}</a>
     </nav>
@@ -255,7 +259,7 @@ When you need more than simple expressions, embed Kotlin directly in templates:
 
 ```html
 
-<report sales="List<Sale>">
+<report sales="${List<Sale>}">
     <script type="text/kotlin">
         val totalRevenue = sales.sumOf { it.amount }
         val avgSale = totalRevenue / sales.size
@@ -277,7 +281,7 @@ Pass HTML blocks as parameters for flexible composition:
 
 ```html
 
-<modal title="String" footer="Content? = null" content="Content">
+<modal title="$String" footer="${Content? = null}" content="$Content">
     <div class="modal">
         <div class="modal-header"><h3>${title}</h3></div>
         <div class="modal-body">${content}</div>
@@ -307,6 +311,15 @@ Use `raw()` to output unescaped HTML (use carefully!):
     <pre><code>${raw(code)}</code></pre>
 </code-block>
 ```
+
+## Dev Mode
+
+When you include the `dev-mode` dependency for KTML, you can run locally and you're templates will automatically be
+compiled as they change. If compilation fails, you'll get messages in the console explaining where the code in the
+template is that caused the error. And if you try to render a KTML page in the browser, you'll get the compilation error
+screen. Which looks like this:
+
+<img src="https://iili.io/KrmIz6N.jpg" alt="KTML Compiler Error">
 
 ## Performance
 

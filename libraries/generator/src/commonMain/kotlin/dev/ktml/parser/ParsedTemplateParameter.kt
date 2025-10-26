@@ -21,17 +21,17 @@ data class ParsedTemplateParameter(
     private val paramNameSafe = paramName.safe
 
     fun contextParameterDefinition() = when {
-        hasDefault && isNullable -> "val $paramName: $type = optionalNullable(\"$paramName\", ${defaultValue()})"
-        hasDefault -> "val $paramNameSafe: $type = optional(\"$paramName\", ${defaultValue()})"
-        isNullable -> "val $paramNameSafe: $type = requiredNullable(\"$paramName\")"
-        else -> "val $paramNameSafe: $type = required(\"$paramName\")"
+        hasDefault && isNullable -> "val $paramName: $type = optionalNullable(\"$paramName\", ${defaultValue()})${expression.idComment}"
+        hasDefault -> "val $paramNameSafe: $type = optional(\"$paramName\", ${defaultValue()})${expression.idComment}"
+        isNullable -> "val $paramNameSafe: $type = requiredNullable(\"$paramName\")${expression.idComment}"
+        else -> "val $paramNameSafe: $type = required(\"$paramName\")${expression.idComment}"
     }
 
     fun contextParameterCall() = when {
-        hasDefault && isNullable -> "$paramNameSafe = optionalNullable(\"$paramName\", ${defaultValue()})"
-        hasDefault -> "$paramNameSafe = optional(\"$paramName\", ${defaultValue()})"
-        isNullable -> "$paramNameSafe = requiredNullable(\"$paramName\")"
-        else -> "$paramNameSafe = required(\"$paramName\")"
+        hasDefault && isNullable -> "$paramNameSafe = optionalNullable(\"$paramName\", ${defaultValue()})${expression.idComment}"
+        hasDefault -> "$paramNameSafe = optional(\"$paramName\", ${defaultValue()})${expression.idComment}"
+        isNullable -> "$paramNameSafe = requiredNullable(\"$paramName\")${expression.idComment}"
+        else -> "$paramNameSafe = required(\"$paramName\")${expression.idComment}"
     }
 
     private fun defaultValue(): String? = when {

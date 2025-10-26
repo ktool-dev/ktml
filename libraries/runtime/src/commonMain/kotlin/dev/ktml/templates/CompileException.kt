@@ -6,21 +6,21 @@ import dev.ktml.util.CompileException
 suspend fun Context.writeCompileException() {
     val exception: CompileException = required("exception")
     raw(TEMPLATE_HTML, 0, 3103)
-    write(exception.errors.size /*id:633dfa17-c7c1-4c07-b1d7-e415061fb548*/)
+    write(exception.errors.size)
     raw(TEMPLATE_HTML, 3103, 1)
-    write(if (exception.errors.size == 1) "error" else "errors" /*id:658801b9-9cab-45db-996b-6c637d1d0589*/)
+    write(if (exception.errors.size == 1) "error" else "errors")
     raw(TEMPLATE_HTML, 3104, 348)
-    for ((filePath, fileErrors) in exception.errors.groupBy { it.filePath } /*id:f5a18df0-f007-42c2-94e1-41b4880e1dda*/) {
+    for ((filePath, fileErrors) in exception.errors.groupBy { it.filePath }) {
         raw(TEMPLATE_HTML, 3452, 179)
-        write(filePath /*id:e8271556-5f8e-488c-915c-ac2b9bffc56c*/)
+        write(filePath)
         raw(TEMPLATE_HTML, 3631, 52)
-        write(fileErrors.size /*id:183ba26b-d88a-41be-ade6-79dcafe52329*/)
+        write(fileErrors.size)
         raw(TEMPLATE_HTML, 3683, 1)
-        write(if (fileErrors.size == 1) "error" else "errors" /*id:d9831abf-e3c1-4b61-8541-d9a0f49f8c4d*/)
+        write(if (fileErrors.size == 1) "error" else "errors")
         raw(TEMPLATE_HTML, 3684, 50)
-        for (error in fileErrors /*id:289ebb66-284b-46af-aaba-acbcf1106eee*/) {
+        for (error in fileErrors) {
             raw(TEMPLATE_HTML, 3734, 64)
-            write(error.message /*id:f3e39dbf-6e13-4693-951f-8ac82dc9155c*/)
+            write(error.message)
             raw(TEMPLATE_HTML, 3798, 21)
         }
         raw(TEMPLATE_HTML, 3819, 11)

@@ -28,32 +28,7 @@ fun createKtmlRegistry(basePackageName: String, templates: Templates) = KotlinFi
                 write("mapOf(")
                 withIndent {
                     templates.registryTemplates.forEach {
-                        val hasParameters = it.nonContextParameters.isNotEmpty()
-
-                        newLine(""""${it.path}" to { """)
-
-                        if (hasParameters) {
-                            indent()
-                            newLine()
-                        }
-
-                        write("${it.uniqueFunctionName}(")
-
-                        if (it.nonContextParameters.isNotEmpty()) {
-                            withIndent {
-                                it.nonContextParameters.forEach { parameter ->
-                                    newLine(parameter.contextParameterCall())
-                                    write(",")
-                                }
-                            }
-                            newLine()
-                        }
-                        write(") ")
-                        if (hasParameters) {
-                            unindent()
-                            newLine()
-                        }
-                        write("},")
+                        newLine(""""${it.path}" to { ${it.uniqueFunctionName}() },""")
                         newLine()
                     }
                 }

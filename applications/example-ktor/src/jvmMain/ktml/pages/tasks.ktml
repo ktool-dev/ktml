@@ -1,7 +1,7 @@
 import dev.ktml.example.ktor.models.User
 import dev.ktml.example.ktor.models.Task
 
-<html lang="en" @tasks="${List<Task>}">
+<html lang="en" @tasks="${List<Issue>}">
 <base-layout title="All Tasks">
     <div class="container-fluid py-4">
         <div class="row mb-4">

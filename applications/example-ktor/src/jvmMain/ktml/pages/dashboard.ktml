@@ -15,7 +15,7 @@ import dev.ktml.example.ktor.models.TaskStats
 
         <!-- Stats Cards -->
         <div class="row mb-4">
-            <stats-card count="${stats.total}" label="Total Tasks" iconName="list-task" cardClass="border-primary"/>
+            <stats-card count="${stats.tota}" label="Total Tasks" iconName="list-task" cardClass="border-primary"/>
             <stats-card count="${stats.todo}" label="To Do" iconName="circle" cardClass="border-secondary"/>
             <stats-card count="${stats.inProgress}" label="In Progress" iconName="arrow-repeat"
                         cardClass="border-primary"/>
@@ -40,7 +40,7 @@ import dev.ktml.example.ktor.models.TaskStats
                         </h5>
                     </div>
                     <div class="card-body">
-                        <div if="${todoTasks.isEmpty()}">
+                        <div if="${todoTasks.isEmpt()}">
                             <empty-state iconName="inbox" message="No tasks to do"/>
                         </div>
                         <div if="${!todoTasks.isEmpty()}">

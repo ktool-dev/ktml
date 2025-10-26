@@ -12,6 +12,10 @@ class KotlinFileGenerator(private val templates: Templates) {
 
         imports.addAll(content.imports)
 
+        if (template.inRegistry && template.nonContextParameters.isNotEmpty()) {
+            generateEmptyParamFunction(template)
+        }
+
         generateFunction(template, content)
 
         if (template.externalScriptContent.isNotEmpty()) {
@@ -33,5 +37,18 @@ class KotlinFileGenerator(private val templates: Templates) {
                 }
             }
             body = FunctionBlock(content.body.statements)
+        }
+
+    private fun KotlinFile.generateEmptyParamFunction(template: ParsedTemplate) =
+        +Function("write${template.name.toCamelCase()}", Type("Context")) {
+            +Modifier.Suspend
+            body = FunctionBlock {
+                write("write${template.name.toCamelCase()}(")
+                newLine()
+                withIndent {
+                    template.nonContextParameters.forEach { write(it.contextParameterCall()) }
+                }
+                write(")")
+            }
         }
 }
