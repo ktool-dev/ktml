@@ -1,6 +1,5 @@
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
-    id("dev.ktml.gradle") version "0.0.15"
 }
 
 kotlin {
