@@ -48,7 +48,7 @@ class KtmlViewResolverSpec : BddSpec({
         }
 
         When
-        resolver.resolveViewName("myTemplate", local).render(null, request, response)
+        resolver.resolveViewName("myTemplate", local)?.render(null, request, response)
 
         Then
         out.toString() shouldBe "Hello World"
@@ -63,7 +63,7 @@ class KtmlViewResolverSpec : BddSpec({
         }
 
         When
-        resolver.resolveViewName("greeting", local).render(mutableMapOf("name" to "Test"), request, response)
+        resolver.resolveViewName("greeting", local)?.render(mutableMapOf("name" to "Test"), request, response)
 
         Then
         out.toString() shouldBe "Hello Test"
@@ -78,7 +78,7 @@ class KtmlViewResolverSpec : BddSpec({
         queryParams["name"] = arrayOf("test")
 
         When
-        resolver.resolveViewName("queryTest", local).render(null, request, response)
+        resolver.resolveViewName("queryTest", local)?.render(null, request, response)
 
         Then
         out.toString() shouldBe "Query: test"
@@ -93,7 +93,7 @@ class KtmlViewResolverSpec : BddSpec({
         pathParams["id"] = "123"
 
         When
-        resolver.resolveViewName("pathTest", local).render(null, request, response)
+        resolver.resolveViewName("pathTest", local)?.render(null, request, response)
 
         Then
         out.toString() shouldBe "Path: 123"
