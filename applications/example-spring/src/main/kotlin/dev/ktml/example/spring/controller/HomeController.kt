@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.PathVariable
 
 @Controller
 class HomeController {
-
     @GetMapping("/")
     fun index(model: Model): String {
         model.addAttribute("title", "Welcome to KTML with Spring MVC")

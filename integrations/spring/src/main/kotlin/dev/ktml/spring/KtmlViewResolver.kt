@@ -6,16 +6,27 @@ import dev.ktml.util.CompileException
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import kotlinx.coroutines.runBlocking
+import org.springframework.core.Ordered
 import org.springframework.web.servlet.HandlerMapping
 import org.springframework.web.servlet.View
 import org.springframework.web.servlet.ViewResolver
 import java.io.OutputStream
 import java.util.*
 
-class KtmlViewResolver(ktmlRegistry: KtmlRegistry? = null) : ViewResolver {
-    private val engine = KtmlEngine(ktmlRegistry ?: findKtmlRegistry())
+class KtmlViewResolver(ktmlRegistry: KtmlRegistry? = null) : ViewResolver, Ordered {
+    private val registry = (ktmlRegistry ?: findKtmlRegistry())
+    private val engine = KtmlEngine(registry)
 
-    override fun resolveViewName(viewName: String, locale: Locale) = KtmlView(engine, viewName)
+    override fun getOrder(): Int = Ordered.HIGHEST_PRECEDENCE
+
+    override fun resolveViewName(viewName: String, locale: Locale): View? {
+        return try {
+            if (registry.templates.containsKey(viewName)) KtmlView(engine, viewName) else null
+        } catch (_: CompileException) {
+            // If there's a compiler exception, we need to return the view so it renders the compiler error page
+            KtmlView(engine, viewName)
+        }
+    }
 }
 
 class KtmlView(private val engine: KtmlEngine, private val path: String) : View {

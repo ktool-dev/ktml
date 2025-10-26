@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-<html lang="en" $title="String">
+<html lang="en" @title="$String">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -50,7 +50,7 @@
     <h1>${title}</h1>
     <p>This is an example Spring MVC server using KTML as the template engine.</p>
 
-    <h2>Try these examples, if you dare:</h2>
+    <h2>Try these examples:</h2>
     <ul>
         <li><a href="/users/Alice">View Alice's profile</a></li>
         <li><a href="/users/Bob">View Bob's profile</a></li>

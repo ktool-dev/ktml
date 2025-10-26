@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-<html lang="en" $name="String" $items="List<String>">
+<html lang="en" @name="$String" @items="${List<String>}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -58,7 +58,7 @@
     <h2>Your Items:</h2>
     <div class="items">
         <div class="item" each="${item in items}">
-            ${item}
+            $item
         </div>
     </div>
 
