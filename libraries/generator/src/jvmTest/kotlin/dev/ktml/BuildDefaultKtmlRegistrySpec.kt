@@ -7,8 +7,8 @@ import java.io.File
 
 private const val RUNTIME_PATH = "../runtime/src/commonMain"
 
-class BuildStandardTemplatesSpec : BddSpec({
-    "build" {
+class BuildDefaultKtmlRegistrySpec : BddSpec({
+    "build DefaultKtmlRegistry in runtime module" {
         Given
         val outputPath = "$RUNTIME_PATH/kotlin"
         val templatePath = "$RUNTIME_PATH/ktml"
