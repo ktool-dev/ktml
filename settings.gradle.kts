@@ -24,10 +24,12 @@ integration("maven")
 integration("spring")
 integration("ktor")
 integration("javalin")
+integration("http4k")
 
 application("example-javalin")
 application("example-ktor")
 application("example-spring")
+application("example-http4k")
 
 fun library(name: String) = includeType("libraries", name)
 fun integration(name: String) = includeType("integrations", name)

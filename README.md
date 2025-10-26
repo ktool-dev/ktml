@@ -32,13 +32,13 @@ Custom tags let you build reusable components with type-safe parameters that can
 
 ```html
 <!-- card.ktml -->
-<card header="Content? = null" content="Content">
+<card header="${Content? = null}" content="$Content">
     <div class="card">
         <div if="${header != null}" class="card-header">
-            ${header}
+            $header
         </div>
         <div class="card-body">
-            ${content}
+            $content
         </div>
     </div>
 </card>
@@ -56,7 +56,7 @@ the root template tag with a `@`.
 
 import com.myapp.User
 
-<html lang="en" @user="User">
+<html lang="en" @user="$User">
 <head>
     <title>Dashboard</title>
 </head>
@@ -137,7 +137,7 @@ have to come from the context model, so all parameter names have to be prefixed 
 
 ```html
 <!DOCTYPE html>
-<html lang="en" @userName="String">
+<html lang="en" @userName="$String">
 <head><title>My Page</title></head>
 <body><h1>Hello, ${userName}!</h1></body>
 </html>

@@ -10,8 +10,6 @@ fun main() {
     Javalin.create().apply {
         configureRouting()
     }.start(8080)
-
-    println("Server started on http://localhost:8080")
 }
 
 fun Javalin.configureRouting() {

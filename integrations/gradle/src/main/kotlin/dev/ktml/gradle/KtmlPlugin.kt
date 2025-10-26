@@ -7,7 +7,7 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSet
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-class KtmlPlugin : Plugin<Project> {
+open class KtmlPlugin : Plugin<Project> {
     override fun apply(project: Project) {
         val extension = project.extensions.create("ktml", KtmlExtension::class.java)
 

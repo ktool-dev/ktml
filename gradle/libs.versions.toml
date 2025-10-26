@@ -11,6 +11,7 @@ kotlin-gen = "1.0.1"
 ksp = "2.2.20-2.0.3"
 ktor = "3.3.0"
 javalin = "6.0.0"
+http4k = "5.37.0.0"
 maven = "3.9.0"
 maven-plugin-tools = "3.9.0"
 spring = "6.2.11"
@@ -41,6 +42,8 @@ ktor-server-core = { module = "io.ktor:ktor-server-core", version.ref = "ktor" }
 ktor-server-cio = { module = "io.ktor:ktor-server-cio", version.ref = "ktor" }
 ktor-server-status = { module = "io.ktor:ktor-server-status-pages", version.ref = "ktor" }
 javalin = { module = "io.javalin:javalin", version.ref = "javalin" }
+http4k-core = { module = "org.http4k:http4k-core", version.ref = "http4k" }
+http4k-server-jetty = { module = "org.http4k:http4k-server-jetty", version.ref = "http4k" }
 maven-plugin-api = { module = "org.apache.maven:maven-plugin-api", version.ref = "maven" }
 maven-core = { module = "org.apache.maven:maven-core", version.ref = "maven" }
 maven-plugin-annotations = { module = "org.apache.maven.plugin-tools:maven-plugin-annotations", version.ref = "maven-plugin-tools" }

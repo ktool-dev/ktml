@@ -8,7 +8,7 @@ import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSet
 
 data class SourceInfo(val sourceSet: KotlinSourceSet, val ktmlDir: String, val outputDir: String)
 
-class KtmlGenerateTask : DefaultTask() {
+open class KtmlGenerateTask : DefaultTask() {
     @Input
     lateinit var moduleName: String
 
@@ -16,7 +16,7 @@ class KtmlGenerateTask : DefaultTask() {
     lateinit var dirSets: List<SourceInfo>
 
     @TaskAction
-    fun generate() {
+    open fun generate() {
         dirSets.forEach { (_, ktmlDir, outputDir) ->
             KtmlProcessor(moduleName = moduleName, outputDirectory = outputDir).apply {
                 processRootDirectory(ktmlDir)
