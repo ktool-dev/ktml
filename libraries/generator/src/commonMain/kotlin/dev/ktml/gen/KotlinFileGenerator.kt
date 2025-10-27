@@ -44,11 +44,10 @@ class KotlinFileGenerator(private val templates: Templates) {
             +Modifier.Suspend
             body = FunctionBlock {
                 write("write${template.name.toCamelCase()}(")
-                newLine()
                 withIndent {
-                    template.nonContextParameters.forEach { write(it.contextParameterCall()) }
+                    template.nonContextParameters.forEach { newLine(it.contextParameterCall()) }
                 }
-                write(")")
+                newLine(")")
             }
         }
 }

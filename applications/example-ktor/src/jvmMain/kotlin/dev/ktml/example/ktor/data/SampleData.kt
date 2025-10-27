@@ -130,6 +130,22 @@ object SampleData {
 
     fun getTasksByStatus(status: Status): List<Task> = tasks.filter { it.status == status }
 
+    fun filterTasks(
+        status: Status? = null,
+        priority: Priority? = null,
+        assigneeId: Int? = null,
+        searchQuery: String? = null
+    ): List<Task> {
+        return tasks.filter { task ->
+            (status == null || task.status == status) &&
+            (priority == null || task.priority == priority) &&
+            (assigneeId == null || task.assignee?.id == assigneeId) &&
+            (searchQuery.isNullOrBlank() ||
+                task.title.contains(searchQuery, ignoreCase = true) ||
+                task.description.contains(searchQuery, ignoreCase = true))
+        }
+    }
+
     fun getStats(): TaskStats {
         val overdue = tasks.count { it.isOverdue() }
         return TaskStats(

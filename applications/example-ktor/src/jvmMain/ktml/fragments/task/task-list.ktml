@@ -1,0 +1,11 @@
+import dev.ktml.example.ktor.models.Task
+
+<task-list fragment tasks="${List<Task>}">
+    <div if="${tasks.isEmpty()}">
+        <empty-state iconName="inbox" message="No tasks found" subMessage="Try adjusting your filters"/>
+    </div>
+
+    <div if="${!tasks.isEmpty()}">
+        <task-card task="${task}" each="${task in tasks}"/>
+    </div>
+</task-list>

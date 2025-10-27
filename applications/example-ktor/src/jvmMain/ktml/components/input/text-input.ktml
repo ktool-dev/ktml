@@ -1,0 +1,4 @@
+<text-input label="$String" name="$String" class="${String = ''}" placeholder="${String = ''}">
+    <label class="form-label">$label</label>
+    <input type="text" name="$name" class="form-control $`class`" placeholder="$placeholder">
+</text-input>

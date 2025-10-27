@@ -2,7 +2,7 @@ import dev.ktml.example.ktor.models.User
 
 <select-priority>
     <label class="form-label">Priority</label>
-    <select class="form-select">
+    <select class="form-select" name="priority">
         <option value="">All Priorities</option>
         <option value="LOW">Low</option>
         <option value="MEDIUM">Medium</option>
@@ -12,7 +12,7 @@ import dev.ktml.example.ktor.models.User
 
 <select-status>
     <label class="form-label">Status</label>
-    <select class="form-select">
+    <select class="form-select" name="status">
         <option value="">All Statuses</option>
         <option value="TODO">To Do</option>
         <option value="IN_PROGRESS">In Progress</option>
@@ -22,7 +22,7 @@ import dev.ktml.example.ktor.models.User
 
 <select-user type="$String" @users="${List<User>}">
     <label class="form-label">${type}</label>
-    <select class="form-select">
+    <select class="form-select" name="assignee">
         <option value="">All Assignees</option>
         <option each="${user in users}" value="${user.id}">${user.name}</option>
     </select>

@@ -17,31 +17,30 @@ import dev.ktml.example.ktor.models.Task
         <!-- Filters -->
         <div class="card mb-4">
             <div class="card-body">
-                <div class="row g-3">
-                    <div class="col-md-3">
-                        <select-status/>
+                <form id="task-filters" hx-get="/tasks/list" hx-target="#task-list"
+                      hx-trigger="change from:select, keyup changed delay:300ms from:input[type='text']">
+
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <select-status/>
+                        </div>
+                        <div class="col-md-3">
+                            <select-priority/>
+                        </div>
+                        <div class="col-md-3">
+                            <select-user type="Assignee"/>
+                        </div>
+                        <div class="col-md-3">
+                            <text-input label="Search" name="search" placeholder="Search tasks..."/>
+                        </div>
                     </div>
-                    <div class="col-md-3">
-                        <select-priority/>
-                    </div>
-                    <div class="col-md-3">
-                        <select-user type="Assignee"/>
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label">Search</label>
-                        <input type="text" class="form-control" placeholder="Search tasks...">
-                    </div>
-                </div>
+                </form>
             </div>
         </div>
 
         <!-- Task List -->
-        <div if="${tasks.isEmpty()}">
-            <empty-state iconName="inbox" message="No tasks found" subMessage="Try adjusting your filters"/>
-        </div>
-
-        <div if="${!tasks.isEmpty()}">
-            <task-card task="${task}" each="${task in tasks}"/>
+        <div id="task-list">
+            <task-list tasks="${tasks}"/>
         </div>
     </div>
 </base-layout>

@@ -1,6 +1,7 @@
 package dev.ktml.example.ktor
 
 import dev.ktml.example.ktor.data.SampleData
+import dev.ktml.example.ktor.models.Priority
 import dev.ktml.example.ktor.models.Status
 import dev.ktml.ktor.KtmlPlugin
 import dev.ktml.ktor.respondKtml
@@ -45,6 +46,32 @@ fun Application.configureRouting() {
                     "user" to SampleData.currentUser,
                     "tasks" to SampleData.tasks,
                     "users" to SampleData.users
+                )
+            )
+        }
+
+        // Task list fragment (for HTMX)
+        get("/tasks/list") {
+            val statusParam = call.request.queryParameters["status"]
+            val priorityParam = call.request.queryParameters["priority"]
+            val assigneeParam = call.request.queryParameters["assignee"]
+            val searchParam = call.request.queryParameters["search"]
+
+            val status = statusParam?.takeIf { it.isNotBlank() }?.let { Status.valueOf(it) }
+            val priority = priorityParam?.takeIf { it.isNotBlank() }?.let { Priority.valueOf(it) }
+            val assigneeId = assigneeParam?.takeIf { it.isNotBlank() }?.toIntOrNull()
+
+            val filteredTasks = SampleData.filterTasks(
+                status = status,
+                priority = priority,
+                assigneeId = assigneeId,
+                searchQuery = searchParam
+            )
+
+            call.respondKtml(
+                path = "fragments/task/task-list",
+                model = mapOf(
+                    "tasks" to filteredTasks,
                 )
             )
         }
