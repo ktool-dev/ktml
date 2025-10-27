@@ -4,7 +4,7 @@
            size="${String = 'sm'}"
            outline="${Boolean = false}"
            extraClass="${String? = null}">
-    <button class="${buildClass('btn', Triple(outline, 'btn-outline-$variant', 'btn-$variant'), 'btn-$size', extraClass)}">
+    <button class="${cssClass('btn', If(outline, 'btn-outline-$variant', 'btn-$variant'), 'btn-$size', extraClass)}">
         <icon name="${iconName}" if="${iconName != null}"></icon>
         ${text}
     </button>

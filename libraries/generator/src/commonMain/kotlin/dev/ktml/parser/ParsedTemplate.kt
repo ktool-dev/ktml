@@ -26,7 +26,7 @@ class ParsedTemplate(
     val externalScriptContent: String = "",
 ) {
     val path = if (subPath.isNotEmpty()) "$subPath/$name" else name
-    val templateFile = "$path.ktml"
+    val templateFile = "${if (subPath.isNotEmpty()) "$subPath/$file" else file}.ktml"
     val camelCaseName = name.toCamelCase()
     val codeFile = "${if (subPath.isNotEmpty()) "$subPath/$camelCaseName" else camelCaseName}.kt"
     val nonContextParameters = parameters.filterNot { it.isContextParam }
