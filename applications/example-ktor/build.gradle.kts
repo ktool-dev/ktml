@@ -3,10 +3,6 @@ plugins {
     id("dev.ktml.gradle") version "0.0.16"
 }
 
-dependencies {
-    developmentOnly(project(":dev-mode"))
-}
-
 kotlin {
     jvmToolchain(22)
 
@@ -23,6 +19,7 @@ kotlin {
         jvmMain.dependencies {
             implementation(project(":runtime"))
             implementation(project(":ktor"))
+            implementation(project(":dev-mode"))
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.ktor.server.core)
             implementation(libs.ktor.server.cio)

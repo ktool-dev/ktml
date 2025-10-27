@@ -5,7 +5,7 @@ plugins {
 
 dependencies {
     implementation(project(":runtime"))
-    developmentOnly(project(":dev-mode"))
+    implementation(project(":dev-mode"))
     implementation(project(":http4k"))
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.http4k.core)

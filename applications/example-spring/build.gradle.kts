@@ -10,7 +10,7 @@ kotlin {
 
 dependencies {
     implementation(project(":runtime"))
-    developmentOnly(project(":dev-mode"))
+    implementation(project(":dev-mode"))
     implementation(project(":spring"))
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.spring.boot.starter.web)

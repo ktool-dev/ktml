@@ -5,7 +5,7 @@ plugins {
 
 dependencies {
     implementation(project(":runtime"))
-    developmentOnly(project(":dev-mode"))
+    implementation(project(":dev-mode"))
     implementation(project(":javalin"))
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.javalin)

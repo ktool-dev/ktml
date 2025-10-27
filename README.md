@@ -2,7 +2,7 @@
 
 # Kotlin Multiplatform HTML Template Engine
 
-A blazingly fast, type-safe HTML template engine for Kotlin Multiplatform that transforms `.ktml` templates into
+A blazingly fast, type-safe HTML template engine for Kotlin JVM and Multiplatform that transforms `.ktml` templates into
 optimized Kotlin functions.
 
 ## Why KTML?
