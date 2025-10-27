@@ -1,6 +1,12 @@
+val ktmlVersion = "0.0.18"
+
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
-    id("dev.ktml.gradle") version "0.0.16"
+    id("dev.ktml.gradle") version "0.0.18"
+}
+
+dependencies {
+    developmentOnly("dev.ktml:ktml-dev-mode:$ktmlVersion")
 }
 
 kotlin {
@@ -17,9 +23,8 @@ kotlin {
 
     sourceSets {
         jvmMain.dependencies {
-            implementation(project(":runtime"))
-            implementation(project(":ktor"))
-            implementation(project(":dev-mode"))
+            implementation("dev.ktml:ktml-runtime:$ktmlVersion")
+            implementation("dev.ktml:ktml-ktor:$ktmlVersion")
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.ktor.server.core)
             implementation(libs.ktor.server.cio)
