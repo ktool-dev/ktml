@@ -2,10 +2,10 @@
 
 # Kotlin Multiplatform HTML Template Engine
 
-![Build](https://github.com/ktool-dev/ktml/actions/workflows/ci.yaml/badge.svg)
-![Maven Central](https://img.shields.io/maven-central/v/dev.ktml/ktml-runtime)
-![GitHub License](https://img.shields.io/github/license/ktool-dev/ktml)
-![GitHub issues](https://img.shields.io/github/issues/ktool-dev/ktml)
+[![Build](https://github.com/ktool-dev/ktml/actions/workflows/ci.yaml/badge.svg)](https://github.com/ktool-dev/ktml/actions/workflows/ci.yaml)
+[![Maven Central](https://img.shields.io/maven-central/v/dev.ktml/ktml-runtime)](https://central.sonatype.com/artifact/dev.ktml/ktml-runtime)
+[![GitHub License](https://img.shields.io/github/license/ktool-dev/ktml)](https://github.com/ktool-dev/ktml/blob/main/LICENSE)
+[![GitHub issues](https://img.shields.io/github/issues/ktool-dev/ktml)](https://github.com/ktool-dev/ktml/issues)
 [![Kotlin](https://img.shields.io/badge/kotlin-2.2.21-blue.svg?logo=kotlin)](http://kotlinlang.org)
 
 ![](https://img.shields.io/static/v1?label=&message=Platforms&color=grey)
