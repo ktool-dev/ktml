@@ -1,5 +1,10 @@
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
+    id("dev.ktml.gradle") version "0.0.16"
+}
+
+dependencies {
+    developmentOnly(project(":dev-mode"))
 }
 
 kotlin {
@@ -17,7 +22,6 @@ kotlin {
     sourceSets {
         jvmMain.dependencies {
             implementation(project(":runtime"))
-            implementation(project(":dev-mode"))
             implementation(project(":ktor"))
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.ktor.server.core)

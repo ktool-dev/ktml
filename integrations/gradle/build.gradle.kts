@@ -19,6 +19,10 @@ dependencies {
 
 signing {
     useInMemoryPgpKeys(System.getenv("SIGNING_KEY"), System.getenv("SIGNING_PASSWORD"))
+    setRequired {
+        // Only require signing if not publishing to Maven Local
+        gradle.taskGraph.allTasks.none { it.name.contains("ToMavenLocal") }
+    }
     sign(publishing.publications)
 }
 

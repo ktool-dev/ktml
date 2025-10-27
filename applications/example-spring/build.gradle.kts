@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.spring.boot)
+    id("dev.ktml.gradle") version "0.0.16"
 }
 
 kotlin {
@@ -9,7 +10,7 @@ kotlin {
 
 dependencies {
     implementation(project(":runtime"))
-    implementation(project(":dev-mode"))
+    developmentOnly(project(":dev-mode"))
     implementation(project(":spring"))
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.spring.boot.starter.web)

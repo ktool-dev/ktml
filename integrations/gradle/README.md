@@ -8,7 +8,7 @@ Apply the plugin in your `build.gradle.kts`:
 
 ```kotlin
 plugins {
-    id("dev.ktml.gradle")
+    id("dev.ktml.gradle") version "<version>"
 }
 ```
 
@@ -30,6 +30,22 @@ One of the following Kotlin plugins must be applied:
 - `org.jetbrains.kotlin.jvm`
 - `org.jetbrains.kotlin.multiplatform`
 
+## Dev Mode
+
+KTML has a dev-mode module that can run on the JVM and hot-reload templates as they are changed. This Gradle plugin adds
+a configuration call `developmentOnly` that you use on that dependency which will ensure it's on the class path when you
+run locally, but when it won't be there when you run the `build` task, so it won't get included in your server code.
+You can use it like this:
+
+```kotlin
+dependencies {
+    developmentOnly("dev.ktml:ktml-dev-mode:<version>")
+}
+```
+
+This will also work with KMP projects, but you still define it at the top level of your project, like it's shown and it
+will get added to your `jvmMain` classpath locally.
+
 ## Tasks
 
 - **`generateKtml`**: Generates Kotlin code from KTML templates
@@ -43,7 +59,7 @@ With Kotlin on the JVM
 ```kotlin
 plugins {
     kotlin("jvm")
-    id("dev.ktml.gradle")
+    id("dev.ktml.gradle") version "0.1.0"
 }
 ```
 

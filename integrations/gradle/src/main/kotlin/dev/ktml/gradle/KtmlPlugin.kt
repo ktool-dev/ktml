@@ -10,16 +10,21 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 open class KtmlPlugin : Plugin<Project> {
     override fun apply(project: Project) {
         val extension = project.extensions.create("ktml", KtmlExtension::class.java)
+        project.developmentOnly()
 
         project.plugins.withId("org.jetbrains.kotlin.jvm") {
-            project.extensions.findByType(KotlinJvmProjectExtension::class.java)?.apply {
-                configurePlugin(project, extension.moduleName, sourceSets.toList())
+            project.afterEvaluate {
+                project.extensions.findByType(KotlinJvmProjectExtension::class.java)?.apply {
+                    setupPlugin(project, extension.moduleName, sourceSets.toList(), ::configureDevelopmentOnly)
+                }
             }
         }
 
         project.plugins.withId("org.jetbrains.kotlin.multiplatform") {
-            project.extensions.getByType(KotlinMultiplatformExtension::class.java).apply {
-                configurePlugin(project, extension.moduleName, sourceSets.toList())
+            project.afterEvaluate {
+                project.extensions.getByType(KotlinMultiplatformExtension::class.java).apply {
+                    setupPlugin(project, extension.moduleName, sourceSets.toList(), ::configureDevelopmentOnlyKmp)
+                }
             }
         }
 
@@ -35,7 +40,44 @@ open class KtmlPlugin : Plugin<Project> {
         }
     }
 
-    private fun configurePlugin(project: Project, moduleName: String, sourceSets: List<KotlinSourceSet>) {
+    private fun Project.developmentOnly() = configurations.findByName("developmentOnly")
+        ?: configurations.create("developmentOnly") {
+            it.isCanBeConsumed = false
+            it.isCanBeResolved = true
+        }
+
+    private fun setupPlugin(
+        project: Project,
+        moduleName: String,
+        sourceSets: List<KotlinSourceSet>,
+        configureDevMode: (Project) -> Unit
+    ) {
+        val isBuildTask = project.gradle.startParameter.taskNames.any {
+            it.contains("build") || it == ":${project.name}:build"
+        }
+
+        if (isBuildTask) setupBuild(project, moduleName, sourceSets) else configureDevMode(project)
+    }
+
+    private fun configureDevelopmentOnlyKmp(project: Project) =
+        createDevelopmentOnly(project, "jvmCompileClasspath", "jvmRuntimeClasspath", "jvmTestRuntimeClasspath")
+
+    private fun configureDevelopmentOnly(project: Project) =
+        createDevelopmentOnly(project, "compileClasspath", "runtimeClasspath", "testRuntimeClasspath")
+
+    private fun createDevelopmentOnly(
+        project: Project,
+        compileName: String,
+        runtimeName: String,
+        testRuntimeName: String
+    ) {
+        val developmentOnly = project.developmentOnly()
+        project.configurations.findByName(compileName)?.extendsFrom(developmentOnly)
+        project.configurations.findByName(testRuntimeName)?.extendsFrom(developmentOnly)
+        project.configurations.findByName(runtimeName)?.extendsFrom(developmentOnly)
+    }
+
+    private fun setupBuild(project: Project, moduleName: String, sourceSets: List<KotlinSourceSet>) {
         val outputDir = project.layout.buildDirectory.asFile.get().resolve("ktml")
 
         val dirSets = sourceSets.mapNotNull { src ->

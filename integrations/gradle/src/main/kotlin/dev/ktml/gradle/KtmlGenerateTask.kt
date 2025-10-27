@@ -23,7 +23,5 @@ open class KtmlGenerateTask : DefaultTask() {
                 generateTemplateCode()
             }
         }
-
-        logger.lifecycle("KTML code generation completed")
     }
 }
