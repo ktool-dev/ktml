@@ -2,6 +2,20 @@
 
 # Kotlin Multiplatform HTML Template Engine
 
+![Build](https://github.com/ktool-dev/ktml/actions/workflows/ci.yaml/badge.svg)
+![Maven Central](https://img.shields.io/maven-central/v/dev.ktml/ktml-runtime)
+![GitHub License](https://img.shields.io/github/license/ktool-dev/ktml)
+![GitHub issues](https://img.shields.io/github/issues/ktool-dev/ktml)
+[![Kotlin](https://img.shields.io/badge/kotlin-2.2.21-blue.svg?logo=kotlin)](http://kotlinlang.org)
+
+![](https://img.shields.io/static/v1?label=&message=Platforms&color=grey)
+![](https://img.shields.io/static/v1?label=&message=Jvm&color=blue)
+![](https://img.shields.io/static/v1?label=&message=Linux&color=blue)
+![](https://img.shields.io/static/v1?label=&message=macOS&color=blue)
+![](https://img.shields.io/static/v1?label=&message=Windows&color=blue)
+![](https://img.shields.io/static/v1?label=&message=iOS&color=blue)
+![](https://img.shields.io/static/v1?label=&message=Android&color=blue)
+
 A blazingly fast, type-safe HTML template engine for Kotlin JVM and Multiplatform that transforms `.ktml` templates into
 optimized Kotlin functions.
 
