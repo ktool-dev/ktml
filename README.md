@@ -8,13 +8,13 @@
 [![GitHub issues](https://img.shields.io/github/issues/ktool-dev/ktml)](https://github.com/ktool-dev/ktml/issues)
 [![Kotlin](https://img.shields.io/badge/kotlin-2.2.21-blue.svg?logo=kotlin)](http://kotlinlang.org)
 
-<img src="https://img.shields.io/static/v1?label=&message=Platforms&color=grey"></img>
-<img src="https://img.shields.io/static/v1?label=&message=Jvm&color=blue"></img>
-<img src="https://img.shields.io/static/v1?label=&message=Linux&color=blue"></img>
-<img src="https://img.shields.io/static/v1?label=&message=macOS&color=blue"></img>
-<img src="https://img.shields.io/static/v1?label=&message=Windows&color=blue"></img>
-<img src="https://img.shields.io/static/v1?label=&message=iOS&color=blue"></img>
-<img src="https://img.shields.io/static/v1?label=&message=Android&color=blue"></img>
+![](https://img.shields.io/badge/Platforms-gray)
+![](https://img.shields.io/badge/Jvm-blue)
+![](https://img.shields.io/badge/Linux-blue)
+![](https://img.shields.io/badge/macOS-blue)
+![](https://img.shields.io/badge/Windows-blue)
+![](https://img.shields.io/badge/iOS-blue)
+![](https://img.shields.io/badge/Android-blue)
 
 A blazingly fast, type-safe HTML template engine for Kotlin JVM and Multiplatform that transforms `.ktml` templates into
 optimized Kotlin functions.
