@@ -1,9 +1,9 @@
-val ktmlVersion = "0.0.18"
+val ktmlVersion = "0.1.0"
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.spring.boot)
-    id("dev.ktml.gradle") version "0.0.18"
+    id("dev.ktml.gradle") version "0.1.0"
 }
 
 kotlin {
