@@ -24,6 +24,17 @@ kotlin {
         }
     }
 
+    js(IR) {
+        browser()
+        nodejs()
+    }
+
+    @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
+    wasmJs {
+        browser()
+        nodejs()
+    }
+
     applyDefaultHierarchyTemplate()
 
     linuxX64()
