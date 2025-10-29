@@ -15,6 +15,8 @@
 ![](https://img.shields.io/badge/Windows-blue)
 ![](https://img.shields.io/badge/iOS-blue)
 ![](https://img.shields.io/badge/Android-blue)
+![](https://img.shields.io/badge/JS-blue)
+![](https://img.shields.io/badge/WASM-blue)
 
 A blazingly fast, type-safe HTML template engine for Kotlin JVM and Multiplatform that transforms `.ktml` templates into
 optimized Kotlin functions.

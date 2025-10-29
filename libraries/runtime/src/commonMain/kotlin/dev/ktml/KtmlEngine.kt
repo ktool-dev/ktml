@@ -1,7 +1,11 @@
 package dev.ktml
 
 import dev.ktml.templates.DefaultKtmlRegistry
+import kotlin.js.ExperimentalJsExport
+import kotlin.js.JsExport
 
+@JsExport
+@OptIn(ExperimentalJsExport::class)
 class KtmlEngine(ktmlRegistry: KtmlRegistry) {
     private val ktmlRegistry = ktmlRegistry.join(DefaultKtmlRegistry)
 
