@@ -1,7 +1,7 @@
 package dev.ktml.example.ktor
 
 import dev.ktml.KtmlEngine
-import dev.ktml.templates.KtmlRegistry
+import dev.ktml.templates.DefaultKtmlRegistry
 import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlinx.coroutines.MainScope
@@ -9,7 +9,7 @@ import kotlinx.coroutines.launch
 import org.w3c.dom.HTMLAnchorElement
 import org.w3c.dom.asList
 
-val ktml = KtmlEngine(KtmlRegistry)
+val ktml = KtmlEngine(DefaultKtmlRegistry)
 val mainScope = MainScope()
 
 fun main() {
