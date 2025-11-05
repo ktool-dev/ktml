@@ -85,7 +85,7 @@ private fun breadthFirstSearchForKtmlDir(basePath: String): String {
 }
 
 private fun findRegistryImpl(): KtmlRegistry = try {
-    val type = Class.forName("dev.ktml.templates.KtmlRegistryImpl")
+    val type = Class.forName("dev.ktml.templates.KtmlRegistry")
     type.getField("INSTANCE").get(null) as KtmlRegistry
 } catch (_: ClassNotFoundException) {
     error("Could not find dev-mode module on the classpath or a generated KtmlRegistry.")

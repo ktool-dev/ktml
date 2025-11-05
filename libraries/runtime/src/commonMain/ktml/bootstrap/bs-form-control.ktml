@@ -1,0 +1,7 @@
+enum class FormControlSize {
+    sm, lg, normal
+}
+
+<bs-form-control type="${String = 'text'}" id="${String = ''}" name="${String = ''}" placeholder="${String = ''}" value="${String = ''}" size="${FormControlSize = FormControlSize.normal}" disabled="${Boolean = false}" readonly="${Boolean = false}" class="${String = ''}">
+    <input type="${type}" class="form-control ${cssClass(if (size != FormControlSize.normal) 'form-control-$size' else '', `class`)}" id="${id}" name="${name}" placeholder="${placeholder}" value="${value}" disabled="${if (disabled) 'disabled' else ''}" readonly="${if (readonly) 'readonly' else ''}" />
+</bs-form-control>

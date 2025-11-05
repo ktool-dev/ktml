@@ -1,0 +1,9 @@
+enum class FormSelectSize {
+    sm, lg, normal
+}
+
+<bs-form-select id="${String = ''}" name="${String = ''}" size="${FormSelectSize = FormSelectSize.normal}" disabled="${Boolean = false}" class="${String = ''}" content="$Content">
+    <select class="form-select ${cssClass(if (size != FormSelectSize.normal) 'form-select-$size' else '', `class`)}" id="${id}" name="${name}" disabled="${if (disabled) 'disabled' else ''}">
+        $content
+    </select>
+</bs-form-select>

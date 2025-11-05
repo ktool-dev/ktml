@@ -11,7 +11,7 @@ class BuildDefaultKtmlRegistrySpec : BddSpec({
     "build DefaultKtmlRegistry in runtime module" {
         Given
         val outputPath = "$RUNTIME_PATH/kotlin"
-        val templatePath = "$RUNTIME_PATH/ktml"
+        val templatePath = "$RUNTIME_PATH/ktml/default"
         val outputPackage = "$outputPath/dev/ktml/templates"
         val processor = KtmlProcessor(outputDirectory = outputPath)
 
@@ -21,10 +21,10 @@ class BuildDefaultKtmlRegistrySpec : BddSpec({
         }
         processor.generateTemplateCode()
 
-        File("$outputPackage/KtmlRegistryImpl.kt").move("$outputPackage/DefaultKtmlRegistry.kt").modifyText {
-            replace("KtmlRegistryImpl", "DefaultKtmlRegistry")
+        File("$outputPackage/KtmlRegistry.kt").move("$outputPackage/DefaultKtmlRegistry.kt").modifyText {
+            replace("object KtmlRegistry", "object DefaultKtmlRegistry")
         }
-        File(outputPackage).listFiles().forEach { it.modifyText { removeContentComments() } }
+        File(outputPackage).listFiles().filter { it.isFile }.forEach { it.modifyText { removeContentComments() } }
 
         Then
         File("$outputPackage/If.kt").exists() shouldBe true

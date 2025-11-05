@@ -48,7 +48,7 @@ import org.http4k.routing.bind
 import org.http4k.routing.routes
 
 fun main() {
-    Http4kKtml.init(KtmlRegistryImpl)
+    Http4kKtml.init(KtmlRegistry)
 
     val app = routes(
         "/" bind Method.GET to { request ->
@@ -128,7 +128,7 @@ import org.http4k.server.SunHttp
 import org.http4k.server.asServer
 
 fun main() {
-    Http4kKtml.init(KtmlRegistryImpl)
+    Http4kKtml.init(KtmlRegistry)
 
     val app = routes(
         "/products" bind Method.GET to { request ->

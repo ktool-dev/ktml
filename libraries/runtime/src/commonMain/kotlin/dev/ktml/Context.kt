@@ -64,17 +64,10 @@ class Context(
     fun pathParam(key: String) = pathParams[key]
     fun queryParam(key: String) = queryParams[key]?.firstOrNull()
 
-    data class IfData(val check: Boolean, val value: Any?, val elseValue: Any? = null) {
-        override fun toString(): String = if (check) value?.toString() ?: "" else elseValue?.toString() ?: ""
+    fun If(check: Boolean, value: Any?, elseValue: Any? = null): String? =
+        if (check) value?.toString()?.takeIf { it.isNotEmpty() } else elseValue?.toString()?.takeIf { it.isNotEmpty() }
 
-        fun include() = (check && value?.toString()?.isNotEmpty() == true)
-                || (!check && elseValue?.toString()?.isNotEmpty() == true)
-    }
-
-    fun If(check: Boolean, value: Any?, elseValue: Any? = null) = IfData(check, value, elseValue)
-
-    fun cssClass(vararg values: Any?) =
-        values.filter { it != null && (it !is IfData || it.include()) }.joinToString(separator = " ")
+    fun cssClass(vararg values: String?) = values.filterNotNull().joinToString(separator = " ")
 }
 
 class StringContentWriter : ContentWriter {

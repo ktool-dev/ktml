@@ -11,6 +11,9 @@ kotlin {
     jvmToolchain(22)
 
     jvm {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+        }
         testRuns.named("test") {
             executionTask.configure {
                 useJUnitPlatform()

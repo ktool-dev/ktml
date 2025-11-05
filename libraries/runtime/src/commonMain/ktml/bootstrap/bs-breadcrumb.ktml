@@ -1,0 +1,7 @@
+<bs-breadcrumb class="${String = ''}" content="$Content">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb ${`class`}">
+            $content
+        </ol>
+    </nav>
+</bs-breadcrumb>

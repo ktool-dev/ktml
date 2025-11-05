@@ -24,7 +24,7 @@ class KtmlRegistryGeneratorSpec : BddSpec({
         val result = createKtmlRegistry(basePackageName, templates)
 
         Then
-        result shouldContain "object KtmlRegistryImpl : KtmlRegistry"
+        result shouldContain "object KtmlRegistry : KtmlRegistry"
         result shouldContain """
         TagDefinition(
             name = "button",

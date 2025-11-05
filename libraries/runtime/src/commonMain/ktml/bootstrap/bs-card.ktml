@@ -1,0 +1,7 @@
+<bs-card header="${Content? = null}" footer="${Content? = null}" class="${String = ''}" content="$Content">
+    <div class="card ${`class`}">
+        <div if="${header != null}" class="card-header">$header</div>
+        <div class="card-body">$content</div>
+        <div if="${footer != null}" class="card-footer">$footer</div>
+    </div>
+</bs-card>

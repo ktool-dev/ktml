@@ -1,0 +1,7 @@
+enum class BadgeStyle {
+    primary, secondary, success, danger, warning, info, light, dark
+}
+
+<bs-badge style="${BadgeStyle = BadgeStyle.primary}" pill="${Boolean = false}" class="${String = ''}" content="$Content">
+    <span class="badge ${cssClass('text-bg-$style', `class`, If(pill, 'rounded-pill'))}">$content</span>
+</bs-badge>

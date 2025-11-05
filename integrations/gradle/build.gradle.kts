@@ -6,6 +6,10 @@ plugins {
 
 kotlin {
     jvmToolchain(22)
+
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+    }
 }
 
 group = project.property("group").toString()

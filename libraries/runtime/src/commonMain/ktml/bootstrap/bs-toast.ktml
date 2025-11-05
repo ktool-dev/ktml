@@ -1,0 +1,12 @@
+<bs-toast id="$String" header="$String" time="${String = ''}" autohide="${Boolean = true}" class="${String = ''}" content="$Content">
+    <div class="toast ${`class`}" id="${id}" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="${autohide}">
+        <div class="toast-header">
+            <strong class="me-auto">$header</strong>
+            <small if="${time.isNotEmpty()}">$time</small>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+            $content
+        </div>
+    </div>
+</bs-toast>

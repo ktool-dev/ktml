@@ -16,7 +16,7 @@ fun createKtmlRegistry(basePackageName: String, templates: Templates) = KotlinFi
         +Import(template.qualifiedFunctionName, template.uniqueFunctionName)
     }
 
-    +Object("KtmlRegistryImpl") {
+    +Object("KtmlRegistry") {
         +SuperType("KtmlRegistry")
 
         +Property(

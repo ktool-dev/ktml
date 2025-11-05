@@ -1,0 +1,7 @@
+enum class ButtonStyle {
+    primary, success, info, warning, danger
+}
+
+<bs-button style="${ButtonStyle = ButtonStyle.primary}" class="${String = ''}" content="$Content">
+    <button class="btn ${cssClass('btn-$style', `class`)}" type='button'>$content</button>
+</bs-button>

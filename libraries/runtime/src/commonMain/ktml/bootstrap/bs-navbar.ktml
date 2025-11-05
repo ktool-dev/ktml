@@ -1,0 +1,21 @@
+enum class NavbarExpand {
+    sm, md, lg, xl, xxl
+}
+
+enum class NavbarTheme {
+    light, dark
+}
+
+<bs-navbar brand="${Content? = null}" expand="${NavbarExpand = NavbarExpand.lg}" theme="${NavbarTheme = NavbarTheme.light}" bgColor="${String = 'light'}" class="${String = ''}" content="$Content">
+    <nav class="navbar ${cssClass('navbar-expand-$expand', 'navbar-$theme', 'bg-$bgColor', `class`)}">
+        <div class="container-fluid">
+            <a if="${brand != null}" class="navbar-brand" href="#">$brand</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                $content
+            </div>
+        </div>
+    </nav>
+</bs-navbar>

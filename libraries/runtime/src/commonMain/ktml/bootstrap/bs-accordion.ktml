@@ -1,0 +1,5 @@
+<bs-accordion id="$String" alwaysOpen="${Boolean = false}" class="${String = ''}" content="$Content">
+    <div class="accordion ${`class`}" id="${id}" data-bs-always-open="${alwaysOpen}">
+        $content
+    </div>
+</bs-accordion>

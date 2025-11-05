@@ -11,7 +11,7 @@ import dev.ktml.javalin.JavalinKtml
 import dev.ktml.KtmlRegistry
 
 fun main() {
-    JavalinKtml.init(KtmlRegistryImpl)
+    JavalinKtml.init(KtmlRegistry)
 
     // Continue with Javalin setup...
 }
@@ -26,7 +26,7 @@ import dev.ktml.javalin.renderKtml
 import io.javalin.Javalin
 
 fun main() {
-    JavalinKtml.init(KtmlRegistryImpl)
+    JavalinKtml.init(KtmlRegistry)
 
     val app = Javalin.create().start(7070)
 
@@ -82,7 +82,7 @@ import dev.ktml.KtmlRegistry
 import io.javalin.Javalin
 
 fun main() {
-    JavalinKtml.init(KtmlRegistryImpl)
+    JavalinKtml.init(KtmlRegistry)
 
     val app = Javalin.create().start(7070)
 

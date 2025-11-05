@@ -6,10 +6,6 @@ plugins {
     id("dev.ktml.gradle") version "0.1.0"
 }
 
-kotlin {
-    jvmToolchain(22)
-}
-
 dependencies {
     implementation("dev.ktml:ktml-runtime:$ktmlVersion")
     developmentOnly("dev.ktml:ktml-dev-mode:$ktmlVersion")

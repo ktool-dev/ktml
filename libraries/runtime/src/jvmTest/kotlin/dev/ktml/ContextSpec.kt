@@ -5,7 +5,7 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 
-class ContextTest : BddSpec({
+class ContextSpec : BddSpec({
     "write with Content lambda" {
         Given
         val writer = StringContentWriter()
@@ -278,7 +278,7 @@ class ContextTest : BddSpec({
         val result = context.If(true, "yes", "no")
 
         Then
-        result.toString() shouldBe "yes"
+        result shouldBe "yes"
     }
 
     "If returns elseValue when check is false" {
@@ -289,29 +289,7 @@ class ContextTest : BddSpec({
         val result = context.If(false, "yes", "no")
 
         Then
-        result.toString() shouldBe "no"
-    }
-
-    "IfData include returns true when check is true and value is non-empty" {
-        Given
-        val context = Context(StringContentWriter())
-
-        When
-        val result = context.If(true, "yes")
-
-        Then
-        result.include() shouldBe true
-    }
-
-    "IfData include returns false when check is true but value is empty" {
-        Given
-        val context = Context(StringContentWriter())
-
-        When
-        val result = context.If(true, "")
-
-        Then
-        result.include() shouldBe false
+        result shouldBe "no"
     }
 
     "cssClass filters nulls and empty IfData" {

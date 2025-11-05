@@ -2,6 +2,7 @@ val ktmlVersion = "0.1.0"
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
+    application
     id("dev.ktml.gradle") version "0.1.0"
 }
 
@@ -12,4 +13,8 @@ dependencies {
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.javalin)
     implementation(libs.slf4j.simple)
+}
+
+application {
+    mainClass.set("dev.ktml.example.javalin.ApplicationKt")
 }

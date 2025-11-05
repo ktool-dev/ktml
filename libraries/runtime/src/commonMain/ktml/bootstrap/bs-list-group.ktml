@@ -1,0 +1,9 @@
+enum class ListGroupStyle {
+    plain, flush, horizontal
+}
+
+<bs-list-group style="${ListGroupStyle = ListGroupStyle.plain}" class="${String = ''}" content="$Content">
+    <ul class="list-group ${cssClass(if (style == ListGroupStyle.flush) 'list-group-flush' else '', if (style == ListGroupStyle.horizontal) 'list-group-horizontal' else '', `class`)}">
+        $content
+    </ul>
+</bs-list-group>

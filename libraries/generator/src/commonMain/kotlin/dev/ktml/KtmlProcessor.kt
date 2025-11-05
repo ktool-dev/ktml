@@ -16,7 +16,7 @@ open class KtmlProcessor(private val moduleName: String = "", outputDirectory: S
     private val templates = Templates()
     private val parsedTemplates = mutableMapOf<String, ParsedTemplate>()
     private val fileGenerator = KotlinFileGenerator(templates)
-    private val basePath = "$outputDirectory/${basePackageName.replace(".", "/")}"
+    private val basePath = "$outputDirectory/${ROOT_PACKAGE.replace(".", "/")}"
 
     fun clear() {
         templates.clear()
@@ -92,7 +92,8 @@ open class KtmlProcessor(private val moduleName: String = "", outputDirectory: S
 
     fun generateRegistry() {
         val content = createKtmlRegistry(basePackageName, templates)
-        Path("$basePath/KtmlRegistryImpl.kt").mkDirs().writeText(content)
+        val path = if (moduleName.isEmpty()) basePath else "$basePath/$moduleName"
+        Path("$path/KtmlRegistry.kt").mkDirs().writeText(content)
     }
 
     fun generateTemplateCodeFile(template: ParsedTemplate) {

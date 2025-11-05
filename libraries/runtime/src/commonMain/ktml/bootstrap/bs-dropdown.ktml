@@ -1,0 +1,14 @@
+enum class DropdownButtonStyle {
+    primary, secondary, success, danger, warning, info, light, dark
+}
+
+<bs-dropdown label="$String" style="${DropdownButtonStyle = DropdownButtonStyle.primary}" class="${String = ''}" content="$Content">
+    <div class="dropdown">
+        <button class="btn dropdown-toggle ${cssClass('btn-$style', `class`)}" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            $label
+        </button>
+        <ul class="dropdown-menu">
+            $content
+        </ul>
+    </div>
+</bs-dropdown>

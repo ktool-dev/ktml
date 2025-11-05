@@ -89,7 +89,7 @@ Example applications demonstrating KTML usage with different frameworks (ktor, s
 
 4. **Registry Creation** (`KtmlRegistryGenerator` in
    libraries/generator/src/commonMain/kotlin/dev/ktml/gen/KtmlRegistryGenerator.kt)
-    - Creates `KtmlRegistryImpl` mapping template paths to generated functions
+    - Creates `KtmlRegistry` mapping template paths to generated functions
     - Enables runtime template lookup by path
 
 5. **Runtime Execution** (`KtmlEngine` in libraries/runtime/src/commonMain/kotlin/dev/ktml/KtmlEngine.kt)

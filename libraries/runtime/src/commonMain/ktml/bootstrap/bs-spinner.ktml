@@ -1,0 +1,17 @@
+enum class SpinnerType {
+    border, grow
+}
+
+enum class SpinnerColor {
+    primary, secondary, success, danger, warning, info, light, dark
+}
+
+enum class SpinnerSize {
+    sm, normal
+}
+
+<bs-spinner type="${SpinnerType = SpinnerType.border}" color="${SpinnerColor = SpinnerColor.primary}" size="${SpinnerSize = SpinnerSize.normal}" label="${String = 'Loading...'}" class="${String = ''}">
+    <div class="spinner-$type ${cssClass('text-$color', if (size == SpinnerSize.sm) 'spinner-$type-sm' else '', `class`)}" role="status">
+        <span class="visually-hidden">$label</span>
+    </div>
+</bs-spinner>

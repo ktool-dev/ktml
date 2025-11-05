@@ -84,7 +84,7 @@ class KtmlDynamicRegistry(
             return DefaultKtmlRegistry
         }
 
-        val className = "$basePackageName.KtmlRegistryImpl"
+        val className = "$basePackageName.KtmlRegistry"
         try {
             val classLoader = createReloadableClassLoader(listOf(compileDir))
             val type = Class.forName(className, true, classLoader).kotlin

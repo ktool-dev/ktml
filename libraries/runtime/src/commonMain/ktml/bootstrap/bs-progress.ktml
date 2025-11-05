@@ -1,0 +1,11 @@
+enum class ProgressColor {
+    primary, secondary, success, danger, warning, info, light, dark
+}
+
+<bs-progress value="$Int" max="${Int = 100}" color="${ProgressColor = ProgressColor.primary}" striped="${Boolean = false}" animated="${Boolean = false}" label="${String = ''}" class="${String = ''}">
+    <div class="progress ${`class`}" role="progressbar" aria-label="${label}" aria-valuenow="${value}" aria-valuemin="0" aria-valuemax="${max}">
+        <div class="progress-bar ${cssClass('bg-$color', If((striped || animated), 'progress-bar-striped'), If(animated, 'progress-bar-animated'))}" style="width: ${value * 100 / max}%">
+            $label
+        </div>
+    </div>
+</bs-progress>
