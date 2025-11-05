@@ -1,9 +1,9 @@
-val ktmlVersion = "0.1.1"
+val ktmlVersion = "0.1.2"
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
     application
-    id("dev.ktml.gradle") version "0.1.1"
+    id("dev.ktml.gradle") version "0.1.2"
 }
 
 dependencies {

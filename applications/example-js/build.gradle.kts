@@ -1,8 +1,8 @@
-val ktmlVersion = "0.1.1"
+val ktmlVersion = "0.1.2"
 
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
-    id("dev.ktml.gradle") version "0.1.1"
+    id("dev.ktml.gradle") version "0.1.2"
 }
 
 kotlin {
@@ -27,7 +27,7 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(project(":runtime"))
+            implementation("dev.ktml:ktml-runtime:${ktmlVersion}")
         }
 
         jsMain.dependencies {
