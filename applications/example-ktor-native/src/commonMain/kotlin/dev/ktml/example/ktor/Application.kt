@@ -2,7 +2,7 @@ package dev.ktml.example.ktor
 
 import dev.ktml.ktor.KtmlPlugin
 import dev.ktml.ktor.respondKtml
-import dev.ktml.templates.DefaultKtmlRegistry
+import dev.ktml.templates.KtmlRegistry
 import io.ktor.server.application.*
 import io.ktor.server.cio.*
 import io.ktor.server.engine.*
@@ -11,7 +11,7 @@ import io.ktor.server.routing.*
 fun main() {
     embeddedServer(CIO, port = 8080, host = "0.0.0.0") {
         install(KtmlPlugin) {
-            registry = DefaultKtmlRegistry
+            registry = KtmlRegistry
         }
         configureRouting()
     }.start(wait = true)
