@@ -34,9 +34,6 @@ fun String.toImport() = Import(
     alias = if (contains(" as ")) substringAfter(" as ") else null
 )
 
-const val ROOT_PACKAGE = "dev.ktml.templates"
-const val ROOT_PACKAGE_PATH = "dev/ktml/templates"
-
 const val CONTEXT_PARAM_PREFIX = "@"
 
 private val VOID_TAGS = listOf(

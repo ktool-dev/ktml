@@ -16,7 +16,7 @@ private val FIRST_TAG_REGEX = """(?m)^\s*<""".toRegex()
 /**
  * Main template parser that uses Ksoup to parse HTML templates
  */
-class TemplateParser(private val moduleName: String = "") {
+class TemplateParser(private val templatePackage: String, private val moduleName: String = "") {
     private val parserOptions = KsoupHtmlOptions.Default.copy(lowerCaseAttributeNames = false)
 
     /**
@@ -61,6 +61,7 @@ class TemplateParser(private val moduleName: String = "") {
                 dockTypeDeclaration = doctype,
                 expressions = expressions,
                 externalScriptContent = externalScriptContent,
+                templatePackage = templatePackage,
             ).let(::listOf)
         }
 
@@ -80,6 +81,7 @@ class TemplateParser(private val moduleName: String = "") {
                 root = it,
                 expressions = expressions,
                 externalScriptContent = externalScriptContent,
+                templatePackage = templatePackage,
             )
         }
     }

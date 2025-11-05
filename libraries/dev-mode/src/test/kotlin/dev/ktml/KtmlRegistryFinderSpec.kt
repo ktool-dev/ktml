@@ -9,7 +9,7 @@ class KtmlRegistryFinderSpec : BddSpec({
         val basePath = ""
 
         When
-        val result = findKtmlRegistry(basePath)
+        val result = findKtmlRegistry(DEFAULT_PACKAGE, basePath)
 
         Then
         result::class shouldBe KtmlDynamicRegistry::class

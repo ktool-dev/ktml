@@ -1,5 +1,6 @@
 package dev.ktml.gen
 
+import dev.ktml.DEFAULT_PACKAGE
 import dev.ktml.parsedTemplateParameter
 import dev.ktml.parser.*
 import dev.ktml.parser.kotlin.removeContentComments
@@ -8,7 +9,7 @@ import dev.ktool.gen.types.KotlinFile
 import dev.ktool.kotest.BddSpec
 import io.kotest.matchers.shouldBe
 
-private val parser = TemplateParser("")
+private val parser = TemplateParser(DEFAULT_PACKAGE, "")
 private val templates = Templates()
 
 class KotlinFileGeneratorSpec : BddSpec({
@@ -278,6 +279,7 @@ private fun parsed(
     parameters = parameters,
     root = root,
     expressions = listOf(),
+    templatePackage = DEFAULT_PACKAGE,
     externalScriptContent = externalScriptContent,
 )
 

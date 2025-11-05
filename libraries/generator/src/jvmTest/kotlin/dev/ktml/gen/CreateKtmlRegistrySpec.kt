@@ -1,5 +1,6 @@
 package dev.ktml.gen
 
+import dev.ktml.DEFAULT_PACKAGE
 import dev.ktml.parsedTemplateParameter
 import dev.ktml.parser.*
 import dev.ktool.kotest.BddSpec
@@ -185,5 +186,6 @@ private fun template(
     imports = imports,
     parameters = parameters,
     expressions = listOf(),
+    templatePackage = DEFAULT_PACKAGE,
     root = HtmlTag("root", emptyMap(), children),
 ).also { templates.register(it) }

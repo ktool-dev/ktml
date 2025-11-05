@@ -5,5 +5,8 @@ import dev.ktml.findKtmlRegistry
 import io.ktor.server.application.*
 
 val KtmlPlugin = createApplicationPlugin(name = "KTML", createConfiguration = ::KtmlConfig) {
-    application.attributes.put(ktmlEngineKey, KtmlEngine(pluginConfig.registry ?: findKtmlRegistry()))
+    application.attributes.put(
+        ktmlEngineKey,
+        KtmlEngine(pluginConfig.registry ?: findKtmlRegistry(pluginConfig.templatePackage))
+    )
 }

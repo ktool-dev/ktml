@@ -8,8 +8,8 @@ import java.net.URLClassLoader
 import kotlin.io.path.createTempDirectory
 
 object KtmlDynamicRegistryFactory : KtmlRegistryFactory {
-    override fun create(templateDir: String, outputDir: String): KtmlRegistry =
-        KtmlDynamicRegistry(templateDir, outputDir = outputDir).apply { initializeRegistry() }
+    override fun create(templateDir: String, templatePackage: String, outputDir: String): KtmlRegistry =
+        KtmlDynamicRegistry(templateDir, templatePackage, outputDir = outputDir).apply { initializeRegistry() }
 }
 
 /**
@@ -17,6 +17,7 @@ object KtmlDynamicRegistryFactory : KtmlRegistryFactory {
  */
 class KtmlDynamicRegistry(
     val templateDir: String,
+    val templatePackage: String,
     watchFiles: Boolean = true,
     val onPathsChanged: () -> Unit = {},
     outputDir: String = createTempDirectory().toString(),
@@ -29,7 +30,7 @@ class KtmlDynamicRegistry(
     override val templates: Map<String, Content> get() = ktmlRegistry.templates
     override val tags: List<TagDefinition> get() = ktmlRegistry.tags
 
-    private val processor = KtmlProcessor(outputDirectory = generatedDir.absolutePath)
+    private val processor = KtmlProcessor(outputDirectory = generatedDir.absolutePath, removeContentComments = false)
 
     private val basePackageName: String get() = processor.basePackageName
 
@@ -107,7 +108,12 @@ class KtmlDynamicRegistry(
         exception = null
         val errors = KotlinCompile.compileFilesToDir(generatedDir.toPath(), compileDir.toPath())
         val errorResolver =
-            CompilerErrorResolver(processor.getParsedTemplates(), generatedDir.absolutePath, templateDir)
+            CompilerErrorResolver(
+                processor.getParsedTemplates(),
+                templatePackage,
+                generatedDir.absolutePath,
+                templateDir
+            )
         if (errors.isNotEmpty()) {
             exception = CompileException(errorResolver.resolve(errors))
         }

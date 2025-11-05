@@ -1,6 +1,5 @@
 package dev.ktml
 
-import dev.ktml.parser.kotlin.removeContentComments
 import dev.ktool.kotest.BddSpec
 import io.kotest.matchers.shouldBe
 import java.io.File
@@ -24,7 +23,6 @@ class BuildDefaultKtmlRegistrySpec : BddSpec({
         File("$outputPackage/KtmlRegistry.kt").move("$outputPackage/DefaultKtmlRegistry.kt").modifyText {
             replace("object KtmlRegistry", "object DefaultKtmlRegistry")
         }
-        File(outputPackage).listFiles().filter { it.isFile }.forEach { it.modifyText { removeContentComments() } }
 
         Then
         File("$outputPackage/If.kt").exists() shouldBe true

@@ -6,14 +6,27 @@ plugins {
     id("dev.ktml.gradle") version "0.1.0"
 }
 
+kotlin {
+    jvmToolchain(22)
+
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+    }
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
 dependencies {
-    implementation("dev.ktml:ktml-runtime:$ktmlVersion")
-    implementation("dev.ktml:ktml-ktor:$ktmlVersion")
+    implementation(project(":runtime"))
+    developmentOnly(project(":dev-mode"))
+    implementation(project(":ktor"))
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.ktor.server.core)
     implementation(libs.ktor.server.cio)
     implementation(libs.ktor.server.status)
-    developmentOnly("dev.ktml:ktml-dev-mode:$ktmlVersion")
 
     testImplementation(libs.kotest.runner.junit5)
     testImplementation(libs.ktool.kotest.bdd)

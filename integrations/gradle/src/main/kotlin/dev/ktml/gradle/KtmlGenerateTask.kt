@@ -13,12 +13,19 @@ open class KtmlGenerateTask : DefaultTask() {
     lateinit var moduleName: String
 
     @Input
+    lateinit var templatePackage: String
+
+    @Input
     lateinit var dirSets: List<SourceInfo>
 
     @TaskAction
     open fun generate() {
         dirSets.forEach { (_, ktmlDir, outputDir) ->
-            KtmlProcessor(moduleName = moduleName, outputDirectory = outputDir).apply {
+            KtmlProcessor(
+                moduleName = moduleName,
+                templatePackage = templatePackage,
+                outputDirectory = outputDir
+            ).apply {
                 processRootDirectory(ktmlDir)
                 generateTemplateCode()
             }

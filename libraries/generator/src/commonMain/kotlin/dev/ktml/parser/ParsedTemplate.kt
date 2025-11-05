@@ -3,7 +3,6 @@ package dev.ktml.parser
 import dev.ktml.TagDefinition
 import dev.ktml.parser.kotlin.EXPRESSION_REPLACE_REGEX
 import dev.ktml.parser.kotlin.KotlinExpression
-import dev.ktml.util.ROOT_PACKAGE
 import dev.ktml.util.replaceTicks
 import dev.ktml.util.toCamelCase
 import dev.ktml.util.toPascalCase
@@ -15,6 +14,7 @@ import dev.ktool.gen.TRIPLE_QUOTE
 class ParsedTemplate(
     val file: String,
     val name: String,
+    val templatePackage: String,
     val isPage: Boolean = false,
     val inRegistry: Boolean = false,
     val subPath: String = "",
@@ -31,7 +31,7 @@ class ParsedTemplate(
     val codeFile = "${if (subPath.isNotEmpty()) "$subPath/$camelCaseName" else camelCaseName}.kt"
     val nonContextParameters = parameters.filterNot { it.isContextParam }
     val functionName = "write${name.toCamelCase()}"
-    val packageName = if (subPath.isEmpty()) ROOT_PACKAGE else ROOT_PACKAGE + "." +
+    val packageName = if (subPath.isEmpty()) templatePackage else templatePackage + "." +
             subPath.split("/").joinToString(".") { it.toPascalCase() }
     val qualifiedFunctionName = "$packageName.$functionName"
     val uniqueFunctionName = "write" + subPath.replace("/", "-").toCamelCase() + functionName.substringAfter("write")

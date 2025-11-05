@@ -1,9 +1,6 @@
 package dev.ktml.ktor
 
-import dev.ktml.ContentWriter
-import dev.ktml.Context
-import dev.ktml.KtmlEngine
-import dev.ktml.KtmlRegistry
+import dev.ktml.*
 import dev.ktml.templates.DefaultKtmlRegistry
 import dev.ktml.util.CompileException
 import io.ktor.http.*
@@ -19,6 +16,7 @@ val ktmlEngineKey = AttributeKey<KtmlEngine>("KtmlEngine")
 
 class KtmlConfig {
     var registry: KtmlRegistry? = null
+    var templatePackage: String = DEFAULT_PACKAGE
 }
 
 suspend fun RoutingCall.respondKtml(

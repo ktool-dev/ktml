@@ -15,7 +15,13 @@ open class KtmlPlugin : Plugin<Project> {
         project.plugins.withId("org.jetbrains.kotlin.jvm") {
             project.afterEvaluate {
                 project.extensions.findByType(KotlinJvmProjectExtension::class.java)?.apply {
-                    setupPlugin(project, extension.moduleName, sourceSets.toList(), ::configureDevelopmentOnly)
+                    setupPlugin(
+                        project,
+                        extension.moduleName,
+                        extension.templatePackage,
+                        sourceSets.toList(),
+                        ::configureDevelopmentOnly
+                    )
                 }
             }
         }
@@ -23,7 +29,13 @@ open class KtmlPlugin : Plugin<Project> {
         project.plugins.withId("org.jetbrains.kotlin.multiplatform") {
             project.afterEvaluate {
                 project.extensions.getByType(KotlinMultiplatformExtension::class.java).apply {
-                    setupPlugin(project, extension.moduleName, sourceSets.toList(), ::configureDevelopmentOnlyKmp)
+                    setupPlugin(
+                        project,
+                        extension.moduleName,
+                        extension.templatePackage,
+                        sourceSets.toList(),
+                        ::configureDevelopmentOnlyKmp
+                    )
                 }
             }
         }
@@ -49,6 +61,7 @@ open class KtmlPlugin : Plugin<Project> {
     private fun setupPlugin(
         project: Project,
         moduleName: String,
+        templatePackage: String,
         sourceSets: List<KotlinSourceSet>,
         configureDevMode: (Project) -> Unit
     ) {
@@ -56,7 +69,7 @@ open class KtmlPlugin : Plugin<Project> {
             it.contains("build") || it == ":${project.name}:build"
         }
 
-        if (isBuildTask) setupBuild(project, moduleName, sourceSets) else configureDevMode(project)
+        if (isBuildTask) setupBuild(project, moduleName, templatePackage, sourceSets) else configureDevMode(project)
     }
 
     private fun configureDevelopmentOnlyKmp(project: Project) =
@@ -77,7 +90,12 @@ open class KtmlPlugin : Plugin<Project> {
         project.configurations.findByName(runtimeName)?.extendsFrom(developmentOnly)
     }
 
-    private fun setupBuild(project: Project, moduleName: String, sourceSets: List<KotlinSourceSet>) {
+    private fun setupBuild(
+        project: Project,
+        moduleName: String,
+        templatePackage: String,
+        sourceSets: List<KotlinSourceSet>
+    ) {
         val outputDir = project.layout.buildDirectory.asFile.get().resolve("ktml")
 
         val dirSets = sourceSets.mapNotNull { src ->
@@ -91,6 +109,7 @@ open class KtmlPlugin : Plugin<Project> {
 
         val generateTask = project.tasks.register("generateKtml", KtmlGenerateTask::class.java) {
             it.moduleName = moduleName
+            it.templatePackage = templatePackage
             it.dirSets = dirSets
         }
 

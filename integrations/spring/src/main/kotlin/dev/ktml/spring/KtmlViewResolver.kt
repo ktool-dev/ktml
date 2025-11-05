@@ -13,8 +13,8 @@ import org.springframework.web.servlet.ViewResolver
 import java.io.OutputStream
 import java.util.*
 
-class KtmlViewResolver(ktmlRegistry: KtmlRegistry? = null) : ViewResolver, Ordered {
-    private val registry = (ktmlRegistry ?: findKtmlRegistry())
+class KtmlViewResolver(templatePackage: String? = null, ktmlRegistry: KtmlRegistry? = null) : ViewResolver, Ordered {
+    private val registry = (ktmlRegistry ?: findKtmlRegistry(templatePackage ?: DEFAULT_PACKAGE))
     private val engine = KtmlEngine(registry)
 
     override fun getOrder(): Int = Ordered.HIGHEST_PRECEDENCE

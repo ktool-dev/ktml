@@ -1,12 +1,13 @@
 package dev.ktml.parser
 
+import dev.ktml.DEFAULT_PACKAGE
 import dev.ktool.kotest.BddSpec
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 
 class TemplateParserSpec : BddSpec({
-    val parser = TemplateParser("mine")
+    val parser = TemplateParser(DEFAULT_PACKAGE, "mine")
 
     fun parse(content: String, subPath: String = "mine", fileName: String = "Test.ktml") =
         parser.parseContent(fileName, content, subPath).first()

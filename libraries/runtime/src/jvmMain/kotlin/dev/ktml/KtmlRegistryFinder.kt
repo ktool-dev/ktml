@@ -9,17 +9,17 @@ import kotlin.io.path.createTempDirectory
 private val log = KotlinLogging.logger {}
 
 interface KtmlRegistryFactory {
-    fun create(templateDir: String, outputDir: String): KtmlRegistry
+    fun create(templateDir: String, templatePackage: String, outputDir: String): KtmlRegistry
 }
 
-fun findKtmlRegistry(basePath: String = determineBasePath()): KtmlRegistry {
-    val registryFactory = loadDynamicRegistryFactory() ?: return findRegistryImpl()
+fun findKtmlRegistry(templatePackage: String, basePath: String = determineBasePath()): KtmlRegistry {
+    val registryFactory = loadDynamicRegistryFactory() ?: return findRegistryImpl(templatePackage)
 
     val ktmlDir = breadthFirstSearchForKtmlDir(basePath)
 
     log.info { "Running with ktml directory: $ktmlDir" }
 
-    return registryFactory.create(ktmlDir, determineOutputDir(ktmlDir))
+    return registryFactory.create(ktmlDir, templatePackage, determineOutputDir(ktmlDir))
 }
 
 /**
@@ -84,8 +84,8 @@ private fun breadthFirstSearchForKtmlDir(basePath: String): String {
     return baseDir.absolutePath
 }
 
-private fun findRegistryImpl(): KtmlRegistry = try {
-    val type = Class.forName("dev.ktml.templates.KtmlRegistry")
+private fun findRegistryImpl(templatePackage: String): KtmlRegistry = try {
+    val type = Class.forName("$templatePackage.KtmlRegistry")
     type.getField("INSTANCE").get(null) as KtmlRegistry
 } catch (_: ClassNotFoundException) {
     error("Could not find dev-mode module on the classpath or a generated KtmlRegistry.")

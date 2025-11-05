@@ -12,7 +12,9 @@ import java.io.StringWriter
 object Http4kKtml {
     private lateinit var engine: KtmlEngine
 
-    fun init(ktmlRegistry: KtmlRegistry = findKtmlRegistry()) {
+    fun init(templatePackage: String = DEFAULT_PACKAGE) = init(findKtmlRegistry(templatePackage))
+
+    fun init(ktmlRegistry: KtmlRegistry) {
         engine = KtmlEngine(ktmlRegistry)
     }
 

@@ -5,18 +5,24 @@ import dev.ktml.gen.createKtmlRegistry
 import dev.ktml.parser.ParsedTemplate
 import dev.ktml.parser.TemplateParser
 import dev.ktml.parser.Templates
+import dev.ktml.parser.kotlin.removeContentComments
 import dev.ktml.util.*
 import io.github.oshai.kotlinlogging.KotlinLogging
 
 private val log = KotlinLogging.logger {}
 
-open class KtmlProcessor(private val moduleName: String = "", outputDirectory: String) {
-    val basePackageName = if (moduleName.isNotEmpty()) "$ROOT_PACKAGE.$moduleName" else ROOT_PACKAGE
-    private val parser = TemplateParser(moduleName)
+open class KtmlProcessor(
+    private val moduleName: String = "",
+    templatePackage: String = DEFAULT_PACKAGE,
+    outputDirectory: String,
+    private val removeContentComments: Boolean = true,
+) {
+    val basePackageName = if (moduleName.isNotEmpty()) "$templatePackage.$moduleName" else templatePackage
+    private val parser = TemplateParser(templatePackage, moduleName)
     private val templates = Templates()
     private val parsedTemplates = mutableMapOf<String, ParsedTemplate>()
     private val fileGenerator = KotlinFileGenerator(templates)
-    private val basePath = "$outputDirectory/${ROOT_PACKAGE.replace(".", "/")}"
+    private val basePath = "$outputDirectory/${templatePackage.replace(".", "/")}"
 
     fun clear() {
         templates.clear()
@@ -98,7 +104,9 @@ open class KtmlProcessor(private val moduleName: String = "", outputDirectory: S
 
     fun generateTemplateCodeFile(template: ParsedTemplate) {
         log.debug { "Generating code for template: ${template.name}" }
-        templateCodeFile(template).mkDirs().writeText(fileGenerator.generateCode(template).render())
+        val code = fileGenerator.generateCode(template).render()
+        val filteredCode = if (removeContentComments) code.removeContentComments() else code
+        templateCodeFile(template).mkDirs().writeText(filteredCode)
     }
 
     private fun templateCodeFile(template: ParsedTemplate) = Path("$basePath/${template.codeFile}")

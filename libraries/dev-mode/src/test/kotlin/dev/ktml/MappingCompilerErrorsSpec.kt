@@ -21,7 +21,7 @@ class MappingCompilerErrorsSpec : BddSpec({
 
         When
         val ex = shouldThrow<CompileException> {
-            KtmlDynamicRegistry(dir.absolutePath, false).templates
+            KtmlDynamicRegistry(dir.absolutePath, DEFAULT_PACKAGE, false).templates
         }
 
         Then
@@ -51,7 +51,7 @@ class MappingCompilerErrorsSpec : BddSpec({
 
         When
         val ex = shouldThrow<CompileException> {
-            KtmlDynamicRegistry(dir.absolutePath, false).templates
+            KtmlDynamicRegistry(dir.absolutePath, DEFAULT_PACKAGE, false).templates
         }
 
         Then
@@ -75,7 +75,7 @@ class MappingCompilerErrorsSpec : BddSpec({
 
         When
         val ex = shouldThrow<CompileException> {
-            KtmlDynamicRegistry(dir.absolutePath, false).templates
+            KtmlDynamicRegistry(dir.absolutePath, DEFAULT_PACKAGE, false).templates
         }
 
         Then
@@ -97,7 +97,7 @@ class MappingCompilerErrorsSpec : BddSpec({
 
         When
         val ex = shouldThrow<CompileException> {
-            KtmlDynamicRegistry(dir.absolutePath, false).templates
+            KtmlDynamicRegistry(dir.absolutePath, DEFAULT_PACKAGE, false).templates
         }
 
         Then

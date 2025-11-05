@@ -15,6 +15,11 @@ kotlin {
     }
 }
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
 group = project.property("group").toString()
 version = project.property("version").toString()
 description = "Maven plugin to generated Koltin code from KTML templates"

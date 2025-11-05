@@ -7,15 +7,17 @@ import dev.ktool.gen.LINE_SEPARATOR
 
 class CompilerErrorResolver(
     private val parsedTemplates: List<ParsedTemplate>,
+    templatePackage: String,
     generatedDir: String,
     templateDir: String
 ) {
     private val generatedDir = generatedDir.toPath()
     private val templateDir = templateDir.toPath()
+    private val templatePackagePath = templatePackage.replace(".", "/")
 
     fun resolve(errors: List<CompilerError>): List<CompilerError> {
         val errorsAndExpressions = errors.map { error ->
-            val codeFile = error.filePath.substringAfter(ROOT_PACKAGE_PATH).removePrefix("/")
+            val codeFile = error.filePath.substringAfter(templatePackagePath).removePrefix("/")
             val template = findTemplateByCodeFile(codeFile) ?: error("Could not find template for $codeFile")
             Triple(resolveExpression(template, error), template, error)
         }.groupBy { it.first?.uuid }.values.map { list ->

@@ -10,8 +10,10 @@ import io.javalin.http.Context as JavalinContext
 object JavalinKtml {
     private lateinit var engine: KtmlEngine
 
-    fun init(ktmlRegistry: KtmlRegistry? = null) {
-        engine = KtmlEngine(ktmlRegistry ?: findKtmlRegistry())
+    fun init(templatePackage: String = DEFAULT_PACKAGE) = init(findKtmlRegistry(templatePackage))
+
+    fun init(ktmlRegistry: KtmlRegistry) {
+        engine = KtmlEngine(ktmlRegistry)
     }
 
     internal fun write(ctx: JavalinContext, path: String, model: Map<String, Any?> = emptyMap()) {

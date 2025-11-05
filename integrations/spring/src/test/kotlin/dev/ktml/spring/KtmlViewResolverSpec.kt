@@ -1,6 +1,7 @@
 package dev.ktml.spring
 
 import dev.ktml.Content
+import dev.ktml.DEFAULT_PACKAGE
 import dev.ktml.KtmlRegistry
 import dev.ktml.TagDefinition
 import dev.ktool.kotest.BddSpec
@@ -19,7 +20,7 @@ class KtmlViewResolverSpec : BddSpec({
     val tags = mutableListOf<TagDefinition>()
     val queryParams = mutableMapOf<String, Array<String>>()
     val pathParams = mutableMapOf<String, String>()
-    val resolver = KtmlViewResolver(object : KtmlRegistry {
+    val resolver = KtmlViewResolver(DEFAULT_PACKAGE, object : KtmlRegistry {
         override val templates: Map<String, Content> get() = templates
         override val tags: List<TagDefinition> get() = tags
     })

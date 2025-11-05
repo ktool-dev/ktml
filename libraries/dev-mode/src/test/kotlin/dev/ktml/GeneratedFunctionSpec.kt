@@ -24,7 +24,7 @@ class GeneratedFunctionSpec : BddSpec({
     lateinit var processor: KtmlDynamicRegistry
 
     beforeEach {
-        processor = KtmlDynamicRegistry(templateDir, watchFiles = false, outputDir = "build/generated")
+        processor = KtmlDynamicRegistry(templateDir, DEFAULT_PACKAGE, watchFiles = false, outputDir = "build/generated")
         engine = KtmlEngine(processor)
     }
 
