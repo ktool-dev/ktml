@@ -5,7 +5,6 @@ import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSet
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 open class KtmlPlugin : Plugin<Project> {
     override fun apply(project: Project) {
@@ -14,14 +13,16 @@ open class KtmlPlugin : Plugin<Project> {
 
         project.plugins.withId("org.jetbrains.kotlin.jvm") {
             project.afterEvaluate {
+                val isBuildTask = project.gradle.startParameter.taskNames.any {
+                    it.contains("build") || it == ":${project.name}:build"
+                }
+
                 project.extensions.findByType(KotlinJvmProjectExtension::class.java)?.apply {
-                    setupPlugin(
-                        project,
-                        extension.moduleName,
-                        extension.templatePackage,
-                        sourceSets.toList(),
-                        ::configureDevelopmentOnly
-                    )
+                    if (isBuildTask) {
+                        setupBuild(project, extension.moduleName, extension.templatePackage, sourceSets.toList())
+                    } else {
+                        configureDevelopmentOnly(project)
+                    }
                 }
             }
         }
@@ -29,13 +30,7 @@ open class KtmlPlugin : Plugin<Project> {
         project.plugins.withId("org.jetbrains.kotlin.multiplatform") {
             project.afterEvaluate {
                 project.extensions.getByType(KotlinMultiplatformExtension::class.java).apply {
-                    setupPlugin(
-                        project,
-                        extension.moduleName,
-                        extension.templatePackage,
-                        sourceSets.toList(),
-                        ::configureDevelopmentOnlyKmp
-                    )
+                    setupBuild(project, extension.moduleName, extension.templatePackage, sourceSets.toList())
                 }
             }
         }
@@ -57,20 +52,6 @@ open class KtmlPlugin : Plugin<Project> {
             it.isCanBeConsumed = false
             it.isCanBeResolved = true
         }
-
-    private fun setupPlugin(
-        project: Project,
-        moduleName: String,
-        templatePackage: String,
-        sourceSets: List<KotlinSourceSet>,
-        configureDevMode: (Project) -> Unit
-    ) {
-        val isBuildTask = project.gradle.startParameter.taskNames.any {
-            it.contains("build") || it == ":${project.name}:build"
-        }
-
-        if (isBuildTask) setupBuild(project, moduleName, templatePackage, sourceSets) else configureDevMode(project)
-    }
 
     private fun configureDevelopmentOnlyKmp(project: Project) =
         createDevelopmentOnly(project, "jvmCompileClasspath", "jvmRuntimeClasspath", "jvmTestRuntimeClasspath")
@@ -113,12 +94,15 @@ open class KtmlPlugin : Plugin<Project> {
             it.dirSets = dirSets
         }
 
-        project.tasks.withType(KotlinCompile::class.java).configureEach {
-            it.dependsOn(generateTask)
-        }
-
         project.afterEvaluate {
             dirSets.forEach { it.sourceSet.kotlin.srcDir(it.outputDir) }
+
+            // Make all Kotlin compilation tasks depend on generateKtml
+            project.tasks.matching { task ->
+                task.name.startsWith("compile") && task.name.contains("Kotlin")
+            }.configureEach {
+                it.dependsOn(generateTask)
+            }
         }
     }
 }

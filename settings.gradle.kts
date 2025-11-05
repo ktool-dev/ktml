@@ -31,6 +31,8 @@ application("example-javalin")
 application("example-ktor")
 application("example-spring")
 application("example-http4k")
+application("example-ktor-native")
+application("example-js")
 
 fun library(name: String) = includeType("libraries", name)
 fun integration(name: String) = includeType("integrations", name)

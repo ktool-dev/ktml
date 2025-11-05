@@ -8,4 +8,8 @@ class KtmlEngine(ktmlRegistry: KtmlRegistry) {
     suspend fun writePage(context: Context, path: String) {
         ktmlRegistry.templates[path.removePrefix("/")]?.invoke(context) ?: error("No page found for path: $path")
     }
+
+    suspend fun renderPage(path: String, model: Map<String, Any> = mapOf()) = StringContentWriter().also {
+        writePage(Context(it, model), path)
+    }.toString()
 }

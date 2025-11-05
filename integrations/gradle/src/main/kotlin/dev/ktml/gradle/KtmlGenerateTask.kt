@@ -21,6 +21,7 @@ open class KtmlGenerateTask : DefaultTask() {
     @TaskAction
     open fun generate() {
         dirSets.forEach { (_, ktmlDir, outputDir) ->
+            project.file(outputDir).deleteRecursively()
             KtmlProcessor(
                 moduleName = moduleName,
                 templatePackage = templatePackage,
