@@ -21,7 +21,7 @@ class KtmlViewResolverSpec : BddSpec({
     val queryParams = mutableMapOf<String, Array<String>>()
     val pathParams = mutableMapOf<String, String>()
     val resolver = KtmlViewResolver(DEFAULT_PACKAGE, object : KtmlRegistry {
-        override val templates: Map<String, Content> get() = templates
+        override operator fun get(path: String): Content? = templates[path]
         override val tags: List<TagDefinition> get() = tags
     })
     val local = Locale.US

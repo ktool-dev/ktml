@@ -19,7 +19,7 @@ class KtmlRendererSpec : BddSpec({
     val queryParams = mutableMapOf<String, List<String>>()
     val pathParams = mutableMapOf<String, String>()
     JavalinKtml.init(object : KtmlRegistry {
-        override val templates: Map<String, Content> get() = templates
+        override operator fun get(path: String): Content? = templates[path]
         override val tags: List<TagDefinition> get() = tags
     })
     val ctx = mockk<io.javalin.http.Context>()

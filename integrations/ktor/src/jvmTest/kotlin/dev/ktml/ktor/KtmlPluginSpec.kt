@@ -40,7 +40,7 @@ class KtmlPluginSpec : BddSpec({
         }
         KtmlPlugin.install(routingCall.application) {
             registry = object : KtmlRegistry {
-                override val templates: Map<String, Content> get() = templates
+                override operator fun get(path: String): Content? = templates[path]
                 override val tags: List<TagDefinition> get() = tags
             }
         }

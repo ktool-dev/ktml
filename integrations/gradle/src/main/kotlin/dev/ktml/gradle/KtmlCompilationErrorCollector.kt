@@ -42,6 +42,8 @@ abstract class KtmlCompilationErrorCollector :
             processSourceSetErrors(errorText, it)
         }
 
+        if (errors.isEmpty()) return
+
         logger.error("\n" + "=".repeat(80))
         logger.error("KTML Compilation Errors (${errors.size}):")
         logger.error("=".repeat(80))

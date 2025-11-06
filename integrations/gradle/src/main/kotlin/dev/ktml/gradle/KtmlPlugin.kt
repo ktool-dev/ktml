@@ -95,12 +95,9 @@ open class KtmlPlugin : Plugin<Project> {
             it.dirSets = dirSets
         }
 
-        // Register the build service for error collection
         val errorCollectorProvider = project.getErrorCollector()
 
         project.afterEvaluate {
-            val errorCollector = errorCollectorProvider.get()
-
             dirSets.forEach {
                 it.sourceSet.kotlin.srcDir(it.outputDir)
             }
@@ -111,7 +108,7 @@ open class KtmlPlugin : Plugin<Project> {
             }.configureEach { compileTask ->
                 compileTask.dependsOn(generateTask)
 
-                // Add logging listener to capture compiler output
+                val errorCollector = errorCollectorProvider.get()
                 compileTask.logging.addStandardErrorListener(errorCollector)
                 compileTask.logging.addStandardOutputListener(errorCollector)
 
@@ -123,6 +120,6 @@ open class KtmlPlugin : Plugin<Project> {
 }
 
 fun Project.getErrorCollector() = project.gradle.sharedServices.registerIfAbsent(
-    "ktmlErrorCollector",
+    "ktmlErrorCollector-${project.path}",
     KtmlCompilationErrorCollector::class.java
 )
