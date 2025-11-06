@@ -6,6 +6,7 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSet
 
+
 open class KtmlPlugin : Plugin<Project> {
     override fun apply(project: Project) {
         val extension = project.extensions.create("ktml", KtmlExtension::class.java)
@@ -94,15 +95,34 @@ open class KtmlPlugin : Plugin<Project> {
             it.dirSets = dirSets
         }
 
+        // Register the build service for error collection
+        val errorCollectorProvider = project.getErrorCollector()
+
         project.afterEvaluate {
-            dirSets.forEach { it.sourceSet.kotlin.srcDir(it.outputDir) }
+            val errorCollector = errorCollectorProvider.get()
+
+            dirSets.forEach {
+                it.sourceSet.kotlin.srcDir(it.outputDir)
+            }
 
             // Make all Kotlin compilation tasks depend on generateKtml
             project.tasks.matching { task ->
                 task.name.startsWith("compile") && task.name.contains("Kotlin")
-            }.configureEach {
-                it.dependsOn(generateTask)
+            }.configureEach { compileTask ->
+                compileTask.dependsOn(generateTask)
+
+                // Add logging listener to capture compiler output
+                compileTask.logging.addStandardErrorListener(errorCollector)
+                compileTask.logging.addStandardOutputListener(errorCollector)
+
+                // Ensure the build service is used by this task
+                compileTask.usesService(errorCollectorProvider)
             }
         }
     }
 }
+
+fun Project.getErrorCollector() = project.gradle.sharedServices.registerIfAbsent(
+    "ktmlErrorCollector",
+    KtmlCompilationErrorCollector::class.java
+)

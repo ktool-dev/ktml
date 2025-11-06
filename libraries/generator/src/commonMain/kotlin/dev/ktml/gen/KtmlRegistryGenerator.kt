@@ -19,11 +19,19 @@ fun createKtmlRegistry(basePackageName: String, templates: Templates) = KotlinFi
     +Object("KtmlRegistry") {
         +SuperType("KtmlRegistry")
 
+        +Function(name = "get", returnType = Type("Content?")) {
+            +Modifier.Override
+            +Modifier.Operator
+            
+            +Parameter(name = "path", type = StringType)
+            body = ExpressionBody("templates[path]")
+        }
+
         +Property(
             name = "templates",
             type = Type("Map", typeArguments = listOf(TypeArgument("String"), TypeArgument("Content")))
         ) {
-            +Modifier.Override
+            +Modifier.Private
             initializer = ExpressionBody {
                 write("mapOf(")
                 withIndent {

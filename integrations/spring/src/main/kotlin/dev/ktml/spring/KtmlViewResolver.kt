@@ -1,7 +1,6 @@
 package dev.ktml.spring
 
 import dev.ktml.*
-import dev.ktml.templates.DefaultKtmlRegistry
 import dev.ktml.util.CompileException
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
@@ -21,7 +20,7 @@ class KtmlViewResolver(templatePackage: String? = null, ktmlRegistry: KtmlRegist
 
     override fun resolveViewName(viewName: String, locale: Locale): View? {
         return try {
-            if (registry.templates.containsKey(viewName)) KtmlView(engine, viewName) else null
+            if (registry.hasPath(viewName)) KtmlView(engine, viewName) else null
         } catch (_: CompileException) {
             // If there's a compiler exception, we need to return the view so it renders the compiler error page
             KtmlView(engine, viewName)
@@ -44,13 +43,7 @@ class KtmlView(private val engine: KtmlEngine, private val path: String) : View 
         )
 
         runBlocking {
-            try {
-                engine.writePage(ktmlContext, path)
-            } catch (e: CompileException) {
-                e.printStackTrace()
-                val context = Context(out, mapOf("exception" to e))
-                DefaultKtmlRegistry.templates["compile-exception"]?.invoke(context)
-            }
+            engine.writePage(ktmlContext, path)
             out.flush()
         }
     }

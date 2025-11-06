@@ -1,9 +1,9 @@
 package dev.ktml.parser
 
 import dev.ktml.KtmlRegistry
-import dev.ktml.KtmlRegistryList
 import dev.ktml.TagDefinition
 import dev.ktml.TagParameter
+import dev.ktml.merge
 import dev.ktml.templates.DefaultKtmlRegistry
 
 /**
@@ -12,7 +12,7 @@ import dev.ktml.templates.DefaultKtmlRegistry
 class Templates(ktmlRegistries: List<KtmlRegistry> = listOf()) {
     private val tags = mutableMapOf<String, TagDefinition>()
     private val templates = mutableMapOf<String, ParsedTemplate>()
-    private val ktmlRegistry: KtmlRegistry = KtmlRegistryList(ktmlRegistries.plus(DefaultKtmlRegistry))
+    private val ktmlRegistry: KtmlRegistry = ktmlRegistries.plus(DefaultKtmlRegistry).merge()
 
     fun clear() {
         tags.clear()

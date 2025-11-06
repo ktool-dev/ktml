@@ -1,9 +1,6 @@
 package dev.ktml
 
-import dev.ktml.util.CompileException
 import dev.ktool.kotest.BddSpec
-import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import java.io.File
 import kotlin.io.path.createTempDirectory
@@ -20,15 +17,11 @@ class MappingCompilerErrorsSpec : BddSpec({
         File(dir, "something.ktml").writeText(template)
 
         When
-        val ex = shouldThrow<CompileException> {
-            KtmlDynamicRegistry(dir.absolutePath, DEFAULT_PACKAGE, false).templates
-        }
+        val result = renderError(dir)
 
         Then
-        ex.printStackTrace()
-        ex.errors.size shouldBe 1
-        ex.errors[0].filePath shouldBe "something.ktml"
-        ex.errors[0].message shouldContain $$"""<div class="$missing"></div>"""
+        result shouldContain "1 error"
+        result shouldContain $$"""<div class="$missing"></div>""".encodeHtml()
     }
 
     "displays multiline expression" {
@@ -50,14 +43,11 @@ class MappingCompilerErrorsSpec : BddSpec({
         File(dir, "something.ktml").writeText(template)
 
         When
-        val ex = shouldThrow<CompileException> {
-            KtmlDynamicRegistry(dir.absolutePath, DEFAULT_PACKAGE, false).templates
-        }
+        val result = renderError(dir)
 
         Then
-        ex.printStackTrace()
-        ex.errors.size shouldBe 1
-        ex.errors[0].message shouldContain """} else if(a == 4) {"""
+        result shouldContain "1 error"
+        result shouldContain """} else if(a == 4) {"""
     }
 
     "handles compiler errors in content above the starting tag" {
@@ -74,15 +64,12 @@ class MappingCompilerErrorsSpec : BddSpec({
         File(dir, "something.ktml").writeText(template)
 
         When
-        val ex = shouldThrow<CompileException> {
-            KtmlDynamicRegistry(dir.absolutePath, DEFAULT_PACKAGE, false).templates
-        }
+        val result = renderError(dir)
 
         Then
-        ex.printStackTrace()
-        ex.errors.size shouldBe 1
-        ex.errors[0].message shouldContain "Code above the template tags"
-        ex.errors[0].message shouldContain "a + b"
+        result shouldContain "1 error"
+        result shouldContain "Code above the template tags"
+        result shouldContain "a + b"
     }
 
     "handles errors in template parameters" {
@@ -96,14 +83,14 @@ class MappingCompilerErrorsSpec : BddSpec({
         File(dir, "something.ktml").writeText(template)
 
         When
-        val ex = shouldThrow<CompileException> {
-            KtmlDynamicRegistry(dir.absolutePath, DEFAULT_PACKAGE, false).templates
-        }
+        val result = renderError(dir)
 
         Then
-        ex.printStackTrace()
-        ex.errors.size shouldBe 1
-        ex.errors[0].message shouldContain "The expression on line 0 starting at column"
-        ex.errors[0].message shouldContain $$"""<something value="${String = null}">"""
+        result shouldContain "1 error"
+        result shouldContain "The expression on line 0 starting at column"
+        result shouldContain $$"""<something value="${String = null}">""".encodeHtml()
     }
 })
+
+private suspend fun renderError(dir: File) =
+    KtmlEngine(KtmlDynamicRegistry(dir.absolutePath, DEFAULT_PACKAGE, false)).renderPage("anything")

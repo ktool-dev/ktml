@@ -100,7 +100,7 @@ class KtmlRegistryGeneratorSpec : BddSpec({
             inRegistry = true,
             name = "my-page",
             subPath = "components",
-            parameters = listOf(parsedTemplateParameter($$"@name", "String")),
+            parameters = listOf(parsedTemplateParameter("@name", "String")),
         )
 
         When
@@ -109,7 +109,9 @@ class KtmlRegistryGeneratorSpec : BddSpec({
         Then
         result shouldContain "import dev.ktml.templates.components.writeMyPage as writeComponentsMyPage"
         result shouldContain """
-    override val templates: Map<String, Content> = mapOf(
+    override operator fun get(path: String): Content? = templates[path]
+
+    private val templates: Map<String, Content> = mapOf(
         "components/my-page" to { writeComponentsMyPage() },
     )
         """.trim()

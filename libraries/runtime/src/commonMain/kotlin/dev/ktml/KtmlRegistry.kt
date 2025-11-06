@@ -23,20 +23,26 @@ data class TagParameter(
 }
 
 interface KtmlRegistry {
-    val templates: Map<String, Content>
+    operator fun get(path: String): Content?
     val tags: List<TagDefinition>
 
-    fun hasPath(path: String): Boolean = templates.containsKey(path)
+    fun hasPath(path: String): Boolean = get(path) != null
     fun hasTag(path: String): Boolean = tags.any { it.path == path }
 }
 
-fun KtmlRegistry.join(vararg registries: KtmlRegistry) = KtmlRegistryList(listOf(this) + registries)
+fun List<KtmlRegistry>.merge(): KtmlRegistry {
+    require(isNotEmpty()) { "Cannot merge empty entries" }
+    if (size == 1) return this.first()
 
-class KtmlRegistryList(private val registries: List<KtmlRegistry>) : KtmlRegistry {
-    override val templates: Map<String, Content>
-        get() = buildMap { registries.forEach { putAll(it.templates) } }
-    override val tags: List<TagDefinition>
-        get() = registries.flatMap { it.tags }
+    return subList(1, size).foldRight(first(), ::DualKtmlRegistry)
+}
+
+fun KtmlRegistry.join(registry: KtmlRegistry) = DualKtmlRegistry(this, registry)
+
+class DualKtmlRegistry(private val first: KtmlRegistry, private val second: KtmlRegistry) : KtmlRegistry {
+    override operator fun get(path: String): Content? = first[path] ?: second[path]
+
+    override val tags: List<TagDefinition> get() = first.tags + second.tags
 }
 
 private fun String.toCamelCase(): String {

@@ -1,8 +1,6 @@
 package dev.ktml.http4k
 
 import dev.ktml.*
-import dev.ktml.templates.DefaultKtmlRegistry
-import dev.ktml.util.CompileException
 import kotlinx.coroutines.runBlocking
 import org.http4k.core.Request
 import org.http4k.core.Response
@@ -44,13 +42,7 @@ object Http4kKtml {
         val ktmlContext = Context(writer = writer, model = model, queryParams = queryParams)
 
         runBlocking {
-            try {
-                engine.writePage(ktmlContext, path)
-            } catch (e: CompileException) {
-                e.printStackTrace()
-                val context = Context(writer, mapOf("exception" to e))
-                DefaultKtmlRegistry.templates["compile-exception"]?.invoke(context)
-            }
+            engine.writePage(ktmlContext, path)
             writer.flush()
         }
 

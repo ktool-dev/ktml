@@ -6,7 +6,7 @@ class KtmlEngine(ktmlRegistry: KtmlRegistry) {
     private val ktmlRegistry = ktmlRegistry.join(DefaultKtmlRegistry)
 
     suspend fun writePage(context: Context, path: String) {
-        ktmlRegistry.templates[path.removePrefix("/")]?.invoke(context) ?: error("No page found for path: $path")
+        ktmlRegistry[path.removePrefix("/")]?.invoke(context) ?: error("No page found for path: $path")
     }
 
     suspend fun renderPage(path: String, model: Map<String, Any> = mapOf()) = StringContentWriter().also {

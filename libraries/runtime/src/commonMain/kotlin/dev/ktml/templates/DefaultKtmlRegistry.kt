@@ -6,7 +6,9 @@ import dev.ktml.TagDefinition
 import dev.ktml.TagParameter
 
 object DefaultKtmlRegistry : KtmlRegistry {
-    override val templates: Map<String, Content> = mapOf(
+    override operator fun get(path: String): Content? = templates[path]
+
+    private val templates: Map<String, Content> = mapOf(
         "compile-exception" to { writeCompileException() },
     )
 

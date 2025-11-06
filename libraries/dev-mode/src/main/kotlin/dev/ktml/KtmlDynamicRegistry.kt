@@ -2,6 +2,7 @@ package dev.ktml
 
 import dev.ktml.templates.DefaultKtmlRegistry
 import dev.ktml.util.CompileException
+import dev.ktml.util.CompileExceptionRegistry
 import dev.ktml.util.CompilerErrorResolver
 import java.io.File
 import java.net.URLClassLoader
@@ -25,9 +26,8 @@ class KtmlDynamicRegistry(
     private var _templateRegistry: KtmlRegistry? = null
     private val compileDir: File = File(outputDir).resolve("compiled")
     private val generatedDir: File = File(outputDir).resolve("generated")
-    private var exception: Exception? = null
 
-    override val templates: Map<String, Content> get() = ktmlRegistry.templates
+    override operator fun get(path: String): Content? = ktmlRegistry[path]
     override val tags: List<TagDefinition> get() = ktmlRegistry.tags
 
     private val processor = KtmlProcessor(outputDirectory = generatedDir.absolutePath, removeContentComments = false)
@@ -43,7 +43,6 @@ class KtmlDynamicRegistry(
     private val ktmlRegistry: KtmlRegistry
         get() {
             if (_templateRegistry == null) _templateRegistry = loadTemplateRegistry()
-            if (exception != null) throw exception!!
             return _templateRegistry!!
         }
 
@@ -78,11 +77,11 @@ class KtmlDynamicRegistry(
     }
 
     private fun compileTemplates(): KtmlRegistry {
-        compile()
+        val exception = compile()
 
         if (exception != null) {
-            exception?.printStackTrace()
-            return DefaultKtmlRegistry
+            exception.printStackTrace()
+            return CompileExceptionRegistry(exception)
         }
 
         val className = "$basePackageName.KtmlRegistry"
@@ -104,8 +103,7 @@ class KtmlDynamicRegistry(
             Thread.currentThread().contextClassLoader
         )
 
-    private fun compile() {
-        exception = null
+    private fun compile(): CompileException? {
         val errors = KotlinCompile.compileFilesToDir(generatedDir.toPath(), compileDir.toPath())
         val errorResolver =
             CompilerErrorResolver(
@@ -114,8 +112,10 @@ class KtmlDynamicRegistry(
                 generatedDir.absolutePath,
                 templateDir
             )
-        if (errors.isNotEmpty()) {
-            exception = CompileException(errorResolver.resolve(errors))
+        return if (errors.isNotEmpty()) {
+            CompileException(errorResolver.resolve(errors))
+        } else {
+            null
         }
     }
 }

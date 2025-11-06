@@ -14,19 +14,10 @@ class CompileException(val errors: List<CompilerError>) :
     Exception("Compilation failed:\n${errors.joinToString("\n") { it.toTemplateMessage() }}")
 
 class CompileExceptionRegistry(val exception: CompileException) : KtmlRegistry {
+    override fun get(path: String): Content = {
+        this["exception"] = exception
+        writeCompileException()
+    }
+
     override val tags: List<TagDefinition> = listOf()
-
-    private class FakeMap(val exception: CompileException) : AbstractMap<String, Content>() {
-        override val entries: Set<Map.Entry<String, Content>> = emptySet()
-        override fun get(key: String): Content = {
-            this["exception"] = exception
-            writeCompileException()
-        }
-    }
-
-    override val templates: Map<String, Content> = FakeMap(exception)
-
-    fun printException() {
-        exception.printStackTrace()
-    }
 }

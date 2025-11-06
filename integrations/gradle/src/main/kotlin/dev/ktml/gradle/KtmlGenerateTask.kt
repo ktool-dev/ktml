@@ -25,8 +25,10 @@ open class KtmlGenerateTask : DefaultTask() {
             KtmlProcessor(
                 moduleName = moduleName,
                 templatePackage = templatePackage,
-                outputDirectory = outputDir
+                outputDirectory = outputDir,
+                removeContentComments = false,
             ).apply {
+                project.getErrorCollector().get().addProjectInfo(ProjectInfo(templatePackage, ktmlDir, outputDir, this))
                 processRootDirectory(ktmlDir)
                 generateTemplateCode()
             }
