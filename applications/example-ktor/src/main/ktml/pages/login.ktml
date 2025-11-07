@@ -1,5 +1,3 @@
-import dev.ktml.example.ktor.models.User
-
 <html lang="en" @error="${String? = null}">
 <pre-login-layout title="Login - Task Manager">
     <div class="container">
