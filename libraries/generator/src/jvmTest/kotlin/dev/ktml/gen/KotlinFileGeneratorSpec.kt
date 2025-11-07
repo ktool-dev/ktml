@@ -259,6 +259,30 @@ class KotlinFileGeneratorSpec : BddSpec({
         file.writerFunction.parameters[3].name shouldBe "anInt"
         file.writerFunction.parameters[3].defaultValue?.expression?.removeContentComments() shouldBe "number"
     }
+
+    "generate empty arg function for fragment" {
+        Given
+        val template = $$"""
+            <my-fragment fragment aString="${String = 'a $defaultString'}" aBoolean="${Boolean = true}">
+                <div>${aString}</div>
+                <div>${aBoolean}</div>
+            </my-fragment>
+        """.trimIndent().parse()
+
+        When
+        val file = kotlinFileGenerator.generateCode(template)
+
+        Then
+        file.writerFunction.parameters.size shouldBe 0
+        file.writerFunction.body?.render()?.trim()?.removeContentComments() shouldBe $$"""
+        {
+            writeMyFragment(
+                aBoolean = optional("aBoolean", true),
+                aString = optional("aString", "a $defaultString"),
+            )
+        }
+        """.trimIndent().trim()
+    }
 })
 
 private val KotlinFile.writerFunction: Function get() = members[0] as Function

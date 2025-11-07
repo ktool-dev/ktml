@@ -45,7 +45,9 @@ class KotlinFileGenerator(private val templates: Templates) {
             body = FunctionBlock {
                 write("write${template.name.toCamelCase()}(")
                 withIndent {
-                    template.nonContextParameters.forEach { newLine(it.contextParameterCall()) }
+                    template.nonContextParameters.forEach {
+                        newLine(it.contextParameterCall().replaceTicks() + ",")
+                    }
                 }
                 newLine(")")
             }
