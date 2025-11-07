@@ -10,7 +10,6 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
-import java.net.URLEncoder
 
 fun Route.configureAuthRoutes() {
     // GET /login - Show login page
@@ -38,16 +37,23 @@ fun Route.configureAuthRoutes() {
         val password = params["password"] ?: ""
 
         if (email.isBlank() || password.isBlank()) {
-            call.respondRedirect("/login?error=${URLEncoder.encode("Email and password are required", "UTF-8")}")
+            call.respondKtml(
+                path = "fragments/auth/login-form",
+                model = mapOf("error" to "Email and password are required")
+            )
             return@post
         }
 
         val user = SampleData.validateCredentials(email, password)
         if (user != null) {
             call.sessions.set(UserSession(userId = user.id))
-            call.respondRedirect("/")
+            call.response.headers.append("HX-Redirect", "/")
+            call.respond(HttpStatusCode.OK)
         } else {
-            call.respondRedirect("/login?error=${URLEncoder.encode("Invalid email or password", "UTF-8")}")
+            call.respondKtml(
+                path = "fragments/auth/login-form",
+                model = mapOf("error" to "Invalid email or password")
+            )
         }
     }
 
@@ -79,30 +85,43 @@ fun Route.configureAuthRoutes() {
 
         // Validate input
         if (name.isBlank() || email.isBlank() || password.isBlank()) {
-            call.respondRedirect("/register?error=${URLEncoder.encode("All fields are required", "UTF-8")}")
+            call.respondKtml(
+                path = "fragments/auth/register-form",
+                model = mapOf("error" to "All fields are required")
+            )
             return@post
         }
 
         if (password != confirmPassword) {
-            call.respondRedirect("/register?error=${URLEncoder.encode("Passwords do not match", "UTF-8")}")
+            call.respondKtml(
+                path = "fragments/auth/register-form",
+                model = mapOf("error" to "Passwords do not match")
+            )
             return@post
         }
 
         if (password.length < 6) {
-            call.respondRedirect("/register?error=${URLEncoder.encode("Password must be at least 6 characters", "UTF-8")}")
+            call.respondKtml(
+                path = "fragments/auth/register-form",
+                model = mapOf("error" to "Password must be at least 6 characters")
+            )
             return@post
         }
 
         // Create user
         val user = SampleData.createUser(name, email, password)
         if (user == null) {
-            call.respondRedirect("/register?error=${URLEncoder.encode("Email already exists", "UTF-8")}")
+            call.respondKtml(
+                path = "fragments/auth/register-form",
+                model = mapOf("error" to "Email already exists")
+            )
             return@post
         }
 
         // Log in the new user
         call.sessions.set(UserSession(userId = user.id))
-        call.respondRedirect("/")
+        call.response.headers.append("HX-Redirect", "/")
+        call.respond(HttpStatusCode.OK)
     }
 
     // POST /logout - Clear session and redirect

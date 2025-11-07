@@ -1,7 +1,7 @@
 import dev.ktml.example.ktor.models.User
 
 <html lang="en" @user="$User" @viewUser="$User">
-<base-layout title="${viewUser.name} - Profile">
+<post-login-layout title="${viewUser.name} - Profile">
     <div class="container py-4">
         <div class="row">
             <div class="col-md-8 offset-md-2">
@@ -64,5 +64,5 @@ import dev.ktml.example.ktor.models.User
             </div>
         </div>
     </div>
-</base-layout>
+</post-login-layout>
 </html>

@@ -35,7 +35,7 @@ fun Route.configureProfileRoutes() {
         )
     }
 
-    // POST /profile/edit - Update profile (returns fragment for HTMX)
+    // POST /profile/edit - Update profile (redirect to profile on success)
     post("/profile/edit") {
         val user = call.requireAuth()
         val params = call.receiveParameters()
@@ -65,10 +65,8 @@ fun Route.configureProfileRoutes() {
         )
         
         if (SampleData.updateUser(updatedUser)) {
-            call.respondKtml(
-                path = "fragments/profile/profile-info",
-                model = mapOf("user" to updatedUser)
-            )
+            call.response.headers.append("HX-Redirect", "/profile")
+            call.respond(HttpStatusCode.OK)
         } else {
             call.respondText("Failed to update profile", status = HttpStatusCode.InternalServerError)
         }
