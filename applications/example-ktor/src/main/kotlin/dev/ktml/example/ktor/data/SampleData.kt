@@ -1,17 +1,101 @@
 package dev.ktml.example.ktor.data
 
 import dev.ktml.example.ktor.models.*
+import dev.ktml.example.ktor.utils.PasswordHash
 import java.time.LocalDateTime
 
 object SampleData {
-    val users = listOf(
-        User(1, "Alice Johnson", "alice@example.com", isAdmin = true, avatarColor = "primary"),
-        User(2, "Bob Smith", "bob@example.com", isAdmin = false, avatarColor = "success"),
-        User(3, "Charlie Brown", "charlie@example.com", isAdmin = false, avatarColor = "warning"),
-        User(4, "Diana Prince", "diana@example.com", isAdmin = false, avatarColor = "info")
+    private var nextUserId = 5
+    
+    // Default password for all users is "password123"
+    val users = mutableListOf(
+        User(
+            1, "Alice Johnson", "alice@example.com",
+            passwordHash = PasswordHash.hashPassword("password123"),
+            isAdmin = true, avatarColor = "primary",
+            createdAt = LocalDateTime.now().minusMonths(6)
+        ),
+        User(
+            2, "Bob Smith", "bob@example.com",
+            passwordHash = PasswordHash.hashPassword("password123"),
+            isAdmin = false, avatarColor = "success",
+            createdAt = LocalDateTime.now().minusMonths(4)
+        ),
+        User(
+            3, "Charlie Brown", "charlie@example.com",
+            passwordHash = PasswordHash.hashPassword("password123"),
+            isAdmin = false, avatarColor = "warning",
+            createdAt = LocalDateTime.now().minusMonths(3)
+        ),
+        User(
+            4, "Diana Prince", "diana@example.com",
+            passwordHash = PasswordHash.hashPassword("password123"),
+            isAdmin = false, avatarColor = "info",
+            createdAt = LocalDateTime.now().minusMonths(2)
+        )
     )
 
-    val currentUser = users[0]
+    /**
+     * Create a new user. Returns null if email already exists.
+     */
+    fun createUser(name: String, email: String, password: String, isAdmin: Boolean = false): User? {
+        if (users.any { it.email.equals(email, ignoreCase = true) }) {
+            return null
+        }
+        
+        val user = User(
+            id = nextUserId++,
+            name = name,
+            email = email,
+            passwordHash = PasswordHash.hashPassword(password),
+            isAdmin = isAdmin,
+            createdAt = LocalDateTime.now()
+        )
+        users.add(user)
+        return user
+    }
+
+    /**
+     * Find a user by email (case-insensitive)
+     */
+    fun findUserByEmail(email: String): User? {
+        return users.find { it.email.equals(email, ignoreCase = true) }
+    }
+
+    /**
+     * Find a user by ID
+     */
+    fun findUserById(id: Int): User? {
+        return users.find { it.id == id }
+    }
+
+    /**
+     * Validate login credentials
+     */
+    fun validateCredentials(email: String, password: String): User? {
+        val user = findUserByEmail(email) ?: return null
+        return if (PasswordHash.verifyPassword(password, user.passwordHash)) {
+            // Update last login
+            val updatedUser = user.copy(lastLogin = LocalDateTime.now())
+            updateUser(updatedUser)
+            updatedUser
+        } else {
+            null
+        }
+    }
+
+    /**
+     * Update an existing user
+     */
+    fun updateUser(user: User): Boolean {
+        val index = users.indexOfFirst { it.id == user.id }
+        return if (index != -1) {
+            users[index] = user
+            true
+        } else {
+            false
+        }
+    }
 
     val tasks = listOf(
         Task(

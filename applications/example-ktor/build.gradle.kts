@@ -2,6 +2,7 @@ val ktmlVersion = "0.1.3"
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
+    kotlin("plugin.serialization") version "2.1.0"
     application
     id("dev.ktml.gradle") version "0.1.3"
 }
@@ -14,6 +15,9 @@ dependencies {
     implementation(libs.ktor.server.core)
     implementation(libs.ktor.server.cio)
     implementation(libs.ktor.server.status)
+    implementation("io.ktor:ktor-server-sessions:3.3.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+    implementation("org.mindrot:jbcrypt:0.4")
 
     testImplementation(libs.kotest.runner.junit5)
     testImplementation(libs.ktool.kotest.bdd)

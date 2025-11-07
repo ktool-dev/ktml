@@ -1,0 +1,68 @@
+import dev.ktml.example.ktor.models.User
+
+<html lang="en" @user="$User" @viewUser="$User">
+<base-layout title="${viewUser.name} - Profile">
+    <div class="container py-4">
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h2 class="mb-0">
+                                <i class="bi bi-person-circle"></i> Profile
+                            </h2>
+                            <a href="/profile/edit" class="btn btn-primary btn-sm" if="${user.id == viewUser.id}">
+                                <i class="bi bi-pencil"></i> Edit Profile
+                            </a>
+                        </div>
+
+                        <div id="profile-info">
+                            <div class="row mb-3">
+                                <div class="col-sm-3 fw-bold">Name:</div>
+                                <div class="col-sm-9">${viewUser.name}</div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-sm-3 fw-bold">Email:</div>
+                                <div class="col-sm-9">${viewUser.email}</div>
+                            </div>
+
+                            <div class="row mb-3" if="${viewUser.bio != null}">
+                                <div class="col-sm-3 fw-bold">Bio:</div>
+                                <div class="col-sm-9">${viewUser.bio}</div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-sm-3 fw-bold">Role:</div>
+                                <div class="col-sm-9">
+                                    <span class="badge ${if (viewUser.isAdmin) "bg-danger" else "bg-secondary"}">
+                                        ${if (viewUser.isAdmin) "Administrator" else "User"}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-sm-3 fw-bold">Joined:</div>
+                                <div class="col-sm-9">${viewUser.createdAt.format(java.time.format.DateTimeFormatter.ofPattern("MMM dd, yyyy"))}</div>
+                            </div>
+
+                            <div class="row mb-3" if="${viewUser.lastLogin != null}">
+                                <div class="col-sm-3 fw-bold">Last Login:</div>
+                                <div class="col-sm-9">${viewUser.lastLogin?.format(java.time.format.DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm"))}</div>
+                            </div>
+                        </div>
+
+                        <hr if="${user.id == viewUser.id}">
+
+                        <form method="post" action="/logout" if="${user.id == viewUser.id}">
+                            <button type="submit" class="btn btn-outline-danger">
+                                <i class="bi bi-box-arrow-right"></i> Logout
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</base-layout>
+</html>

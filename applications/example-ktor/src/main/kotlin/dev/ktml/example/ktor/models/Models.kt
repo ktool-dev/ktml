@@ -7,9 +7,16 @@ data class User(
     val id: Int,
     val name: String,
     val email: String,
+    val passwordHash: String,
     val isAdmin: Boolean = false,
-    val avatarColor: String = "primary"
+    val avatarColor: String = "primary",
+    val bio: String? = null,
+    val createdAt: LocalDateTime,
+    val lastLogin: LocalDateTime? = null
 )
+
+@kotlinx.serialization.Serializable
+data class UserSession(val userId: Int)
 
 enum class Priority(val displayName: String, val badgeClass: String) {
     LOW("Low", "success"),
