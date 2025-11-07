@@ -70,7 +70,9 @@ fun Route.configureAuthRoutes() {
             path = "pages/register",
             model = mapOf(
                 "title" to "Register - Task Manager",
-                "error" to error
+                "error" to error,
+                "name" to null,
+                "email" to null
             )
         )
     }
@@ -86,24 +88,39 @@ fun Route.configureAuthRoutes() {
         // Validate input
         if (name.isBlank() || email.isBlank() || password.isBlank()) {
             call.respondKtml(
-                path = "fragments/auth/register-form",
-                model = mapOf("error" to "All fields are required")
+                path = "pages/register",
+                model = mapOf(
+                    "title" to "Register - Task Manager",
+                    "error" to "All fields are required",
+                    "name" to name,
+                    "email" to email
+                )
             )
             return@post
         }
 
         if (password != confirmPassword) {
             call.respondKtml(
-                path = "fragments/auth/register-form",
-                model = mapOf("error" to "Passwords do not match")
+                path = "pages/register",
+                model = mapOf(
+                    "title" to "Register - Task Manager",
+                    "error" to "Passwords do not match",
+                    "name" to name,
+                    "email" to email
+                )
             )
             return@post
         }
 
         if (password.length < 6) {
             call.respondKtml(
-                path = "fragments/auth/register-form",
-                model = mapOf("error" to "Password must be at least 6 characters")
+                path = "pages/register",
+                model = mapOf(
+                    "title" to "Register - Task Manager",
+                    "error" to "Password must be at least 6 characters",
+                    "name" to name,
+                    "email" to email
+                )
             )
             return@post
         }
@@ -112,8 +129,13 @@ fun Route.configureAuthRoutes() {
         val user = SampleData.createUser(name, email, password)
         if (user == null) {
             call.respondKtml(
-                path = "fragments/auth/register-form",
-                model = mapOf("error" to "Email already exists")
+                path = "pages/register",
+                model = mapOf(
+                    "title" to "Register - Task Manager",
+                    "error" to "Email already exists",
+                    "name" to name,
+                    "email" to email
+                )
             )
             return@post
         }
