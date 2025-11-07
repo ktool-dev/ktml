@@ -1,10 +1,10 @@
-val ktmlVersion = "0.1.3"
+val ktmlVersion = "0.1.4"
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
     kotlin("plugin.serialization") version "2.1.0"
     application
-    id("dev.ktml.gradle") version "0.1.3"
+    id("dev.ktml.gradle") version "0.1.4"
 }
 
 dependencies {

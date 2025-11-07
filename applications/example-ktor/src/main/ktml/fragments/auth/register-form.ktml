@@ -1,17 +1,17 @@
-<register-form fragment error="${String? = null}">
+<register-form fragment error="${String? = null}" name="${String? = null}" email="${String? = null}">
     <div class="alert alert-danger" if="${error != null}">
         <i class="bi bi-exclamation-triangle"></i> ${error}
     </div>
 
-    <form hx-post="/register" hx-swap="outerHTML" hx-target="body">
+    <form hx-post="/register" hx-target="#register-form" hx-swap="outerHTML">
         <div class="mb-3">
             <label for="name" class="form-label">Full Name</label>
-            <input type="text" class="form-control" id="name" name="name" required autofocus>
+            <input type="text" class="form-control" id="name" name="name" value="${name ?: ""}" required autofocus>
         </div>
 
         <div class="mb-3">
             <label for="email" class="form-label">Email address</label>
-            <input type="email" class="form-control" id="email" name="email" required>
+            <input type="email" class="form-control" id="email" name="email" value="${email ?: ""}" required>
         </div>
 
         <div class="mb-3">

@@ -70,9 +70,7 @@ fun Route.configureAuthRoutes() {
             path = "pages/register",
             model = mapOf(
                 "title" to "Register - Task Manager",
-                "error" to error,
-                "name" to null,
-                "email" to null
+                "error" to error
             )
         )
     }
@@ -88,9 +86,8 @@ fun Route.configureAuthRoutes() {
         // Validate input
         if (name.isBlank() || email.isBlank() || password.isBlank()) {
             call.respondKtml(
-                path = "pages/register",
+                path = "fragments/auth/register-form",
                 model = mapOf(
-                    "title" to "Register - Task Manager",
                     "error" to "All fields are required",
                     "name" to name,
                     "email" to email
@@ -101,9 +98,8 @@ fun Route.configureAuthRoutes() {
 
         if (password != confirmPassword) {
             call.respondKtml(
-                path = "pages/register",
+                path = "fragments/auth/register-form",
                 model = mapOf(
-                    "title" to "Register - Task Manager",
                     "error" to "Passwords do not match",
                     "name" to name,
                     "email" to email
@@ -114,9 +110,8 @@ fun Route.configureAuthRoutes() {
 
         if (password.length < 6) {
             call.respondKtml(
-                path = "pages/register",
+                path = "fragments/auth/register-form",
                 model = mapOf(
-                    "title" to "Register - Task Manager",
                     "error" to "Password must be at least 6 characters",
                     "name" to name,
                     "email" to email
@@ -129,9 +124,8 @@ fun Route.configureAuthRoutes() {
         val user = SampleData.createUser(name, email, password)
         if (user == null) {
             call.respondKtml(
-                path = "pages/register",
+                path = "fragments/auth/register-form",
                 model = mapOf(
-                    "title" to "Register - Task Manager",
                     "error" to "Email already exists",
                     "name" to name,
                     "email" to email
