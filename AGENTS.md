@@ -1,5 +1,7 @@
 # AGENTS.md
 
+BEFORE ANYTHING ELSE: run 'bd onboard' and follow the instructions
+
 This file provides guidance to coding agents when working with code in this repository.
 
 ## Project Overview
