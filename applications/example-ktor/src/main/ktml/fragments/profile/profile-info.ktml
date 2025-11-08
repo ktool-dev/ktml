@@ -1,0 +1,42 @@
+import dev.ktml.example.ktor.models.User
+
+<profile-info fragment user="$User">
+    <div class="row mb-3">
+        <div class="col-sm-3 fw-bold">Name:</div>
+        <div class="col-sm-9">${user.name}</div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-sm-3 fw-bold">Email:</div>
+        <div class="col-sm-9">${user.email}</div>
+    </div>
+
+    <div class="row mb-3" if="${user.bio != null}">
+        <div class="col-sm-3 fw-bold">Bio:</div>
+        <div class="col-sm-9">${user.bio}</div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-sm-3 fw-bold">Role:</div>
+        <div class="col-sm-9">
+            <span class="badge ${if (user.isAdmin) "bg-danger" else "bg-secondary"}">
+                ${if (user.isAdmin) "Administrator" else "User"}
+            </span>
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-sm-3 fw-bold">Joined:</div>
+        <div class="col-sm-9">${user.createdAt.format(java.time.format.DateTimeFormatter.ofPattern("MMM dd, yyyy"))}</div>
+    </div>
+
+    <div class="row mb-3" if="${user.lastLogin != null}">
+        <div class="col-sm-3 fw-bold">Last Login:</div>
+        <div class="col-sm-9">${user.lastLogin?.format(java.time.format.DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm"))}</div>
+    </div>
+
+    <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+        <i class="bi bi-check-circle"></i> Profile updated successfully!
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+</profile-info>

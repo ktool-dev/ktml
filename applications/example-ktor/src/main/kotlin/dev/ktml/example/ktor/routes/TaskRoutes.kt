@@ -3,6 +3,7 @@ package dev.ktml.example.ktor.routes
 import dev.ktml.example.ktor.data.SampleData
 import dev.ktml.example.ktor.models.Priority
 import dev.ktml.example.ktor.models.Status
+import dev.ktml.example.ktor.plugins.requireAuth
 import dev.ktml.ktor.respondKtml
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -12,12 +13,13 @@ import io.ktor.server.routing.*
 fun Route.configureTaskRoutes() {
     // Dashboard
     get("/") {
+        val user = call.requireAuth()
         val stats = SampleData.getStats()
         call.respondKtml(
             path = "pages/dashboard",
             model = mapOf(
                 "title" to "Dashboard - Task Manager",
-                "user" to SampleData.currentUser,
+                "user" to user,
                 "stats" to stats,
                 "todoTasks" to SampleData.getTasksByStatus(Status.TODO),
                 "inProgressTasks" to SampleData.getTasksByStatus(Status.IN_PROGRESS),
@@ -28,11 +30,12 @@ fun Route.configureTaskRoutes() {
 
     // All tasks page
     get("/tasks") {
+        val user = call.requireAuth()
         call.respondKtml(
             path = "pages/tasks",
             model = mapOf(
                 "title" to "All Tasks - Task Manager",
-                "user" to SampleData.currentUser,
+                "user" to user,
                 "tasks" to SampleData.tasks,
                 "users" to SampleData.users
             )
@@ -67,6 +70,7 @@ fun Route.configureTaskRoutes() {
 
     // Task detail page
     get("/tasks/{id}") {
+        val user = call.requireAuth()
         val taskId = call.parameters["id"]?.toIntOrNull()
         val task = taskId?.let { SampleData.getTaskById(it) }
 
@@ -79,7 +83,7 @@ fun Route.configureTaskRoutes() {
             path = "pages/task-detail",
             model = mapOf(
                 "title" to "${task.title} - Task Manager",
-                "user" to SampleData.currentUser,
+                "user" to user,
                 "task" to task
             )
         )

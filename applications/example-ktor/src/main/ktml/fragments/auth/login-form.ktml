@@ -1,0 +1,30 @@
+<login-form fragment error="${String? = null}">
+    <div class="alert alert-danger" if="${error != null}">
+        <i class="bi bi-exclamation-triangle"></i> ${error}
+    </div>
+
+    <form hx-post="/login" hx-target="#login-form" hx-swap="outerHTML">
+        <div class="mb-3">
+            <label for="email" class="form-label">Email address</label>
+            <input type="email" class="form-control" id="email" name="email" required autofocus>
+        </div>
+
+        <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control" id="password" name="password" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">
+            <i class="bi bi-box-arrow-in-right"></i> Sign In
+        </button>
+    </form>
+
+    <hr class="my-4">
+
+    <div class="text-center">
+        <p class="mb-0">
+            Don't have an account? 
+            <a href="/register" class="text-decoration-none">Sign up</a>
+        </p>
+    </div>
+</login-form>
