@@ -6,11 +6,11 @@ import java.time.LocalDateTime
 
 object SampleData {
     private var nextUserId = 5
-    
+
     // Default password for all users is "password123"
     val users = mutableListOf(
         User(
-            1, "Alice Johnson", "alice@example.com",
+            1, "Alice Johnson", "test@test.com",
             passwordHash = PasswordHash.hashPassword("password123"),
             isAdmin = true, avatarColor = "primary",
             createdAt = LocalDateTime.now().minusMonths(6)
@@ -42,7 +42,7 @@ object SampleData {
         if (users.any { it.email.equals(email, ignoreCase = true) }) {
             return null
         }
-        
+
         val user = User(
             id = nextUserId++,
             name = name,
@@ -222,11 +222,11 @@ object SampleData {
     ): List<Task> {
         return tasks.filter { task ->
             (status == null || task.status == status) &&
-            (priority == null || task.priority == priority) &&
-            (assigneeId == null || task.assignee?.id == assigneeId) &&
-            (searchQuery.isNullOrBlank() ||
-                task.title.contains(searchQuery, ignoreCase = true) ||
-                task.description.contains(searchQuery, ignoreCase = true))
+                    (priority == null || task.priority == priority) &&
+                    (assigneeId == null || task.assignee?.id == assigneeId) &&
+                    (searchQuery.isNullOrBlank() ||
+                            task.title.contains(searchQuery, ignoreCase = true) ||
+                            task.description.contains(searchQuery, ignoreCase = true))
         }
     }
 

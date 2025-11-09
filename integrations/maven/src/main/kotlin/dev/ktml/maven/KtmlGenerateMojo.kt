@@ -20,9 +20,9 @@ class KtmlGenerateMojo : AbstractMojo() {
      */
     @Parameter(defaultValue = $$"${project}", readonly = true, required = true)
     private lateinit var project: MavenProject
-    
+
     private val templateDir = "src/main/ktml"
-    private val outputDir = "ktml/generated"
+    private val outputDir = "ktml/main"
 
     override fun execute() {
         try {

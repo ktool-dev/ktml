@@ -8,7 +8,6 @@ import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.cli.jvm.K2JVMCompiler
 import org.jetbrains.kotlin.config.Services
 import java.io.File
-import java.net.URLClassLoader
 import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.io.path.createDirectories
@@ -19,7 +18,6 @@ object KotlinCompile {
      *
      * @param rootDir Root directory to search for .kt files
      * @param outputDir Where .class files go
-     * @param cacheDir Optional cache directory for incremental compilation (enables incremental if provided)
      */
     fun compileFilesToDir(
         rootDir: Path,
@@ -37,8 +35,6 @@ object KotlinCompile {
             noReflect = true
             this.jvmTarget = jvmTarget
             this.noStdlib = true
-            moduleName = "ktml-module"
-            incrementalCompilation = true
         }
 
         val messages = mutableListOf<CompilerError>()
@@ -76,18 +72,6 @@ private fun getCurrentJvmTarget() = System.getProperty("java.specification.versi
         version.startsWith("1.") -> version.substring(2)
         else -> version
     }
-}
-
-
-/**
- * Utility: quick classloader from dirs/jars to load compiled code immediately.
- *
- * @param paths Directories or JAR files to add to the classpath
- * @param parent Optional parent classloader (default: system classloader)
- */
-fun newURLClassLoader(vararg paths: Path, parent: ClassLoader = ClassLoader.getSystemClassLoader()): ClassLoader {
-    val urls = paths.map { it.toUri().toURL() }.toTypedArray()
-    return URLClassLoader.newInstance(urls, parent)
 }
 
 /**

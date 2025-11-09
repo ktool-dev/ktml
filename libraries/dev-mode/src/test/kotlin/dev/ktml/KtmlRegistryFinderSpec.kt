@@ -5,11 +5,8 @@ import io.kotest.matchers.shouldBe
 
 class KtmlRegistryFinderSpec : BddSpec({
     "can load dynamic registry" {
-        Given
-        val basePath = ""
-
         When
-        val result = findKtmlRegistry(DEFAULT_PACKAGE, basePath)
+        val result = findKtmlRegistry(DEFAULT_PACKAGE)
 
         Then
         result::class shouldBe KtmlDynamicRegistry::class

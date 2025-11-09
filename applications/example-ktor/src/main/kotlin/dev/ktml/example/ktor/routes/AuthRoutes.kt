@@ -5,7 +5,6 @@ import dev.ktml.example.ktor.models.UserSession
 import dev.ktml.example.ktor.plugins.getCurrentUser
 import dev.ktml.ktor.respondKtml
 import io.ktor.http.*
-import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -20,14 +19,7 @@ fun Route.configureAuthRoutes() {
             return@get
         }
 
-        val error = call.request.queryParameters["error"]
-        call.respondKtml(
-            path = "pages/login",
-            model = mapOf(
-                "title" to "Login - Task Manager",
-                "error" to error
-            )
-        )
+        call.respondKtml(path = "pages/login")
     }
 
     // POST /login - Process login
@@ -59,20 +51,12 @@ fun Route.configureAuthRoutes() {
 
     // GET /register - Show registration page
     get("/register") {
-        val currentUser = call.getCurrentUser()
-        if (currentUser != null) {
+        if (call.getCurrentUser() != null) {
             call.respondRedirect("/")
             return@get
         }
 
-        val error = call.request.queryParameters["error"]
-        call.respondKtml(
-            path = "pages/register",
-            model = mapOf(
-                "title" to "Register - Task Manager",
-                "error" to error
-            )
-        )
+        call.respondKtml(path = "pages/register")
     }
 
     // POST /register - Process registration

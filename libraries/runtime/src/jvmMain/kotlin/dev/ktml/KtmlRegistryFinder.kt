@@ -12,77 +12,48 @@ interface KtmlRegistryFactory {
     fun create(templateDir: String, templatePackage: String, outputDir: String): KtmlRegistry
 }
 
-fun findKtmlRegistry(templatePackage: String, basePath: String = determineBasePath()): KtmlRegistry {
+fun findKtmlRegistry(templatePackage: String): KtmlRegistry {
     val registryFactory = loadDynamicRegistryFactory() ?: return findRegistryImpl(templatePackage)
 
-    val ktmlDir = breadthFirstSearchForKtmlDir(basePath)
+    val projectDir = determineProjectRoot()
+    val ktmlDir = determineKtmlDir(projectDir)
 
     log.info { "Running with ktml directory: $ktmlDir" }
 
-    return registryFactory.create(ktmlDir, templatePackage, determineOutputDir(ktmlDir))
+    val outputDir = determineOutputDir(projectDir, ktmlDir)
+
+    return registryFactory.create(ktmlDir.absolutePath, templatePackage, outputDir.absolutePath)
 }
 
-/**
- * This will try to determine where the ktml files are located. They should be in a directory like src/main/ktml
- * or maybe src/commonMain/ktml
- */
-private fun determineBasePath(): String {
-    val workingDir = System.getProperty("user.dir")
-    val projectPath = System.getProperty("java.class.path").split(pathSeparator).find { it.startsWith(workingDir) }
+private fun determineKtmlDir(projectDir: File): File =
+    projectDir.findExisting(listOf("src", "main", "ktml"), listOf("src", "jvmMain", "ktml")) ?: projectDir
 
-    if (projectPath?.contains(workingDir) == true) {
-        return workingDir + projectPath.substringAfter(workingDir)
-            .substringBefore("${separator}build$separator")
+private fun File.findExisting(vararg options: List<String>): File? =
+    options.map { resolve(it.joinToString(separator)) }.find { it.exists() && it.isDirectory }
+
+
+private fun determineProjectRoot(): File {
+    val buildFolder = "${separator}build${separator}"
+    val targetFolder = "${separator}target${separator}"
+
+    // Try to find the actual project directory by looking at the classpath
+    // Look for a build/classes or target/classes directory in the classpath
+    val classpath = System.getProperty("java.class.path").split(pathSeparator)
+    val projectRoot = classpath.firstOrNull {
+        it.contains("${buildFolder}classes") || it.contains("${targetFolder}classes")
+    }?.let {
+        if (it.contains(buildFolder)) it.substringBefore(buildFolder) else it.substringBefore(targetFolder)
     }
 
-    return workingDir
+    // Fall back to working directory
+    return File(projectRoot ?: System.getProperty("user.dir"))
 }
 
-private fun determineOutputDir(ktmlDir: String): String {
-    // Usually this is in a src/main/ktml directory. If there is a build or target directory near, use that.
-    if (ktmlDir.contains("/src/")) {
-        val dir = File(ktmlDir.substringBeforeLast("/src/"))
-
-        val buildDir = dir.resolve("build")
-        if (buildDir.exists()) return buildDir.resolve("ktml").absolutePath
-
-        val targetDir = dir.resolve("target")
-        if (targetDir.exists()) return targetDir.resolve("ktml").absolutePath
-    }
-
-    return createTempDirectory().toString()
-}
-
-private fun breadthFirstSearchForKtmlDir(basePath: String): String {
-    val userDir = File(basePath)
-
-    val baseDir = if (userDir.name == "build") {
-        userDir.parentFile
-    } else {
-        userDir
-    }
-
-    val queue = ArrayDeque<File>()
-
-    val srcDir = baseDir.resolve("src")
-    queue.add(if (srcDir.exists()) srcDir else baseDir)
-
-    while (queue.isNotEmpty()) {
-        val current = queue.removeFirst()
-        val files = current.listFiles() ?: continue
-
-        val ktmlDir = files.find { it.isDirectory && it.name == "ktml" }
-        if (ktmlDir != null) return ktmlDir.absolutePath
-
-        for (file in files) {
-            if (file.isDirectory) {
-                queue.add(file)
-            }
-        }
-    }
-
-    return baseDir.absolutePath
-}
+private fun determineOutputDir(projectDir: File, ktmlDir: File) = projectDir.findExisting(
+    listOf("build", "ktml", "main"),
+    listOf("build", "ktml", "jvmMain"),
+    listOf("target", "ktml", "main")
+) ?: createTempDirectory().toFile()
 
 private fun findRegistryImpl(templatePackage: String): KtmlRegistry = try {
     val type = Class.forName("$templatePackage.KtmlRegistry")

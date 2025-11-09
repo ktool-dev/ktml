@@ -1,10 +1,14 @@
 package dev.ktml
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.io.File.separator
 import java.nio.file.*
 import java.nio.file.attribute.FileTime
+
+private val log = KotlinLogging.logger {}
 
 class KtmlFileWatcher(dir: String, val onChange: (String, Boolean) -> Unit) {
     private val dirPath = Paths.get(dir)
@@ -49,6 +53,7 @@ class KtmlFileWatcher(dir: String, val onChange: (String, Boolean) -> Unit) {
     }
 
     private fun callOnChange(file: WatchedFile, itemDeleted: Boolean) = runCatching {
+        log.info { "Change detected for ${file.path.substringAfter(dirPath.toString()).removePrefix(separator)}." }
         onChange(file.path, itemDeleted)
     }
 

@@ -14,16 +14,9 @@ open class KtmlPlugin : Plugin<Project> {
 
         project.plugins.withId("org.jetbrains.kotlin.jvm") {
             project.afterEvaluate {
-                val isBuildTask = project.gradle.startParameter.taskNames.any {
-                    it.contains("build") || it == ":${project.name}:build"
-                }
-
                 project.extensions.findByType(KotlinJvmProjectExtension::class.java)?.apply {
-                    if (isBuildTask) {
-                        setupBuild(project, extension.moduleName, extension.templatePackage, sourceSets.toList())
-                    } else {
-                        configureDevelopmentOnly(project)
-                    }
+                    setupBuild(project, extension.moduleName, extension.templatePackage, sourceSets.toList())
+                    configureDevelopmentOnly(project)
                 }
             }
         }
@@ -32,6 +25,7 @@ open class KtmlPlugin : Plugin<Project> {
             project.afterEvaluate {
                 project.extensions.getByType(KotlinMultiplatformExtension::class.java).apply {
                     setupBuild(project, extension.moduleName, extension.templatePackage, sourceSets.toList())
+                    configureDevelopmentOnlyKmp(project)
                 }
             }
         }
@@ -80,10 +74,10 @@ open class KtmlPlugin : Plugin<Project> {
     ) {
         val outputDir = project.layout.buildDirectory.asFile.get().resolve("ktml")
 
-        val dirSets = sourceSets.mapNotNull { src ->
+        val sets = sourceSets.mapNotNull { src ->
             val ktmlDir = src.kotlin.srcDirs.firstOrNull()?.resolveSibling("ktml")?.takeIf { it.exists() }
             if (ktmlDir != null) {
-                SourceInfo(src, ktmlDir.absolutePath, outputDir.resolve(src.name).absolutePath)
+                src to SourceInfo(ktmlDir.absolutePath, outputDir.resolve(src.name).absolutePath)
             } else {
                 null
             }
@@ -92,15 +86,13 @@ open class KtmlPlugin : Plugin<Project> {
         val generateTask = project.tasks.register("generateKtml", KtmlGenerateTask::class.java) {
             it.moduleName = moduleName
             it.templatePackage = templatePackage
-            it.dirSets = dirSets
+            it.dirSets = sets.map { it.second }
         }
 
         val errorCollectorProvider = project.getErrorCollector()
 
         project.afterEvaluate {
-            dirSets.forEach {
-                it.sourceSet.kotlin.srcDir(it.outputDir)
-            }
+            sets.forEach { it.first.kotlin.srcDir(it.second.outputDir) }
 
             // Make all Kotlin compilation tasks depend on generateKtml
             project.tasks.matching { task ->
@@ -112,7 +104,6 @@ open class KtmlPlugin : Plugin<Project> {
                 compileTask.logging.addStandardErrorListener(errorCollector)
                 compileTask.logging.addStandardOutputListener(errorCollector)
 
-                // Ensure the build service is used by this task
                 compileTask.usesService(errorCollectorProvider)
             }
         }

@@ -30,6 +30,7 @@ dependencies {
     implementation(libs.kotlin.compiler.embeddable)
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlin.reflect)
+    implementation(libs.kotlin.logging)
 
     testImplementation(kotlin("test"))
     testImplementation(libs.kotlin.test)

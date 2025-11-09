@@ -5,7 +5,6 @@ import dev.ktml.util.CompileException
 import dev.ktml.util.CompileExceptionRegistry
 import dev.ktml.util.CompilerErrorResolver
 import java.io.File
-import java.net.URLClassLoader
 import kotlin.io.path.createTempDirectory
 
 object KtmlDynamicRegistryFactory : KtmlRegistryFactory {
@@ -24,8 +23,8 @@ class KtmlDynamicRegistry(
     outputDir: String = createTempDirectory().toString(),
 ) : KtmlRegistry {
     private var _templateRegistry: KtmlRegistry? = null
-    private val compileDir: File = File(outputDir).resolve("compiled")
-    private val generatedDir: File = File(outputDir).resolve("generated")
+    private val generatedDir: File = File(outputDir)
+    private val compileDir: File = generatedDir.parentFile.resolve("classes")
 
     override operator fun get(path: String): Content? = ktmlRegistry[path]
     override val tags: List<TagDefinition> get() = ktmlRegistry.tags
@@ -57,7 +56,7 @@ class KtmlDynamicRegistry(
             removed.forEach { File(generatedDir, it.codeFile).delete() }
             // We have to rebuild everything to make sure the removal didn't break anything
             processor.clear()
-            _templateRegistry = loadTemplateRegistry()
+            _templateRegistry = loadTemplateRegistry(false)
         } else {
             val templates = processor.processFile(file, templateDir)
             templates.forEach { processor.generateTemplateCodeFile(it) }
@@ -69,11 +68,17 @@ class KtmlDynamicRegistry(
         }
     }
 
-    private fun loadTemplateRegistry(): KtmlRegistry {
+    private fun loadTemplateRegistry(onlyIfNonExisting: Boolean = true): KtmlRegistry {
         generatedDir.mkdirs()
         processor.processRootDirectories(listOf(templateDir))
-        processor.generateTemplateCode()
-        return compileTemplates()
+
+        // If the registry is already there, then the build must have already generated the code, so we don't need to
+        return if (onlyIfNonExisting && File(generatedDir, "KtmlRegistry.kt").exists()) {
+            loadRegistry()
+        } else {
+            processor.generateTemplateCode()
+            compileTemplates()
+        }
     }
 
     private fun compileTemplates(): KtmlRegistry {
@@ -84,6 +89,10 @@ class KtmlDynamicRegistry(
             return CompileExceptionRegistry(exception)
         }
 
+        return loadRegistry()
+    }
+
+    private fun loadRegistry(): DualKtmlRegistry {
         val className = "$basePackageName.KtmlRegistry"
         try {
             val classLoader = createReloadableClassLoader(listOf(compileDir))
@@ -98,8 +107,8 @@ class KtmlDynamicRegistry(
     }
 
     private fun createReloadableClassLoader(classpath: List<File>): ClassLoader =
-        URLClassLoader(
-            classpath.plus(defaultClasspath().map { it.toFile() }).map { it.toURI().toURL() }.toTypedArray(),
+        ChildFirstClassLoader(
+            classpath.map { it.toURI().toURL() }.toTypedArray(),
             Thread.currentThread().contextClassLoader
         )
 
