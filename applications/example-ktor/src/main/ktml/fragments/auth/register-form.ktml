@@ -1,0 +1,41 @@
+<register-form fragment error="${String? = null}" name="${String? = null}" email="${String? = null}">
+    <div class="alert alert-danger" if="${error != null}">
+        <i class="bi bi-exclamation-triangle"></i> ${error}
+    </div>
+
+    <form hx-post="/register" hx-target="#register-form" hx-swap="outerHTML">
+        <div class="mb-3">
+            <label for="name" class="form-label">Full Name</label>
+            <input type="text" class="form-control" id="name" name="name" value="${name ?: ""}" required autofocus>
+        </div>
+
+        <div class="mb-3">
+            <label for="email" class="form-label">Email address</label>
+            <input type="email" class="form-control" id="email" name="email" value="${email ?: ""}" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control" id="password" name="password" required minlength="6">
+            <div class="form-text">At least 6 characters</div>
+        </div>
+
+        <div class="mb-3">
+            <label for="confirmPassword" class="form-label">Confirm Password</label>
+            <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">
+            <i class="bi bi-person-plus"></i> Create Account
+        </button>
+    </form>
+
+    <hr class="my-4">
+
+    <div class="text-center">
+        <p class="mb-0">
+            Already have an account? 
+            <a href="/login" class="text-decoration-none">Sign in</a>
+        </p>
+    </div>
+</register-form>

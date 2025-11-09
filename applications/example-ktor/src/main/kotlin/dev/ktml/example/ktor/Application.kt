@@ -1,5 +1,6 @@
 package dev.ktml.example.ktor
 
+import dev.ktml.example.ktor.plugins.configureSessions
 import dev.ktml.example.ktor.routes.configureAdminRoutes
 import dev.ktml.example.ktor.routes.configureAuthRoutes
 import dev.ktml.example.ktor.routes.configureProfileRoutes
@@ -12,6 +13,7 @@ import io.ktor.server.routing.*
 
 fun main() {
     embeddedServer(CIO, port = 8080, host = "0.0.0.0") {
+        configureSessions()
         install(KtmlPlugin)
         configureRouting()
     }.start(wait = true)
