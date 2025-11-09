@@ -35,6 +35,7 @@ class CustomTagHandler(context: ElementHandlerContext) : BaseTagHandler(context)
         val templateParams = customTag.parameters
         val remainingChildren = tag.children.toMutableList()
         val lastParam = templateParams.lastOrNull()
+        var templateCallEnded = false
 
         if (templateParams.isEmpty()) {
             contentBuilder.deleteLastNewLine()
@@ -63,6 +64,7 @@ class CustomTagHandler(context: ElementHandlerContext) : BaseTagHandler(context)
                 if (!content.isNullOrEmpty()) {
                     if (param == lastParam) {
                         contentBuilder.endTemplateCallWithContent()
+                        templateCallEnded = true
                         contentBuilder.startEmbeddedContent()
                         generateChildContent(content)
                         contentBuilder.endEmbeddedContent()
@@ -92,7 +94,7 @@ class CustomTagHandler(context: ElementHandlerContext) : BaseTagHandler(context)
             }
         }
 
-        if (lastParam?.isContent != true) {
+        if (!templateCallEnded) {
             contentBuilder.endTemplateCall()
         }
     }

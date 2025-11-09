@@ -20,7 +20,12 @@ class ContentGeneratorSpec : BddSpec({
     $$"""
         <tag-with-content content="$Content">
             <div>${content}</div>
-        </tag>
+        </tag-with-content>
+    """.parse()
+    $$"""
+        <tag-with-optional-content content="${Content = null}">
+            <div>${content}</div>
+        </tag-with-optional-content>
     """.parse()
     $$"""
         <if test="$Boolean" content="$Content" else="${Content? = null}">
@@ -594,6 +599,27 @@ class ContentGeneratorSpec : BddSpec({
              {
                 set("something", "value")
                 set("another", "value")
+            }
+        """.trimIndent()
+    }
+
+    "tag with optional content renders correctly" {
+        Given
+        val template = $$"""
+            <my-tag>
+                <tag-with-optional-content />
+                <div>anything</div>
+            </my-tag>
+        """.parse()
+
+        When
+        val result = ContentGenerator(templates, template).generate()
+
+        Then
+        result.body.render() shouldBe """
+             {
+                writeTagWithOptionalContent()
+                raw(TEMPLATE_HTML, 0, 19)
             }
         """.trimIndent()
     }
