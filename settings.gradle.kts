@@ -33,6 +33,7 @@ application("example-spring")
 application("example-http4k")
 application("example-ktor-native")
 application("example-js")
+application("example-wasm-js")
 
 fun library(name: String) = includeType("libraries", name)
 fun integration(name: String) = includeType("integrations", name)
