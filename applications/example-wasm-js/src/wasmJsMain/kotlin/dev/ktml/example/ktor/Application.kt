@@ -25,7 +25,7 @@ suspend fun renderApp() {
 
     root.innerHTML = ktml.renderPage(
         path = "index",
-        model = mapOf("title" to "KTML + Kotlin/JS Example")
+        model = mapOf("title" to "KTML + Kotlin/WasmJS Example")
     )
 
     // Add click handler for user links
