@@ -2,11 +2,11 @@
 
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 
-val ktmlVersion = "0.1.3"
+val ktmlVersion = "0.1.7"
 
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
-    id("dev.ktml.gradle") version "0.1.3"
+    id("dev.ktml.gradle") version "0.1.7"
 }
 
 kotlin {
@@ -31,7 +31,7 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation("dev.ktml:ktml-runtime:${ktmlVersion}")
+            implementation(project(":runtime"))
         }
 
         wasmJsMain.dependencies {
