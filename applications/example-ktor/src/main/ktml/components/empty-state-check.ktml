@@ -1,0 +1,4 @@
+<empty-state-check isEmpty="$Boolean" emptyIcon="$String" emptyMessage="$String" content="$Content">
+    <empty-state if="$isEmpty" iconName="$emptyIcon" message="$emptyMessage"/>
+    ${ if(!isEmpty) content else null }
+</empty-state-check>

@@ -64,6 +64,11 @@ class Context(
     fun pathParam(key: String) = pathParams[key]
     fun queryParam(key: String) = queryParams[key]?.firstOrNull()
 
+    fun If(check: Boolean, content: Content?, elseValue: Content? = null): Content? = if (check) content else elseValue
+
+    fun If(check: Boolean, value: String?, elseValue: String? = null): String? =
+        if (check) value?.takeIf { it.isNotEmpty() } else elseValue?.takeIf { it.isNotEmpty() }
+
     fun If(check: Boolean, value: Any?, elseValue: Any? = null): String? =
         if (check) value?.toString()?.takeIf { it.isNotEmpty() } else elseValue?.toString()?.takeIf { it.isNotEmpty() }
 

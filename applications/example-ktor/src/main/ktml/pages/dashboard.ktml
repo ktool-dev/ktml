@@ -32,42 +32,33 @@ import dev.ktml.example.ktor.models.TaskStats
         <div class="row">
             <!-- To Do Column -->
             <div class="col-md-4 mb-4">
-                <div class="card">
-                    <div class="card-header bg-secondary text-white">
+                <card headerClass="bg-secondary text-white">
+                    <header>
                         <h5 class="mb-0">
                             <icon name="circle"/>
                             To Do
                         </h5>
-                    </div>
-                    <div class="card-body">
-                        <div if="${todoTasks.isEmpty()}">
-                            <empty-state iconName="inbox" message="No tasks to do"/>
-                        </div>
-                        <div if="${!todoTasks.isEmpty()}">
-                            <task-card task="${task}" each="${task in todoTasks}"/>
-                        </div>
-                    </div>
-                </div>
+                    </header>
+                    <empty-state-check isEmpty="${todoTasks.isEmpty()}" emptyIcon="inbox" emptyMessage="No tasks to do">
+                        <task-card task="${task}" each="${task in todoTasks}"/>
+                    </empty-state-check>
+                </card>
             </div>
 
             <!-- In Progress Column -->
             <div class="col-md-4 mb-4">
-                <div class="card">
-                    <div class="card-header bg-primary text-white">
+                <card headerClass="bg-primary text-white">
+                    <header>
                         <h5 class="mb-0">
                             <icon name="arrow-repeat"/>
                             In Progress
                         </h5>
-                    </div>
-                    <div class="card-body">
-                        <div if="${inProgressTasks.isEmpty()}">
-                            <empty-state iconName="hourglass-split" message="No tasks in progress"/>
-                        </div>
-                        <div if="${!inProgressTasks.isEmpty()}">
-                            <task-card task="${task}" each="${task in inProgressTasks}"/>
-                        </div>
-                    </div>
-                </div>
+                    </header>
+                    <empty-state-check isEmpty="${inProgressTasks.isEmpty()}" emptyIcon="hourglass-split"
+                                       emptyMessage="No tasks in progress">
+                        <task-card task="${task}" each="${task in inProgressTasks}"/>
+                    </empty-state-check>
+                </card>
             </div>
 
             <!-- Done Column -->
@@ -79,12 +70,10 @@ import dev.ktml.example.ktor.models.TaskStats
                             Done
                         </h5>
                     </header>
-                    <div if="${doneTasks.isEmpty()}">
-                        <empty-state iconName="check2-all" message="No completed tasks"/>
-                    </div>
-                    <div if="${!doneTasks.isEmpty()}">
+                    <empty-state-check isEmpty="${doneTasks.isEmpty()}" emptyIcon="check2-all"
+                                       emptyMessage="No completed tasks">
                         <task-card task="${task}" each="${task in doneTasks}"/>
-                    </div>
+                    </empty-state-check>
                 </card>
             </div>
         </div>
