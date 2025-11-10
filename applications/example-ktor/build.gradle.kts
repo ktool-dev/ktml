@@ -1,16 +1,14 @@
-val ktmlVersion = "0.1.4"
-
 plugins {
     alias(libs.plugins.kotlin.jvm)
     kotlin("plugin.serialization") version "2.1.0"
     application
-    id("dev.ktml.gradle") version "0.1.4"
+    alias(libs.plugins.ktml)
 }
 
 dependencies {
-    implementation("dev.ktml:ktml-runtime:$ktmlVersion")
-    implementation("dev.ktml:ktml-ktor:$ktmlVersion")
-    developmentOnly("dev.ktml:ktml-dev-mode:$ktmlVersion")
+    implementation(libs.ktml.runtime)
+    developmentOnly(libs.ktml.dev.mode)
+    implementation(libs.ktml.ktor)
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.ktor.server.core)
     implementation(libs.ktor.server.cio)

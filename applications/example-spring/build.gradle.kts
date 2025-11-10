@@ -1,15 +1,13 @@
-val ktmlVersion = "0.1.3"
-
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.spring.boot)
-    id("dev.ktml.gradle") version "0.1.3"
+    alias(libs.plugins.ktml)
 }
 
 dependencies {
-    implementation("dev.ktml:ktml-runtime:$ktmlVersion")
-    developmentOnly("dev.ktml:ktml-dev-mode:$ktmlVersion")
-    implementation("dev.ktml:ktml-spring:$ktmlVersion")
+    implementation(libs.ktml.runtime)
+    developmentOnly(libs.ktml.dev.mode)
+    implementation(libs.ktml.spring)
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.spring.boot.starter.web)
     implementation(libs.spring.webmvc)

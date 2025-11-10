@@ -1,15 +1,13 @@
-val ktmlVersion = "0.1.3"
-
 plugins {
     alias(libs.plugins.kotlin.jvm)
     application
-    id("dev.ktml.gradle") version "0.1.3"
+    alias(libs.plugins.ktml)
 }
 
 dependencies {
-    implementation("dev.ktml:ktml-runtime:$ktmlVersion")
-    developmentOnly("dev.ktml:ktml-dev-mode:$ktmlVersion")
-    implementation("dev.ktml:ktml-http4k:$ktmlVersion")
+    implementation(libs.ktml.runtime)
+    developmentOnly(libs.ktml.dev.mode)
+    implementation(libs.ktml.http4k)
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.http4k.core)
     implementation(libs.http4k.server.jetty)

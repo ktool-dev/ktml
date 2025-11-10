@@ -22,6 +22,7 @@ mockk = "1.14.6"
 vanniktechMavenPublish = "0.34.0"
 dokka = "2.1.0"
 gradle-publish = "2.0.0"
+ktml = "0.1.8"
 
 [libraries]
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
@@ -55,6 +56,14 @@ jakarta-servlet-api = { module = "jakarta.servlet:jakarta.servlet-api", version.
 kotlinx-browser = { module = "org.jetbrains.kotlinx:kotlinx-browser", version.ref = "kotlinx-browser" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 
+# For the example applications
+ktml-runtime = { module = "dev.ktml:ktml-runtime", version.ref = "ktml" }
+ktml-dev-mode = { module = "dev.ktml:ktml-dev-mode", version.ref = "ktml" }
+ktml-http4k = { module = "dev.ktml:ktml-http4k", version.ref = "ktml" }
+ktml-ktor = { module = "dev.ktml:ktml-ktor", version.ref = "ktml" }
+ktml-spring = { module = "dev.ktml:ktml-spring", version.ref = "ktml" }
+ktml-javalin = { module = "dev.ktml:ktml-javalin", version.ref = "ktml" }
+
 [plugins]
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
@@ -64,3 +73,4 @@ spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 vanniktech-mavenPublish = { id = "com.vanniktech.maven.publish", version.ref = "vanniktechMavenPublish" }
 gradle-publish = { id = "com.gradle.plugin-publish", version.ref = "gradle-publish" }
+ktml = { id = "dev.ktml.gradle", version.ref = "ktml" }
