@@ -17,6 +17,7 @@ maven-plugin-tools = "3.9.0"
 spring = "6.2.11"
 spring-boot = "3.4.1"
 jakarta-servlet = "6.0.0"
+kotlinx-browser = "0.5.0"
 mockk = "1.14.6"
 vanniktechMavenPublish = "0.34.0"
 dokka = "2.1.0"
@@ -51,6 +52,7 @@ spring-webmvc = { module = "org.springframework:spring-webmvc", version.ref = "s
 spring-boot-starter-web = { module = "org.springframework.boot:spring-boot-starter-web", version.ref = "spring-boot" }
 spring-boot-autoconfigure = { module = "org.springframework.boot:spring-boot-autoconfigure", version.ref = "spring-boot" }
 jakarta-servlet-api = { module = "jakarta.servlet:jakarta.servlet-api", version.ref = "jakarta-servlet" }
+kotlinx-browser = { module = "org.jetbrains.kotlinx:kotlinx-browser", version.ref = "kotlinx-browser" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 
 [plugins]

@@ -1,5 +1,8 @@
+@file:OptIn(ExperimentalWasmDsl::class)
+
 import com.vanniktech.maven.publish.JavadocJar
 import com.vanniktech.maven.publish.KotlinMultiplatform
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
@@ -30,6 +33,10 @@ kotlin {
     applyDefaultHierarchyTemplate()
 
     js(IR) {
+        browser()
+        nodejs()
+    }
+    wasmJs {
         browser()
         nodejs()
     }
