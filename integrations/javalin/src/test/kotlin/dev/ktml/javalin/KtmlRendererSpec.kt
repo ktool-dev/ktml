@@ -21,6 +21,7 @@ class KtmlRendererSpec : BddSpec({
     JavalinKtml.init(object : KtmlRegistry {
         override operator fun get(path: String): Content? = templates[path]
         override val tags: List<TagDefinition> get() = tags
+        override val paths: List<String> get() = templates.keys.toList()
     })
     val ctx = mockk<io.javalin.http.Context>()
     val out = StringOutputStream()

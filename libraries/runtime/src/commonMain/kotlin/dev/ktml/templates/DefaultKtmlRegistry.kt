@@ -11,6 +11,7 @@ object DefaultKtmlRegistry : KtmlRegistry {
     private val templates: Map<String, Content> = mapOf(
         "compile-exception" to { writeCompileException() },
     )
+    override val paths: List<String> = templates.keys.toList()
 
     override val tags: List<TagDefinition> = listOf(
         TagDefinition(

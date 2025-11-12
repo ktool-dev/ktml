@@ -109,11 +109,13 @@ class KtmlRegistryGeneratorSpec : BddSpec({
         Then
         result shouldContain "import dev.ktml.templates.components.writeMyPage as writeComponentsMyPage"
         result shouldContain """
-    override operator fun get(path: String): Content? = templates[path]
-
     private val templates: Map<String, Content> = mapOf(
         "components/my-page" to { writeComponentsMyPage() },
     )
+
+    override val paths: List<String> = templates.keys.toList()
+
+    override operator fun get(path: String): Content? = templates[path]
         """.trim()
     }
 

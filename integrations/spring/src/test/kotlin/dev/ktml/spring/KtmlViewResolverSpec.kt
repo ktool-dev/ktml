@@ -23,6 +23,7 @@ class KtmlViewResolverSpec : BddSpec({
     val resolver = KtmlViewResolver(DEFAULT_PACKAGE, object : KtmlRegistry {
         override operator fun get(path: String): Content? = templates[path]
         override val tags: List<TagDefinition> get() = tags
+        override val paths: List<String> get() = templates.keys.toList()
     })
     val local = Locale.US
     val request = mockk<HttpServletRequest>()

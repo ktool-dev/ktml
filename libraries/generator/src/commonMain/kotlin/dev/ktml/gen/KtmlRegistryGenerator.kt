@@ -19,14 +19,6 @@ fun createKtmlRegistry(basePackageName: String, templates: Templates) = KotlinFi
     +Object("KtmlRegistry") {
         +SuperType("KtmlRegistry")
 
-        +Function(name = "get", returnType = Type("Content?")) {
-            +Modifier.Override
-            +Modifier.Operator
-            
-            +Parameter(name = "path", type = StringType)
-            body = ExpressionBody("templates[path]")
-        }
-
         +Property(
             name = "templates",
             type = Type("Map", typeArguments = listOf(TypeArgument("String"), TypeArgument("Content")))
@@ -43,6 +35,19 @@ fun createKtmlRegistry(basePackageName: String, templates: Templates) = KotlinFi
                 trimEnd()
                 newLine(")")
             }
+        }
+
+        +Property(name = "paths", type = Type("List<String>")) {
+            +Modifier.Override
+            initializer = ExpressionBody("templates.keys.toList()")
+        }
+
+        +Function(name = "get", returnType = Type("Content?")) {
+            +Modifier.Override
+            +Modifier.Operator
+
+            +Parameter(name = "path", type = StringType)
+            body = ExpressionBody("templates[path]")
         }
 
         +Property(name = "tags", type = Type("List", typeArguments = listOf(TypeArgument("TagDefinition")))) {

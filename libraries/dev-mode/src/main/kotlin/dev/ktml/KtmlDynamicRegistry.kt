@@ -28,6 +28,7 @@ class KtmlDynamicRegistry(
 
     override operator fun get(path: String): Content? = ktmlRegistry[path]
     override val tags: List<TagDefinition> get() = ktmlRegistry.tags
+    override val paths: List<String> get() = ktmlRegistry.paths
 
     private val processor = KtmlProcessor(outputDirectory = generatedDir.absolutePath, removeContentComments = false)
 

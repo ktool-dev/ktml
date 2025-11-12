@@ -20,4 +20,6 @@ class CompileExceptionRegistry(val exception: CompileException) : KtmlRegistry {
     }
 
     override val tags: List<TagDefinition> = listOf()
+    override val paths: List<String> = listOf()
+    override fun hasPath(path: String) = true
 }
