@@ -1,1 +1,2 @@
-java temurin-jre-22.0.2+9
+java zulu-24.32.13.0
+gradle 9.2.0
