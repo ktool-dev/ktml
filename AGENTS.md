@@ -10,6 +10,9 @@ KTML is a Kotlin Multiplatform HTML template engine that transforms `.ktml` temp
 compile time. Templates are valid HTML files with special attributes (`if` and `each`) and type-safe parameter
 declarations.
 
+**IMPORTANT: This project uses the file at gradle/libs.versions.toml to manage the version of dependencies. So you can
+look in that file to find out what version of a library is being used.
+
 ## Commands
 
 ### Build
