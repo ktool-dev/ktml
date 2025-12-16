@@ -29,6 +29,7 @@ interface KtmlRegistry {
 
     fun hasPath(path: String): Boolean = path.contains(path)
     fun hasTag(path: String): Boolean = tags.any { it.path == path }
+    fun toKtmlEngine() = KtmlEngine(this)
 }
 
 fun List<KtmlRegistry>.merge(): KtmlRegistry {
