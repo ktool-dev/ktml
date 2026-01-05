@@ -3,13 +3,20 @@ package dev.ktml.gradle
 import dev.ktml.KtmlProcessor
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.FileTree
+import org.gradle.api.file.ProjectLayout
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.*
 import java.io.File
 import java.io.Serializable
+import javax.inject.Inject
 
 data class SourceInfo(val ktmlDir: String, val outputDir: String) : Serializable
 
-open class KtmlGenerateTask : DefaultTask() {
+open class KtmlGenerateTask @Inject constructor(private var projectLayout: ProjectLayout) : DefaultTask() {
+
+    @Internal
+    lateinit var errorCollectorProvider: Provider<KtmlCompilationErrorCollector>
+
     @Input
     lateinit var moduleName: String
 
@@ -23,25 +30,25 @@ open class KtmlGenerateTask : DefaultTask() {
     @SkipWhenEmpty
     @PathSensitive(PathSensitivity.RELATIVE)
     fun getInputFiles(): FileTree {
-        return project.files(dirSets.map { dirSet -> project.fileTree(dirSet.ktmlDir) { it.include("**/*.ktml") } }).asFileTree
+        return projectLayout.files(dirSets.map { it.ktmlDir }).asFileTree.matching { it.include("**/*.ktml") }
     }
 
     @OutputDirectories
     fun getOutputDirectories(): List<File> {
-        return dirSets.map { project.file(it.outputDir) }
+        return dirSets.flatMap { projectLayout.files(it.outputDir).files }
     }
 
     @TaskAction
     open fun generate() {
         dirSets.forEach { (ktmlDir, outputDir) ->
-            project.file(outputDir).deleteRecursively()
+            projectLayout.files(outputDir).forEach { it.deleteRecursively() }
             KtmlProcessor(
                 moduleName = moduleName,
                 templatePackage = templatePackage,
                 outputDirectory = outputDir,
                 removeContentComments = false,
             ).apply {
-                project.getErrorCollector().get().addProjectInfo(ProjectInfo(templatePackage, ktmlDir, outputDir, this))
+                errorCollectorProvider.get().addProjectInfo(ProjectInfo(templatePackage, ktmlDir, outputDir, this))
                 processRootDirectory(ktmlDir)
                 generateTemplateCode()
             }
