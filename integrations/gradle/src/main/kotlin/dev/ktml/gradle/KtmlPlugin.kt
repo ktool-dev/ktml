@@ -83,13 +83,14 @@ open class KtmlPlugin : Plugin<Project> {
             }
         }
 
+        val errorCollectorProvider = project.getErrorCollector()
+
         val generateTask = project.tasks.register("generateKtml", KtmlGenerateTask::class.java) {
             it.moduleName = moduleName
             it.templatePackage = templatePackage
             it.dirSets = sets.map { it.second }
+            it.errorCollectorProvider = errorCollectorProvider
         }
-
-        val errorCollectorProvider = project.getErrorCollector()
 
         project.afterEvaluate {
             sets.forEach { it.first.kotlin.srcDir(it.second.outputDir) }
