@@ -18,7 +18,7 @@ class CompilerErrorResolver(
     fun resolve(errors: List<CompilerError>): List<CompilerError> {
         val errorsAndExpressions = errors.map { error ->
             val codeFile = error.filePath.substringAfter(templatePackagePath).removePrefix("/")
-            val template = findTemplateByCodeFile(codeFile) ?: error("Could not find template for $codeFile")
+            val template = findTemplateByCodeFile(codeFile) ?: error(CompileException(errors))
             Triple(resolveExpression(template, error), template, error)
         }.groupBy { it.first?.uuid }.values.map { list ->
             Triple(list.first().first, list.first().second, list.map { it.third })

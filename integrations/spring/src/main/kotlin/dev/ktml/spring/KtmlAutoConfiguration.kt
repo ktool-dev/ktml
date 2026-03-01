@@ -23,7 +23,7 @@ open class KtmlAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    open fun ktmlEngin(ktmlRegistry: KtmlRegistry) = KtmlEngine(ktmlRegistry)
+    open fun ktmlEngine(ktmlRegistry: KtmlRegistry) = KtmlEngine(ktmlRegistry)
 
     @Bean
     @ConditionalOnMissingBean
