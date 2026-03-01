@@ -1,5 +1,5 @@
 [versions]
-kotlin = "2.2.21"
+kotlin = "2.3.10"
 kotlinx-coroutines = "1.10.2"
 ksoup = "0.6.0"
 kotlin-logging = "7.0.7"

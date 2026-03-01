@@ -12,6 +12,8 @@ import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.io.path.createDirectories
 
+private const val MAX_JDK_VERSION = 25
+
 object KotlinCompile {
     /**
      * Compile Kotlin source files on disk to a destination classes directory.
@@ -71,6 +73,8 @@ private fun getCurrentJvmTarget() = System.getProperty("java.specification.versi
     when {
         version.startsWith("1.") -> version.substring(2)
         else -> version
+    }.let {
+        if (it.toInt() > MAX_JDK_VERSION) MAX_JDK_VERSION.toString() else it
     }
 }
 
