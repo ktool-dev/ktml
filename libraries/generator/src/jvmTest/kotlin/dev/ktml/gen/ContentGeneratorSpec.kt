@@ -7,6 +7,7 @@ import dev.ktml.parser.kotlin.removeContentComments
 import dev.ktool.gen.TRIPLE_QUOTE
 import dev.ktool.kotest.BddSpec
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 
 private val parser = TemplateParser(DEFAULT_PACKAGE, "")
 private val templates = Templates()
@@ -84,11 +85,28 @@ class ContentGeneratorSpec : BddSpec({
         val result = ContentGenerator(templates, template).generate()
 
         Then
-        result.body.statements.first().toString().trim().removeContentComments() shouldBe """
-            raw($TEMPLATE_CONSTANT, 0, 17)
-            write(onClick)
-            raw($TEMPLATE_CONSTANT, 17, 16)
-        """.trimIndent()
+        val generated = result.body.render().removeContentComments()
+        generated shouldContain "val __ktmlAttr0 = onClick"
+        generated shouldContain "if (__ktmlAttr0 != null) {"
+        generated shouldContain "write(__ktmlAttr0)"
+    }
+
+    "tag with nullable kotlin attribute" {
+        Given
+        val template = $$"""
+            <tag text="${String?}">
+                <button onclick="${text}">Hello</button>
+            </tag>
+        """.trim().parse()
+
+        When
+        val result = ContentGenerator(templates, template).generate()
+
+        Then
+        val generated = result.body.render().removeContentComments()
+        generated shouldContain "val __ktmlAttr0 = text"
+        generated shouldContain "if (__ktmlAttr0 != null) {"
+        generated shouldContain "write(__ktmlAttr0)"
     }
 
     "tag with kotlin text" {

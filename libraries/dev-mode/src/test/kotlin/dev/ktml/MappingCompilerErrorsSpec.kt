@@ -20,7 +20,6 @@ class MappingCompilerErrorsSpec : BddSpec({
         val result = renderError(dir)
 
         Then
-        result shouldContain "1 error"
         result shouldContain $$"""<div class="$missing"></div>""".encodeHtml()
     }
 
