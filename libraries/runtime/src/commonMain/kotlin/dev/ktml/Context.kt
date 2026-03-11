@@ -64,6 +64,10 @@ class Context(
     fun pathParam(key: String) = pathParams[key]
     fun queryParam(key: String) = queryParams[key]?.firstOrNull()
 
+    suspend fun ifNotNull(it: Any?, block: suspend Context.(Any) -> Any?) {
+        if (it != null) this.block(it)
+    }
+
     fun If(check: Boolean, content: Content?, elseValue: Content? = null): Content? = if (check) content else elseValue
 
     fun If(check: Boolean, value: String?, elseValue: String? = null): String? =

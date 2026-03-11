@@ -16,7 +16,7 @@ class DefaultTagHandler(context: ElementHandlerContext) : BaseTagHandler(context
             val expression = value.extractExpressions().firstOrNull()?.expression?.kotlinFileContent
 
             if (expression?.trim()?.startsWith("raw(") == false) {
-                contentBuilder.startEmbeddedContent("(${expression.replaceTicks()})?.let ")
+                contentBuilder.startEmbeddedContent("ifNotNull(${expression.replaceTicks()}) ")
                 contentBuilder.raw(" $name=\"")
                 contentBuilder.write("it")
                 contentBuilder.raw("\"")
