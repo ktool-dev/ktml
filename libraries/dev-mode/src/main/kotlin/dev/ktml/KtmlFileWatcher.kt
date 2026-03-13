@@ -23,21 +23,62 @@ class KtmlFileWatcher(dir: String, val onChange: (String, Boolean) -> Unit) {
 
     fun start() {
         val watchService: WatchService = FileSystems.getDefault().newWatchService()
-        dirPath.register(
-            watchService,
-            StandardWatchEventKinds.ENTRY_CREATE,
-            StandardWatchEventKinds.ENTRY_DELETE,
-            StandardWatchEventKinds.ENTRY_MODIFY
-        )
+        val watchedDirectories = mutableMapOf<WatchKey, Path>()
+        registerDirectoryRecursively(dirPath, watchService, watchedDirectories)
 
         CoroutineScope(Dispatchers.IO).launch {
             var lastFileList = buildFileList()
             while (true) {
                 val key = watchService.take()
-                if (key.pollEvents().isNotEmpty()) {
+                val parentDirectory = watchedDirectories[key]
+                val events = key.pollEvents()
+
+                if (parentDirectory != null) {
+                    registerNewDirectories(events, parentDirectory, watchService, watchedDirectories)
+                }
+
+                if (events.isNotEmpty()) {
                     lastFileList = checkForChanges(lastFileList)
                 }
-                key.reset()
+
+                if (!key.reset()) {
+                    watchedDirectories.remove(key)
+                }
+            }
+        }
+    }
+
+    private fun registerDirectoryRecursively(
+        root: Path,
+        watchService: WatchService,
+        watchedDirectories: MutableMap<WatchKey, Path>
+    ) {
+        Files.walk(root).use { paths ->
+            paths.filter { Files.isDirectory(it) }
+                .forEach { directory ->
+                    val key = directory.register(
+                        watchService,
+                        StandardWatchEventKinds.ENTRY_CREATE,
+                        StandardWatchEventKinds.ENTRY_DELETE,
+                        StandardWatchEventKinds.ENTRY_MODIFY
+                    )
+                    watchedDirectories[key] = directory
+                }
+        }
+    }
+
+    private fun registerNewDirectories(
+        events: List<WatchEvent<*>>,
+        parentDirectory: Path,
+        watchService: WatchService,
+        watchedDirectories: MutableMap<WatchKey, Path>
+    ) {
+        events.forEach { event ->
+            if (event.kind() == StandardWatchEventKinds.ENTRY_CREATE) {
+                val createdPath = parentDirectory.resolve(event.context() as Path)
+                if (Files.isDirectory(createdPath)) {
+                    registerDirectoryRecursively(createdPath, watchService, watchedDirectories)
+                }
             }
         }
     }
