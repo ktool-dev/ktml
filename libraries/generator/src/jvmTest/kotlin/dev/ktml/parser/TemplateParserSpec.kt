@@ -313,6 +313,21 @@ class TemplateParserSpec : BddSpec({
         template.inRegistry shouldBe false
     }
 
+    "tage with name ending in -page is put in registry" {
+        Given
+        val content = """
+            <my-page>
+                <span>Hello</span>
+            </my-tag
+        """.trimIndent()
+
+        When
+        val template = parse(content)
+
+        Then
+        template.inRegistry shouldBe true
+    }
+
     "tag with existing HTML element name throws an exception" {
         Given
         val content = """

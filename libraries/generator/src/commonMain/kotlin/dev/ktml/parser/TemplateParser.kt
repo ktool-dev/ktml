@@ -75,7 +75,7 @@ class TemplateParser(private val templatePackage: String, private val moduleName
                 file = fileName,
                 name = it.name,
                 subPath = subPath,
-                inRegistry = it.attrs.any { (key, value) -> key == FRAGMENT_INDICATOR && value != "false" },
+                inRegistry = it.name.endsWith("-page") || it.attrs.any { (key, value) -> key == FRAGMENT_INDICATOR && value != "false" },
                 parameters = extractParameters(it.attrs, expressions),
                 imports = imports,
                 root = it,
